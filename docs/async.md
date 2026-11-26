@@ -100,9 +100,10 @@ its source page.
 
 ## Hygiene
 
-25. Tests and local runs use asyncio debug mode (`PYTHONASYNCIODEBUG=1` or `debug=True`) and
-    `-W error`: a never-awaited coroutine (`RuntimeWarning`) or a never-retrieved task
-    exception fails the run instead of scrolling by.
+25. Tests turn warnings into errors (`filterwarnings = ["error"]`): a never-awaited coroutine's
+    `RuntimeWarning` fails the test instead of scrolling by. A task exception that is never
+    retrieved is only logged by asyncio and fails nothing, which is why every task is owned and
+    its result read (rule 2). Debug mode stays off in the suite (rule 12).
 26. Signals are handled by the loop in the main thread (`loop.add_signal_handler`; under
     uvicorn, its own shutdown path): shutdown cancels the lifespan's task group, which stops
     background loops, ends children as in rule 14, and closes the engine.
@@ -117,7 +118,7 @@ its source page.
 | 5 (CancelledError propagates) | ruff `ASYNC`, `BLE` and `TRY` rules; no `except BaseException` in `src/` |
 | 6 (timeouts on outside awaits) | `platform/db/engine.py` `ping` under `asyncio.timeout`; `tests/health/test_health_routes.py` (a server that never answers) |
 | 9 (no blocking call in `async def`) | ruff `ASYNC2xx`, `tests/test_event_loop_blocking.py` |
-| 12, 25 (debug mode, warnings are errors) | `filterwarnings = ["error"]` in `pyproject.toml`; blocking calls by ruff `ASYNC2xx` and `tests/test_event_loop_blocking.py` |
+| 12, 25 (no debug mode in the suite, warnings are errors) | `filterwarnings = ["error"]` in `pyproject.toml`; blocking calls by ruff `ASYNC2xx` and `tests/test_event_loop_blocking.py` |
 | 21 (context variables) | `platform.logging.request_id_var`, set by a pure ASGI layer (`platform/web/middleware.py`) |
 | 22 (sessions) | `platform/db/unit_of_work.py` (one session per use case), `tests/platform/test_unit_of_work.py`; the engine is disposed in `platform/runtime.py` |
 | 23 (logging never blocks the loop) | `platform/logging.py` `setup_logging` (queue and listener thread), `tests/platform/test_logging.py` |
