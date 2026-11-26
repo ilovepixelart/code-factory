@@ -1,0 +1,41 @@
+name: Set up the board's runtime
+description: >
+  The Ubuntu libraries, the sandbox runtime and an isolated PostgreSQL the tests migrate; exports
+  CODE_FACTORY_GATE_DATABASE_URL. Needs Node (setup-web) for the sandbox runtime.
+runs:
+  using: composite
+  steps:
+    - name: Install Ubuntu runtime libraries
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql bubblewrap socat ripgrep libatomic1 gh
+        if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then
+          # Hosted test VMs need capability-bearing namespaces for srt's nested seccomp filter.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+        fi
+    - name: Install the sandbox runtime
+      shell: bash
+      run: |
+        # Factory only starts runtimes from paths with known writers.
+        runtime_tools="$HOME/.local/code-factory-ci"
+        install -d -m 700 "$runtime_tools/bin"
+        install -m 755 "$(command -v node)" "$runtime_tools/bin/node"
+        npm install --global --prefix "$runtime_tools" @anthropic-ai/sandbox-runtime@0.0.83
+        echo "$runtime_tools/bin" >> "$GITHUB_PATH"
+    - name: Start an isolated test database
+      shell: bash
+      run: |
+        pg_bin="$(pg_config --bindir)"
+        echo "$pg_bin" >> "$GITHUB_PATH"
+        pg_state="$RUNNER_TEMP/code-factory-postgres"
+        password="$(openssl rand -hex 24)"
+        echo "::add-mask::$password"
+        pwfile="$(mktemp)"
+        chmod 600 "$pwfile"
+        printf '%s\n' "$password" > "$pwfile"
+        "$pg_bin/initdb" -D "$pg_state" --username=postgres --pwfile="$pwfile" --auth=scram-sha-256
+        rm "$pwfile"
+        "$pg_bin/pg_ctl" -D "$pg_state" -l "$RUNNER_TEMP/postgres.log" -o '-h 127.0.0.1 -p 54320 -k /tmp' -w start
+        PGPASSWORD="$password" "$pg_bin/createdb" -h 127.0.0.1 -p 54320 -U postgres code_factory_test
+        printf 'CODE_FACTORY_GATE_DATABASE_URL=postgresql+asyncpg://postgres:%s@127.0.0.1:54320/code_factory_test\n' "$password" >> "$GITHUB_ENV"
