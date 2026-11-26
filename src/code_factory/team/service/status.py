@@ -7,6 +7,8 @@ from code_factory.team.repository import LeaseRepository
 from code_factory.team.service.base import DAY, ServiceBase, fan_out, merged, together
 from code_factory.team.service.ports import TeamPorts
 
+_RUNS = "the runs"
+
 LANE_WINDOW = 21_600.0
 
 
@@ -39,12 +41,12 @@ class Status(ServiceBase):
         ports = self._ports()
         agents, leases = await self._agents_and_leases(ports)
         names = [agent.name for agent in agents]
-        latest = await self._read("the runs", ports.runs.latest_runs(names))
+        latest = await self._read(_RUNS, ports.runs.latest_runs(names))
         extra: list[TeamRun] = []
         if window is not None:
             async with together() as group:
-                started = group.create_task(self._read("the runs", ports.runs.runs_since(window)))
-                active = group.create_task(self._read("the runs", ports.runs.active_runs()))
+                started = group.create_task(self._read(_RUNS, ports.runs.runs_since(window)))
+                active = group.create_task(self._read(_RUNS, ports.runs.active_runs()))
             extra = merged(started.result(), [item.run for item in active.result()])
         tickets = sorted({*leases, *(run.ticket_id for run in [*latest, *extra] if run.ticket_id)})
         runs = await self._runs_for(
@@ -84,10 +86,8 @@ class Status(ServiceBase):
         at = self._seconds(None)
         async with together() as group:
             defined = group.create_task(self._read("the agents", ports.agents.team_agents()))
-            here = group.create_task(self._read("the runs", ports.runs.runs_on_ticket(ticket_id)))
-            today = group.create_task(
-                self._read("the runs", ports.runs.runs_since(at // DAY * DAY))
-            )
+            here = group.create_task(self._read(_RUNS, ports.runs.runs_on_ticket(ticket_id)))
+            today = group.create_task(self._read(_RUNS, ports.runs.runs_since(at // DAY * DAY)))
         agents = defined.result()
         agent = next((a for a in agents if a.name == agent_name), None)
         if agent is None:

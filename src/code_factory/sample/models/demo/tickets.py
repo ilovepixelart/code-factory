@@ -6,6 +6,8 @@ Plain data, as `demo/__init__.py` says.
 from dataclasses import dataclass
 from enum import StrEnum
 
+_GIFT_CARDS = "Gift cards"
+
 
 class Stage(StrEnum):
     """Where a demo ticket's git facts put it."""
@@ -149,7 +151,7 @@ DEMO_TICKETS: tuple[DemoTicket, ...] = (
     ),
     DemoTicket(
         "shop-api",
-        "Gift cards",
+        _GIFT_CARDS,
         Stage.SPEC,
         labels=("payments",),
         priority="medium",
@@ -161,7 +163,7 @@ DEMO_TICKETS: tuple[DemoTicket, ...] = (
         Stage.REVIEW,
         labels=("payments",),
         priority="medium",
-        parent="Gift cards",
+        parent=_GIFT_CARDS,
         change="src/gift_cards/issue.py",
     ),
     DemoTicket(
@@ -170,7 +172,7 @@ DEMO_TICKETS: tuple[DemoTicket, ...] = (
         Stage.BUILD,
         labels=("payments",),
         priority="medium",
-        parent="Gift cards",
+        parent=_GIFT_CARDS,
         blocked_by=("Issue a gift card code on purchase",),
         change="src/gift_cards/redeem.py",
     ),
@@ -179,7 +181,7 @@ DEMO_TICKETS: tuple[DemoTicket, ...] = (
         "Gift card field on the checkout page",
         Stage.SPEC,
         labels=("checkout",),
-        parent="Gift cards",
+        parent=_GIFT_CARDS,
         blocked_by=("Pay part of an order with a gift card",),
     ),
     DemoTicket(

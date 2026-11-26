@@ -81,8 +81,9 @@ def test_the_environment_never_shows_a_key_in_its_repr() -> None:
 
 
 def test_a_connection_that_breaks_the_rules_gives_no_environment() -> None:
+    given = conn("c", "ollama", "http://10.0.0.5:11434")
     with pytest.raises(BadRequestError):
-        run_environment(conn("c", "ollama", "http://10.0.0.5:11434"), "", None)
+        run_environment(given, "", None)
 
 
 def test_a_codex_config_names_one_provider_without_a_key_and_the_board_options() -> None:

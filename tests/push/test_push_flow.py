@@ -145,8 +145,9 @@ async def test_a_link_past_its_wait_says_the_one_refusal(board: Board) -> None:
     await board.push.push_once(BOARD)
     board.clock[0] += timedelta(seconds=541)
 
+    given = _token(board, "permission")
     with pytest.raises(NotFoundError, match=REFUSAL):
-        await board.push.read(_token(board, "permission"))
+        await board.push.read(given)
 
 
 async def test_a_failed_delivery_shows_on_the_inbox_until_a_pass_fails_nothing(

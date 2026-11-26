@@ -124,8 +124,9 @@ def test_every_command_line_is_one_the_tools_accept(name: str) -> None:
 
 
 def test_a_refused_command_line_fails_the_check() -> None:
+    parser = _parser()
     with pytest.raises(SystemExit):
-        _parser().parse_args(["stage", "summon", "CF-1"])
+        parser.parse_args(["stage", "summon", "CF-1"])
 
 
 def test_the_push_address_is_one_the_board_takes() -> None:

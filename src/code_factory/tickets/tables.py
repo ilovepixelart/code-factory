@@ -29,6 +29,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from code_factory.platform.db.base import Base
 from code_factory.tickets.models import Priority, PullRequestState, TicketType
 
+_FK = "tickets.number"
+
 _EMPTY = text("''")
 
 
@@ -115,11 +117,11 @@ class TicketLinkRow(Base):
     )
 
     ticket_number: Mapped[int] = mapped_column(
-        ForeignKey("tickets.number", ondelete="CASCADE"), primary_key=True
+        ForeignKey(_FK, ondelete="CASCADE"), primary_key=True
     )
     kind: Mapped[str] = mapped_column(Text, primary_key=True)
     linked_number: Mapped[int] = mapped_column(
-        ForeignKey("tickets.number", ondelete="RESTRICT"), primary_key=True, index=True
+        ForeignKey(_FK, ondelete="RESTRICT"), primary_key=True, index=True
     )
     # The order the links were written in, which a list of blockers keeps.
     position: Mapped[int] = mapped_column(Integer, server_default=text("0"))
@@ -135,7 +137,7 @@ class TicketPullRequestRow(Base):
     )
 
     ticket_number: Mapped[int] = mapped_column(
-        ForeignKey("tickets.number", ondelete="CASCADE"), primary_key=True
+        ForeignKey(_FK, ondelete="CASCADE"), primary_key=True
     )
     number: Mapped[int] = mapped_column(Integer)
     state: Mapped[str] = mapped_column(Text)
@@ -149,7 +151,7 @@ class TicketDocumentRow(Base):
     __tablename__ = "ticket_documents"
 
     ticket_number: Mapped[int] = mapped_column(
-        ForeignKey("tickets.number", ondelete="CASCADE"), primary_key=True
+        ForeignKey(_FK, ondelete="CASCADE"), primary_key=True
     )
     name: Mapped[str] = mapped_column(Text, primary_key=True)
     body: Mapped[str] = mapped_column(Text)
@@ -179,7 +181,7 @@ class TicketMockFileRow(Base):
     )
 
     ticket_number: Mapped[int] = mapped_column(
-        ForeignKey("tickets.number", ondelete="CASCADE"), primary_key=True
+        ForeignKey(_FK, ondelete="CASCADE"), primary_key=True
     )
     name: Mapped[str] = mapped_column(Text, primary_key=True)
     content_type: Mapped[str] = mapped_column(Text)
@@ -204,7 +206,7 @@ class TicketActivityRow(Base):
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
-    ticket_number: Mapped[int] = mapped_column(ForeignKey("tickets.number", ondelete="RESTRICT"))
+    ticket_number: Mapped[int] = mapped_column(ForeignKey(_FK, ondelete="RESTRICT"))
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     kind: Mapped[str] = mapped_column(Text)
     # Who wrote it: the actor's subject (the owner, a run); '' for the board itself.

@@ -63,9 +63,11 @@ async def test_a_row_takes_the_defaults_unknown_none_and_not_reverted(
 async def test_a_word_outside_the_classes_is_refused_by_the_table(
     db_session: AsyncSession, column: str, word: str
 ) -> None:
+    savepoint = db_session.begin_nested()
+    statement = text(INSERT.format(extra=column, values=f"'{word}'"))
     with pytest.raises(IntegrityError, match=f"ck_metrics_merges_{column}"):
-        async with db_session.begin_nested():
-            await db_session.execute(text(INSERT.format(extra=column, values=f"'{word}'")))
+        async with savepoint:
+            await db_session.execute(statement)
 
 
 @pytest.mark.parametrize(("column", "word"), [("autonomy", "assisted"), ("checks", "failed")])
@@ -83,6 +85,7 @@ async def test_a_branch_cut_may_have_no_time_and_a_repository_branch_pair_is_one
         "values ('r', 'ticket/cf-1', now())"
     )
     await db_session.execute(insert)
+    savepoint = db_session.begin_nested()
     with pytest.raises(IntegrityError, match="pk_metrics_branch_cuts"):
-        async with db_session.begin_nested():
+        async with savepoint:
             await db_session.execute(insert)

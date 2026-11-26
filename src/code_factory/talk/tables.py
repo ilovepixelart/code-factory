@@ -28,6 +28,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from code_factory.platform.db.base import Base
 from code_factory.talk.models import Channel, Route
 
+_FK = "tickets.number"
+
 _EMPTY = sql_text("''")
 CHANNELS = get_args(Channel)
 ROUTES = get_args(Route)
@@ -66,7 +68,7 @@ class QuestionRow(Base):
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
-    ticket_number: Mapped[int] = mapped_column(ForeignKey("tickets.number", ondelete="CASCADE"))
+    ticket_number: Mapped[int] = mapped_column(ForeignKey(_FK, ondelete="CASCADE"))
     # A ticket document by name (`spec`), `''` for none.
     document: Mapped[str] = mapped_column(Text, server_default=_EMPTY)
     text: Mapped[str] = mapped_column(Text)
@@ -124,7 +126,7 @@ class PostRow(Base):
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
-    ticket_number: Mapped[int] = mapped_column(ForeignKey("tickets.number", ondelete="CASCADE"))
+    ticket_number: Mapped[int] = mapped_column(ForeignKey(_FK, ondelete="CASCADE"))
     kind: Mapped[str] = mapped_column(Text)
     author: Mapped[str] = mapped_column(Text)
     text: Mapped[str] = mapped_column(Text)
@@ -142,7 +144,7 @@ class NewsMarkRow(Base):
     __tablename__ = "talk_news_marks"
 
     ticket_number: Mapped[int] = mapped_column(
-        ForeignKey("tickets.number", ondelete="CASCADE"), primary_key=True
+        ForeignKey(_FK, ondelete="CASCADE"), primary_key=True
     )
     session_id: Mapped[str] = mapped_column(Text, primary_key=True)
     post_id: Mapped[int] = mapped_column(BigInteger, server_default=sql_text("0"))

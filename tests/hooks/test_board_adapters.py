@@ -72,8 +72,9 @@ async def test_an_unknown_platform_has_no_opener(monkeypatch: pytest.MonkeyPatch
 async def test_an_opener_that_hangs_is_stopped(opener_on_path: Path) -> None:
     _program(opener_on_path, "open", "exec /bin/sleep 30")
 
+    opener = BrowserOpener(timeout_s=0.2)
     with pytest.raises(OpenerUnavailableError, match=r"did not return within 0\.2 seconds"):
-        await BrowserOpener(timeout_s=0.2).open_url(URL)
+        await opener.open_url(URL)
 
 
 class _Board(http.server.BaseHTTPRequestHandler):

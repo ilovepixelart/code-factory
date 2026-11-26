@@ -101,8 +101,9 @@ def test_doubled_braces_are_literal_and_an_unknown_name_or_a_lone_brace_is_refus
         ("a {prompt", "the agent command has an unmatched brace"),
         ("a }", "the agent command has an unmatched brace"),
     ):
+        given = parts()
         with pytest.raises(BadRequestError) as caught:
-            command_for(template, parts())
+            command_for(template, given)
         assert str(caught.value) == why
 
 

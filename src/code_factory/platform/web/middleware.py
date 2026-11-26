@@ -16,6 +16,8 @@ from code_factory.platform.identity import redact
 from code_factory.platform.logging import request_id_var
 from code_factory.platform.web.errors import error_response, internal_error_response
 
+_RESPONSE_START = "http.response.start"
+
 logger = logging.getLogger(__name__)
 
 REQUEST_ID_HEADER = "x-request-id"
@@ -68,7 +70,7 @@ class RequestId:
 
         async def send_with_id(message: Message) -> None:
             nonlocal status
-            if message["type"] == "http.response.start":
+            if message["type"] == _RESPONSE_START:
                 status = message["status"]
                 MutableHeaders(scope=message)[REQUEST_ID_HEADER] = request_id
             await send(message)
@@ -101,7 +103,7 @@ class SecurityHeaders:
             return
 
         async def send_with_headers(message: Message) -> None:
-            if message["type"] == "http.response.start":
+            if message["type"] == _RESPONSE_START:
                 headers = MutableHeaders(scope=message)
                 for name, value in SECURITY_HEADERS.items():
                     headers.setdefault(name, value)
@@ -191,7 +193,7 @@ class ErrorBoundary:
 
         async def tracking_send(message: Message) -> None:
             nonlocal started
-            if message["type"] == "http.response.start":
+            if message["type"] == _RESPONSE_START:
                 started = True
             await send(message)
 

@@ -26,6 +26,8 @@ from code_factory.platform.errors import BadRequestError, NotFoundError
 from code_factory.platform.text.paging import Paging
 from code_factory.tickets.models import ActivityMarks, Ticket
 
+NO_TICKET = "no such ticket"
+
 TALK_PAGE = 100
 # The repository a ticket is filed in until a repository is tracked (`code-factory repo track`).
 TICKET_TYPES = frozenset({"feature", "bug", "refactor", "upgrade", "hotfix", "docs"})
@@ -122,7 +124,7 @@ class BoardService:
         tickets = await read_tickets(self._sources)
         ticket = next((t for t in tickets if t.id == ticket_id), None)
         if ticket is None:
-            raise NotFoundError("no such ticket")
+            raise NotFoundError(NO_TICKET)
         return await self._page.summary(ticket)
 
     async def template(self, repository: str, kind: str) -> dict[str, str]:
@@ -182,7 +184,7 @@ class BoardService:
         try:
             ticket = await self._sources.tickets.get(ticket_id)
         except (BadRequestError, NotFoundError) as error:
-            raise NotFoundError("no such ticket") from error
+            raise NotFoundError(NO_TICKET) from error
         if ticket.repository != repository:
-            raise NotFoundError("no such ticket")
+            raise NotFoundError(NO_TICKET)
         return ticket

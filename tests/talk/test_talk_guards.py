@@ -90,10 +90,11 @@ async def test_a_write_waits_for_the_ticket_lock_and_gives_up_with_a_conflict(
                     lambda: ask(service, ticket),
                 )
                 for write in writes:
+                    given = write()
                     with pytest.raises(
                         ConflictError, match=r"^another change to the same ticket is in"
                     ):
-                        await asyncio.wait_for(write(), timeout=5)
+                        await asyncio.wait_for(given, timeout=5)
                 await holder.rollback()
             await service.add_comment(ticket, "now", OWNER)
         finally:

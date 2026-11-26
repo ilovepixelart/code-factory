@@ -198,16 +198,16 @@ async def test_constraints_have_the_names_the_convention_derives(
 async def test_schema_info_holds_one_row_and_names_the_constraint_that_says_so(
     db_session: AsyncSession,
 ) -> None:
+    savepoint = db_session.begin_nested()
+    statement = text("insert into schema_info (id, data_format_version) values (2, 1)")
     with pytest.raises(IntegrityError, match="ck_schema_info_single_row"):
-        async with db_session.begin_nested():
-            await db_session.execute(
-                text("insert into schema_info (id, data_format_version) values (2, 1)")
-            )
+        async with savepoint:
+            await db_session.execute(statement)
+    savepoint = db_session.begin_nested()
+    statement = text("insert into schema_info (id, data_format_version) values (1, 1)")
     with pytest.raises(IntegrityError, match="pk_schema_info"):
-        async with db_session.begin_nested():
-            await db_session.execute(
-                text("insert into schema_info (id, data_format_version) values (1, 1)")
-            )
+        async with savepoint:
+            await db_session.execute(statement)
 
 
 async def test_columns_use_the_postgres_types_the_rules_ask_for(db_session: AsyncSession) -> None:

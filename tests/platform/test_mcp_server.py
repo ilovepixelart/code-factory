@@ -137,8 +137,9 @@ async def test_the_stdio_server_refuses_a_database_it_cannot_read(
 ) -> None:
     monkeypatch.setenv(MCP_TOKEN_VARIABLE, "cfo_" + "A" * 43)
     monkeypatch.setattr(schema_module, "EXPECTED_REVISION", "a_newer_revision")
+    client = Client(create_mcp_server(settings, [auth, PROBE]))
     with pytest.raises(RuntimeError, match="code-factory db upgrade"):
-        async with Client(create_mcp_server(settings, [auth, PROBE])):
+        async with client:
             pytest.fail("the server started on a database it cannot read")
 
 

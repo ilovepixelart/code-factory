@@ -9,6 +9,8 @@ from code_factory.checks.service import CheckService
 from code_factory.platform.module import Command
 from code_factory.platform.services import Services
 
+TICKET_HELP = "CF-<n>"
+
 STREAM_POLL_S = 0.5
 EXIT_FAILED = 1
 EXIT_NO_VERDICT = 2
@@ -17,10 +19,10 @@ EXIT_NO_VERDICT = 2
 def _configure(parser: argparse.ArgumentParser) -> None:
     actions = parser.add_subparsers(dest="action", required=True)
     run = actions.add_parser("run", help="run the checks of a ticket here, streaming the log")
-    run.add_argument("ticket", help="CF-<n>")
+    run.add_argument("ticket", help=TICKET_HELP)
     run.add_argument("--scope", choices=[s.value for s in Scope], default=Scope.REACHED.value)
     show = actions.add_parser("show", help="print a ticket's latest check and a page of its log")
-    show.add_argument("ticket", help="CF-<n>")
+    show.add_argument("ticket", help=TICKET_HELP)
     show.add_argument("--log-offset", type=int, default=0, help="byte offset into the log")
     listed = actions.add_parser("list", help="print the recent runs")
     listed.add_argument("ticket", nargs="?", help="CF-<n> or main")
@@ -31,10 +33,10 @@ def _configure(parser: argparse.ArgumentParser) -> None:
     verify = actions.add_parser("verify", help="run [release] verify of a repository now")
     verify.add_argument("repository")
     flaky = actions.add_parser("flaky", help="attach a bug to the flaky failure of a ticket")
-    flaky.add_argument("ticket", help="CF-<n>")
+    flaky.add_argument("ticket", help=TICKET_HELP)
     flaky.add_argument("bug", help="CF-<m>, a bug ticket")
     forget = actions.add_parser("forget-cache", help="remove a ticket's build cache")
-    forget.add_argument("ticket", help="CF-<n>")
+    forget.add_argument("ticket", help=TICKET_HELP)
     actions.add_parser("reconcile", help="mark runs of a stopped process lost; remove strays")
 
 

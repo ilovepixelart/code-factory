@@ -40,8 +40,9 @@ async def test_a_mock_row_the_service_would_refuse_is_refused_by_the_table(
     db_session: AsyncSession, ticket: Ticket, row: tuple[str, str, bytes], constraint: str
 ) -> None:
     number = int(ticket.id.removeprefix("CF-"))
+    savepoint = db_session.begin_nested()
     with pytest.raises(DBAPIError, match=constraint):
-        async with db_session.begin_nested():
+        async with savepoint:
             await _insert_mock(db_session, number, row)
 
 

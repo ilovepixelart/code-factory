@@ -38,8 +38,9 @@ async def test_a_second_claim_row_for_a_ticket_is_refused_by_the_unique_ticket(
 async def test_a_claim_for_a_ticket_that_does_not_exist_is_not_found(
     db_session: AsyncSession,
 ) -> None:
+    leases = LeaseRepository(db_session)
     with pytest.raises(NotFoundError, match=r"^CF-999999999 does not exist"):
-        await LeaseRepository(db_session).add(999_999_999, "writer", NOW)
+        await leases.add(999_999_999, "writer", NOW)
 
 
 async def test_deleting_the_ticket_deletes_its_claim_and_the_runs_under_it(

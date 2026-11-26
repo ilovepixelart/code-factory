@@ -60,18 +60,21 @@ async def test_a_replace_from_an_older_version_is_a_conflict_and_changes_nothing
 ) -> None:
     await documents.write_document(ticket.id, SPEC, write("first"), by=OWNER)
     await documents.write_document(ticket.id, SPEC, write("second", base_version=1), by=OWNER)
+    given = write("stale", base_version=1)
     with pytest.raises(ConflictError, match="spec is at version 2, written from 1"):
-        await documents.write_document(ticket.id, SPEC, write("stale", base_version=1), by=OWNER)
+        await documents.write_document(ticket.id, SPEC, given, by=OWNER)
+    given = write("blind")
     with pytest.raises(ConflictError, match="spec exists at version 2"):
-        await documents.write_document(ticket.id, SPEC, write("blind"), by=OWNER)
+        await documents.write_document(ticket.id, SPEC, given, by=OWNER)
     assert (await documents.get_document(ticket.id, SPEC)).body == "second"
 
 
 async def test_a_base_version_for_a_document_not_written_yet_is_a_conflict(
     documents: DocumentService, ticket: Ticket
 ) -> None:
+    given = write("text", base_version=3)
     with pytest.raises(ConflictError, match="spec does not exist yet"):
-        await documents.write_document(ticket.id, SPEC, write("text", base_version=3), by=OWNER)
+        await documents.write_document(ticket.id, SPEC, given, by=OWNER)
 
 
 async def test_an_append_adds_a_line_after_the_text_and_needs_no_version(
@@ -95,20 +98,20 @@ async def test_a_long_document_is_read_in_pages(documents: DocumentService, tick
 async def test_requirements_that_break_their_shape_are_refused_with_the_line(
     documents: DocumentService, ticket: Ticket
 ) -> None:
+    given = write(REQUIREMENTS)
     with pytest.raises(
         BadRequestError, match=r"requirements row 2 \(CF-7-R2\) has no named check \(line 6\)"
     ):
-        await documents.write_document(
-            ticket.id, DocumentName.REQUIREMENTS, write(REQUIREMENTS), by=OWNER
-        )
+        await documents.write_document(ticket.id, DocumentName.REQUIREMENTS, given, by=OWNER)
     assert await documents.list_documents(ticket.id) == []
 
 
 async def test_a_document_over_the_limit_is_refused(
     documents: DocumentService, ticket: Ticket
 ) -> None:
+    given = write("x" * 100_001)
     with pytest.raises(BadRequestError, match="a document is at most 100000 characters"):
-        await documents.write_document(ticket.id, SPEC, write("x" * 100_001), by=OWNER)
+        await documents.write_document(ticket.id, SPEC, given, by=OWNER)
 
 
 async def test_the_index_lists_documents_in_writing_order_and_a_delete_removes_one(
@@ -150,10 +153,11 @@ async def test_an_append_that_would_grow_a_document_past_the_limit_is_refused(
     notes = DocumentName.NOTES
     await documents.write_document(ticket.id, notes, write("x" * 99_998), by=OWNER)
     # 99998 characters, the joining newline and 2 more make 100001.
+    given = write("yz", mode="append")
     with pytest.raises(
         BadRequestError, match="notes would be 100001 characters, 1 over the limit of 100000"
     ):
-        await documents.write_document(ticket.id, notes, write("yz", mode="append"), by=OWNER)
+        await documents.write_document(ticket.id, notes, given, by=OWNER)
     assert (await documents.get_document(ticket.id, notes)).version == 1
 
 

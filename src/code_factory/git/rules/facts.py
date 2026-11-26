@@ -2,6 +2,10 @@
 
 from code_factory.git.models import MERGE_LOG_LIMIT, GitFacts, RefTips, StackBase
 
+_MERGE_BRANCH = "Merge branch '"
+
+_FROM = " from "
+
 _LOCAL = "refs/heads/"
 _REMOTE = "refs/remotes/origin/"
 
@@ -79,8 +83,8 @@ def merged_heads(log: str) -> frozenset[str]:
         rest = subject.removeprefix("Merge ")
         if (merged := _merged_into(rest)) is not None:
             heads.add(merged)
-        if rest.startswith("pull request #") and " from " in rest:
-            head = rest.partition(" from ")[2]
+        if rest.startswith("pull request #") and _FROM in rest:
+            head = rest.partition(_FROM)[2]
             heads.add(head)
             if "/" in head:
                 heads.add(head.partition("/")[2])
@@ -89,12 +93,12 @@ def merged_heads(log: str) -> frozenset[str]:
 
 def merged_branch(subject: str) -> str | None:
     """The branch a merge subject says it merged, without its owner."""
-    if subject.startswith("Merge pull request #") and " from " in subject:
-        head = subject.partition(" from ")[2]
+    if subject.startswith("Merge pull request #") and _FROM in subject:
+        head = subject.partition(_FROM)[2]
         if "/" in head:
             return head.partition("/")[2]
-    if subject.startswith("Merge branch '") and "'" in subject[len("Merge branch '") :]:
-        return subject[len("Merge branch '") :].partition("'")[0]
+    if subject.startswith(_MERGE_BRANCH) and "'" in subject[len(_MERGE_BRANCH) :]:
+        return subject[len(_MERGE_BRANCH) :].partition("'")[0]
     return None
 
 

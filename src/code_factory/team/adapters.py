@@ -149,4 +149,4 @@ async def _reap(process: asyncio.subprocess.Process) -> None:
         with contextlib.suppress(TimeoutError):
             async with asyncio.timeout(_GRACE):
                 while await process.stdout.read(65_536):
-                    pass
+                    continue  # the pipe is read to its end so the child is not left blocked

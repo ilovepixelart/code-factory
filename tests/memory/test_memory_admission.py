@@ -75,8 +75,9 @@ async def test_the_base_checks_come_before_any_admission(memory: MemoryService) 
         called.append(draft.statement)
 
     memory.add_admission(admit)
+    given = DRAFT.model_copy(update={"source": ""})
     with pytest.raises(BadRequestError, match="an entry needs a source"):
-        await memory.add(DRAFT.model_copy(update={"source": ""}), by=OWNER)
+        await memory.add(given, by=OWNER)
     assert called == []
 
 

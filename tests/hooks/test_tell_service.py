@@ -125,8 +125,10 @@ async def test_a_malformed_confirm_is_a_bad_request_and_marks_nothing(
 ) -> None:
     fakes = with_news()
 
+    service = fakes.service()
+    actor = run_actor()
     with pytest.raises(BadRequestError, match=r"^confirm is malformed$"):
-        await fakes.service().confirm_tell(run_actor(), "s-1", confirm)
+        await service.confirm_tell(actor, "s-1", confirm)
 
     assert fakes.talk.confirmed == []
 
@@ -142,7 +144,10 @@ async def test_a_confirm_for_a_session_with_no_ticket_marks_nothing() -> None:
 async def test_a_confirm_with_no_session_is_a_bad_request() -> None:
     fakes = with_news()
 
+    service = fakes.service()
+    actor = run_actor()
+    marks = MARKS.model_dump()
     with pytest.raises(BadRequestError, match=r"^confirm is malformed$"):
-        await fakes.service().confirm_tell(run_actor(), "", MARKS.model_dump())
+        await service.confirm_tell(actor, "", marks)
 
     assert fakes.talk.confirmed == []

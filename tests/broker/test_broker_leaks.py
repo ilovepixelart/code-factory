@@ -272,5 +272,6 @@ async def test_a_refused_token_error_and_a_bad_export_carry_only_their_sentences
     with pytest.raises(TokenRefusedError, match=r"^not a live run token$"):
         await broker.receive_telemetry("cfb_" + "z" * 43, b"{}")
     issued = await issue(broker, connection=None)
+    token = issued.token.get_secret_value()
     with pytest.raises(BadRequestError, match=r"^the export is not JSON$"):
-        await broker.receive_telemetry(issued.token.get_secret_value(), b"{nope")
+        await broker.receive_telemetry(token, b"{nope")

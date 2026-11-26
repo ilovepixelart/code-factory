@@ -90,7 +90,7 @@ class GitFacts:
         try:
             async with asyncio.timeout(self._grace):
                 while await process.stdout.read(_CHUNK):
-                    pass
+                    continue  # the pipe is read to its end so the child is not left blocked
         except TimeoutError:
             return
 

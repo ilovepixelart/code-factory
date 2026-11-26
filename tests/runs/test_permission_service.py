@@ -387,8 +387,9 @@ async def test_decisions_are_the_latest_on_the_ticket_oldest_first(
 
 
 async def test_a_request_of_an_unknown_run_is_not_found(perms: PermissionService) -> None:
+    given = call(command="ls")
     with pytest.raises(NotFoundError, match="no such run"):
-        await perms.request("ffffffffffff", call(command="ls"), wait=1)
+        await perms.request("ffffffffffff", given, wait=1)
 
 
 async def test_decisions_older_than_ninety_days_are_pruned(

@@ -80,8 +80,9 @@ async def test_a_repository_with_no_commits_is_refused(
     empty.mkdir()
     git(empty, "init", "-q", "-b", "main")
     fakes.roots["empty"] = empty
+    service = make_service(uow, fakes)
     with pytest.raises(BadRequestError, match="no commits yet"):
-        await make_service(uow, fakes).start_worktree("empty", "CF-1")
+        await service.start_worktree("empty", "CF-1")
 
 
 async def test_a_repository_with_no_info_folder_still_gets_the_exclude_line(

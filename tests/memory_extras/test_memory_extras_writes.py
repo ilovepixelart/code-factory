@@ -42,8 +42,9 @@ async def test_an_add_with_a_blank_source_is_refused_and_writes_nothing(bench: B
 
 
 async def test_an_add_to_a_repository_that_is_not_tracked_is_refused(bench: Bench) -> None:
+    given = draft().model_copy(update={"repository": "nowhere"})
     with pytest.raises(NotFoundError, match=r"^no such repository$"):
-        await bench.service.add(draft().model_copy(update={"repository": "nowhere"}), OWNER)
+        await bench.service.add(given, OWNER)
 
 
 async def test_undoing_an_add_removes_the_entry(bench: Bench) -> None:
@@ -65,8 +66,9 @@ async def test_an_add_that_supersedes_retires_the_old_entry_and_the_undo_puts_bo
 
 async def test_a_supersession_of_no_entry_is_refused_and_writes_nothing(bench: Bench) -> None:
     await bench.seed(OLD, "Merge each pull request at once")
+    given = draft(supersedes=["2026-01-01-nothing"])
     with pytest.raises(BadRequestError, match=r"^no entry 2026-01-01-nothing to supersede$"):
-        await bench.service.add(draft(supersedes=["2026-01-01-nothing"]), OWNER)
+        await bench.service.add(given, OWNER)
     assert await rows(bench) == {OLD: ("Merge each pull request at once", "")}
 
 

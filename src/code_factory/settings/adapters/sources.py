@@ -24,6 +24,8 @@ from code_factory.settings.rules.tool_files import (
     listed,
 )
 
+_CARGO_LOCK = "Cargo.lock"
+
 TOOL_FILES = ("**/deny.toml", "**/pnpm-workspace.yaml")
 CARGO_LOCK_BYTES = 8 * 1024 * 1024
 UNPARSED_YAML = "yaml: not valid YAML, or too large to read"
@@ -61,7 +63,7 @@ class Sources:
     async def _lock_holds(self, root: Path, entry: ExceptionEntry) -> bool | Problem:
         """Whether the entry's lockfile resolves its package, or why that cannot be said."""
         name = file_name(entry.file)
-        limit = CARGO_LOCK_BYTES if name == "Cargo.lock" else YAML_BYTES
+        limit = CARGO_LOCK_BYTES if name == _CARGO_LOCK else YAML_BYTES
         text = await self._files.read_below(root, entry.file, limit)
         if text is None:
             if not await self._files.present(root, entry.file):
@@ -69,7 +71,7 @@ class Sources:
             return Problem(
                 EXCEPTIONS_FILE, entry.name_line, f"{entry.file} {unreadable_message(limit)}"
             )
-        if name == "Cargo.lock":
+        if name == _CARGO_LOCK:
             return await in_thread(cargo_lock_holds, text, entry.name) is True
         packages = await lock_packages(text)
         if packages is None:
@@ -87,7 +89,7 @@ class Sources:
         held: set[tuple[str, str]] = set()
         problems: dict[tuple[str, int, str], Problem] = {}
         for entry in (e for e in entries if e.kind == "age"):
-            if file_name(entry.file) not in {"Cargo.lock", "pnpm-lock.yaml"}:
+            if file_name(entry.file) not in {_CARGO_LOCK, "pnpm-lock.yaml"}:
                 continue
             result = await self._lock_holds(root, entry)
             if isinstance(result, Problem):

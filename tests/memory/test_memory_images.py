@@ -78,8 +78,9 @@ async def test_one_bad_patch_leaves_every_row_as_it_was(memory: MemoryService) -
 
 
 async def test_a_patch_names_only_fields_an_entry_has(memory: MemoryService) -> None:
+    given = [explicit(OLD, wobble="x")]
     with pytest.raises(BadRequestError, match="no field wobble"):
-        await memory.apply([explicit(OLD, wobble="x")], by=OWNER)
+        await memory.apply(given, by=OWNER)
 
 
 async def test_restoring_an_insert_deletes_the_row(memory: MemoryService) -> None:

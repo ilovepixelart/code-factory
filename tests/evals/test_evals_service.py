@@ -91,8 +91,9 @@ async def test_a_record_reads_back_with_its_task_runs(uow: UnitOfWork) -> None:
 
 
 async def test_a_set_name_with_a_path_is_refused(uow: UnitOfWork) -> None:
+    evals = EvalService(uow)
     with pytest.raises(BadRequestError, match="is not a task set name"):
-        await EvalService(uow).report("sample", "../x")
+        await evals.report("sample", "../x")
 
 
 async def test_the_scorer_table_counts_the_week_and_the_month(judge: JudgeService) -> None:

@@ -69,6 +69,8 @@ from code_factory.tickets.service import (
     TicketService,
 )
 
+_BUILDER = "run:builder"
+
 AUTHOR = "demo"
 HISTORY_DAYS = 60
 BRANCHED_BEFORE_MERGE_DAYS = 1
@@ -253,7 +255,7 @@ class DemoLoader:
                 document=str(asked.get("document") or "") or None,
                 several=bool(asked.get("several")),
                 topic=str(asked["topic"]),
-                by="run:builder",
+                by=_BUILDER,
             )
 
     async def _comment(self) -> None:
@@ -276,7 +278,7 @@ class DemoLoader:
             await self._d.memory.add(new, by=AUTHOR)
         for entry in DEMO_PROPOSALS:
             new = NewMemory.model_validate({**entry, "repository": "shop-api"})
-            await self._d.memory.propose(new, by="run:builder")
+            await self._d.memory.propose(new, by=_BUILDER)
 
     async def _connect_agents(self) -> None:
         for connection in DEMO_CONNECTIONS:
@@ -365,7 +367,7 @@ class DemoLoader:
         for at, image in enumerate(images):
             shade = (24 + at * 16, 26 + at * 16, 32 + at * 16)
             await asyncio.to_thread(write_png, folder / image, 1280, 800, shade)
-        await self._d.screens.record(ticket, tree, list(images), by="run:builder")
+        await self._d.screens.record(ticket, tree, list(images), by=_BUILDER)
 
 
 def _number(ticket_id: str) -> int:

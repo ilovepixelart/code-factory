@@ -7,6 +7,8 @@ from typing import Any, Literal
 from code_factory.platform.errors import BadRequestError
 from code_factory.tickets.models import Finding, FindingState, Problem, Review
 
+_DISMISSED = "finding.dismissed"
+
 _RULE = re.compile(r"[a-z][a-z0-9]*(-[a-z0-9]+)*")
 _RULE_TAG = re.compile(r"\s*\[rule:\s*([^\]]*?)\s*\]\s*$")
 RULE_LIMIT = 40
@@ -115,7 +117,7 @@ def check_reason(reason: str) -> str:
 FINDING_KINDS = (
     "finding",
     "finding.kept",
-    "finding.dismissed",
+    _DISMISSED,
     "finding.closed",
     "review_submitted",
 )
@@ -162,8 +164,8 @@ def findings_of(trail: Trail) -> tuple[list[FindingState], dict[int, list[str]]]
                 update["finding_class"] = finding_class(data["severity"])
             found[data["id"]] = found[data["id"]].model_copy(update=update)
             pending.append(data["id"])
-        elif kind in ("finding.dismissed", "finding.closed") and data["id"] in found:
-            state = "dismissed" if kind == "finding.dismissed" else data["state"]
+        elif kind in (_DISMISSED, "finding.closed") and data["id"] in found:
+            state = "dismissed" if kind == _DISMISSED else data["state"]
             update = {"state": state, "reason": data["reason"], "by": by}
             found[data["id"]] = found[data["id"]].model_copy(update=update)
         elif kind == "review_submitted":

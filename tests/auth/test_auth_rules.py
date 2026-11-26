@@ -81,5 +81,6 @@ def test_the_longest_lifetime_is_allowed_and_one_second_more_is_not(
     kind: TokenKind, longest: timedelta
 ) -> None:
     assert expiry(NOW, longest, kind) == NOW + longest
+    given = longest + timedelta(seconds=1)
     with pytest.raises(BadRequestError, match=f"{kind.value} token lifetime is at most"):
-        expiry(NOW, longest + timedelta(seconds=1), kind)
+        expiry(NOW, given, kind)

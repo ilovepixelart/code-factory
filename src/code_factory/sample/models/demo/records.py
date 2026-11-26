@@ -6,6 +6,16 @@ scorer's answers and the owner's comments. Plain data, as `demo/__init__.py` say
 
 from code_factory.sample.models.demo.tickets import DemoSession
 
+_ISSUE_PY = "src/gift_cards/issue.py"
+
+_ADDRESS_TS = "src/checkout/address.ts"
+
+_STAGING_MOVE = "Move staging to the new cluster"
+
+_CHECKOUT_ADDRESS = "Checkout keeps the address after a failed payment"
+
+_GIFT_CARD_CODE = "Issue a gift card code on purchase"
+
 # Documents by the title of the ticket that holds them.
 DEMO_DOCUMENTS: dict[str, dict[str, str]] = {
     "Gift cards": {
@@ -23,11 +33,11 @@ DEMO_DOCUMENTS: dict[str, dict[str, str]] = {
             "## Open questions\n\n- Do cards expire?\n"
         ),
     },
-    "Issue a gift card code on purchase": {
+    _GIFT_CARD_CODE: {
         "spec": "# Spec\n\nIssue the code once the payment settles, never before.\n",
         "uat": "# UAT\n\n1. Buy a card for 50.\n2. The confirmation shows a code.\n",
     },
-    "Checkout keeps the address after a failed payment": {
+    _CHECKOUT_ADDRESS: {
         "spec": "# Spec\n\nKeep every address field across a declined payment.\n",
     },
     "Export orders as CSV": {
@@ -72,7 +82,7 @@ DEMO_QUESTIONS: tuple[dict[str, object], ...] = (
         ),
     },
     {
-        "title": "Move staging to the new cluster",
+        "title": _STAGING_MOVE,
         "topic": "Rollback",
         "text": "Keep the old staging running until the move is checked?",
         "choices": (
@@ -178,20 +188,20 @@ DEMO_AGENTS: tuple[dict[str, object], ...] = (
 # (ticket title, verdict, summary, findings as (severity, text, path, line)).
 DEMO_REVIEWS: tuple[tuple[str, str, str, tuple[tuple[str, str, str, int], ...]], ...] = (
     (
-        "Issue a gift card code on purchase",
+        _GIFT_CARD_CODE,
         "pass",
         "Codes come from the secure generator and the uniqueness test covers collisions.",
         (),
     ),
     (
-        "Checkout keeps the address after a failed payment",
+        _CHECKOUT_ADDRESS,
         "changes",
         "The fields survive a decline, but the saved address is never cleared after success.",
         (
             (
                 "major",
                 "Clear the kept address once the order is paid",
-                "src/checkout/address.ts",
+                _ADDRESS_TS,
                 1,
             ),
         ),
@@ -203,11 +213,11 @@ DEMO_RELEASES: tuple[tuple[str, bool], ...] = (("1.3.0", True), ("1.4.0", False)
 
 _CHECKOUT_SESSION = DemoSession(
     session_id="demo-checkout-address",
-    ticket="Checkout keeps the address after a failed payment",
+    ticket=_CHECKOUT_ADDRESS,
     prompt="Keep the checkout address when a payment is declined",
     tools=(
-        ("Read", "src/checkout/address.ts"),
-        ("Edit", "src/checkout/address.ts"),
+        ("Read", _ADDRESS_TS),
+        ("Edit", _ADDRESS_TS),
         ("Bash", "pnpm test checkout"),
     ),
     messages=((5200, 900, 42000, 3100), (2100, 1400, 51000, 900), (1800, 600, 53000, 0)),
@@ -217,11 +227,11 @@ DEMO_SESSIONS: tuple[DemoSession, ...] = (
     _CHECKOUT_SESSION,
     DemoSession(
         session_id="demo-gift-card-issue",
-        ticket="Issue a gift card code on purchase",
+        ticket=_GIFT_CARD_CODE,
         prompt="Issue a gift card code once the payment settles",
         tools=(
-            ("Read", "src/gift_cards/issue.py"),
-            ("Write", "src/gift_cards/issue.py"),
+            ("Read", _ISSUE_PY),
+            ("Write", _ISSUE_PY),
             ("Bash", "uv run pytest tests/gift_cards"),
         ),
         messages=((6100, 2300, 38000, 4200), (2400, 1900, 47000, 600)),
@@ -236,8 +246,8 @@ DEMO_SESSIONS: tuple[DemoSession, ...] = (
     ),
     DemoSession(
         session_id="demo-staging-move",
-        ticket="Move staging to the new cluster",
-        prompt="Move staging to the new cluster",
+        ticket=_STAGING_MOVE,
+        prompt=_STAGING_MOVE,
         tools=(("Read", "deploy/staging.yml"), ("Bash", "kubectl get nodes")),
         messages=((3900, 700, 18000, 2500), (1500, 500, 21000, 0)),
         model="claude-haiku-5-5",
@@ -284,15 +294,15 @@ DEMO_ANSWERS: tuple[tuple[str, str, str], ...] = (
 # The owner's comments: (ticket title, text, path, line); an empty path is about the ticket.
 DEMO_COMMENTS: tuple[tuple[str, str, str, int], ...] = (
     (
-        "Checkout keeps the address after a failed payment",
+        _CHECKOUT_ADDRESS,
         "Also keep the delivery notes field, support hears about it weekly.",
         "",
         0,
     ),
     (
-        "Issue a gift card code on purchase",
+        _GIFT_CARD_CODE,
         "Leave out 0, O, 1 and I so a code read over the phone is never ambiguous.",
-        "src/gift_cards/issue.py",
+        _ISSUE_PY,
         1,
     ),
 )
@@ -300,6 +310,6 @@ DEMO_COMMENTS: tuple[tuple[str, str, str, int], ...] = (
 # The open pull requests' sizes as GitHub would count them: (additions, deletions, changed files).
 # One is past what a review reads well, so the board's size signal has something to show.
 DEMO_PULL_SIZES: dict[str, tuple[int, int, int]] = {
-    "Issue a gift card code on purchase": (86, 12, 4),
+    _GIFT_CARD_CODE: (86, 12, 4),
     "Rotate the payment provider keys every 90 days": (1240, 380, 27),
 }

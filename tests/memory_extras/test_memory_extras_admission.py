@@ -31,13 +31,12 @@ async def test_a_statement_restating_a_claude_md_line_is_refused_naming_the_line
     bench: Bench,
 ) -> None:
     bench.git.files = {"CLAUDE.md": CLAUDE}
+    given = draft("Commits and pull requests carry no AI attribution of any kind")
     with pytest.raises(
         BadRequestError,
         match=r"^restates CLAUDE.md line 3: Commits and pull requests carry no AI attribution",
     ):
-        await bench.memory.add(
-            draft("Commits and pull requests carry no AI attribution of any kind"), by=OWNER
-        )
+        await bench.memory.add(given, by=OWNER)
     assert await ids(bench) == []
 
 
@@ -54,10 +53,9 @@ async def test_a_repository_without_a_claude_md_restates_nothing(bench: Bench) -
 
 async def test_a_proposal_meets_the_same_restatement_check(bench: Bench) -> None:
     bench.git.files = {"CLAUDE.md": CLAUDE}
+    given = draft("Build it, run the tests the change reaches and commit")
     with pytest.raises(BadRequestError, match=r"restates CLAUDE.md line 4"):
-        await bench.memory.propose(
-            draft("Build it, run the tests the change reaches and commit"), by="run-1"
-        )
+        await bench.memory.propose(given, by="run-1")
 
 
 BUDGET_SENTENCE = (
@@ -75,8 +73,9 @@ async def test_a_rule_loading_everywhere_that_passes_the_budget_is_refused_with_
     bench: Bench,
 ) -> None:
     await fill(bench, 4)
+    given = draft("y" * 1997)
     with pytest.raises(BadRequestError, match=BUDGET_SENTENCE):
-        await bench.memory.add(draft("y" * 1997), by=OWNER)
+        await bench.memory.add(given, by=OWNER)
     assert len(await ids(bench)) == 4
 
 
@@ -98,8 +97,9 @@ async def test_a_rule_that_supersedes_one_is_judged_without_the_entry_it_retires
 
 async def test_a_proposal_retires_nothing_so_it_is_judged_with_every_entry(bench: Bench) -> None:
     await fill(bench, 4)
+    given = draft("y" * 1997, supersedes=["2026-11-01-rule"])
     with pytest.raises(BadRequestError, match=BUDGET_SENTENCE):
-        await bench.memory.propose(draft("y" * 1997, supersedes=["2026-11-01-rule"]), by="run-1")
+        await bench.memory.propose(given, by="run-1")
 
 
 async def test_a_lesson_a_scoped_rule_and_a_decision_are_judged_apart_for_the_budget(
@@ -108,8 +108,9 @@ async def test_a_lesson_a_scoped_rule_and_a_decision_are_judged_apart_for_the_bu
     await fill(bench, 4)
     await bench.memory.add(draft("y" * 1997, kind="lesson"), by=OWNER)
     await bench.memory.add(draft("z" * 1997, scope="build"), by=OWNER)
+    given = draft("w" * 1997, kind="decision")
     with pytest.raises(BadRequestError, match=r"memory budget of 8,000"):
-        await bench.memory.add(draft("w" * 1997, kind="decision"), by=OWNER)
+        await bench.memory.add(given, by=OWNER)
 
 
 async def test_a_core_lesson_is_never_refused_for_the_budget_though_it_loads_first(
@@ -121,10 +122,9 @@ async def test_a_core_lesson_is_never_refused_for_the_budget_though_it_loads_fir
 
 
 async def test_a_superseded_id_that_is_no_entry_is_refused(bench: Bench) -> None:
+    given = draft("Land through one queue", supersedes=["2026-01-01-nothing"])
     with pytest.raises(BadRequestError, match=r"^no entry 2026-01-01-nothing to supersede$"):
-        await bench.memory.add(
-            draft("Land through one queue", supersedes=["2026-01-01-nothing"]), by=OWNER
-        )
+        await bench.memory.add(given, by=OWNER)
 
 
 async def test_a_retired_id_may_be_named_as_superseded(bench: Bench) -> None:
@@ -134,10 +134,12 @@ async def test_a_retired_id_may_be_named_as_superseded(bench: Bench) -> None:
 
 
 async def test_a_bad_scope_or_expiry_is_refused_by_the_field_check(bench: Bench) -> None:
+    given = draft("Scoped", scope="bulid")
     with pytest.raises(BadRequestError, match=r"^scope names core"):
-        await bench.memory.add(draft("Scoped", scope="bulid"), by=OWNER)
+        await bench.memory.add(given, by=OWNER)
+    given = draft("Ends", expires="soon")
     with pytest.raises(BadRequestError, match=r"^expires is a date, YYYY-MM-DD$"):
-        await bench.memory.add(draft("Ends", expires="soon"), by=OWNER)
+        await bench.memory.add(given, by=OWNER)
 
 
 async def test_the_fields_are_checked_before_the_restatement_and_the_restatement_before_the_budget(
@@ -146,16 +148,19 @@ async def test_the_fields_are_checked_before_the_restatement_and_the_restatement
     bench.git.files = {"CLAUDE.md": CLAUDE}
     await fill(bench, 4)
     restating = "Commits and pull requests carry no AI attribution of any kind"
+    given = draft(restating, scope="bulid")
     with pytest.raises(BadRequestError, match=r"^scope names core"):
-        await bench.memory.add(draft(restating, scope="bulid"), by=OWNER)
+        await bench.memory.add(given, by=OWNER)
+    given = draft(restating + "!" + "y" * 1900)
     with pytest.raises(BadRequestError, match=r"^restates CLAUDE.md"):
-        await bench.memory.add(draft(restating + "!" + "y" * 1900), by=OWNER)
+        await bench.memory.add(given, by=OWNER)
 
 
 async def test_the_budget_is_checked_before_the_superseded_ids(bench: Bench) -> None:
     await fill(bench, 4)
+    given = draft("y" * 1997, supersedes=["2026-01-01-nothing"])
     with pytest.raises(BadRequestError, match=r"memory budget"):
-        await bench.memory.add(draft("y" * 1997, supersedes=["2026-01-01-nothing"]), by=OWNER)
+        await bench.memory.add(given, by=OWNER)
 
 
 async def paired(bench: Bench) -> None:
@@ -166,13 +171,12 @@ async def test_an_entry_on_the_subject_of_an_active_one_is_refused_until_answere
     bench: Bench,
 ) -> None:
     await paired(bench)
+    given = draft("Never rebase ticket branches onto main")
     with pytest.raises(
         ConflictError,
         match=rf"^it is on the subject of {PAIRED}: pass --supersedes {PAIRED} or --keep-both$",
     ):
-        await bench.memory.add(
-            draft("Never rebase ticket branches onto main"), by=OWNER, check_pairs=True
-        )
+        await bench.memory.add(given, by=OWNER, check_pairs=True)
     assert await ids(bench) == [PAIRED]
 
 
