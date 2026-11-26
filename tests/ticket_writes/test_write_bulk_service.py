@@ -100,8 +100,9 @@ async def test_one_unknown_ticket_changes_none_and_offers_no_undo(
     gone = address(one).model_copy(update={"id": "CF-999999"})
     held = await entries(db_session)
 
+    given = [address(one), gone]
     with pytest.raises(NotFoundError, match=exactly("no such ticket")):
-        await writes.bulk([address(one), gone], "priority", "low", OWNER)
+        await writes.bulk(given, "priority", "low", OWNER)
 
     assert (await tickets.get(one.id)).priority == ""
     assert await entries(db_session) == held
@@ -113,8 +114,9 @@ async def test_one_refused_column_move_changes_none_and_joins_every_refusal(
     first = await file(tickets, "First")
     second = await file(tickets, "Second")
 
+    given = [address(first), address(second)]
     with pytest.raises(BadRequestError) as refused:
-        await writes.bulk([address(first), address(second)], "stage", "build", OWNER)
+        await writes.bulk(given, "stage", "build", OWNER)
 
     needs = "{id} needs a branch before Build: start an agent on it, or run code-factory start {id}"
     assert str(refused.value) == "; ".join(needs.format(id=t.id) for t in (first, second))
@@ -191,8 +193,9 @@ async def test_a_bulk_on_a_field_that_is_no_action_renames_nothing(
 ) -> None:
     one = await file(tickets, "One")
 
+    given = [address(one)]
     with pytest.raises(BadRequestError, match=exactly("one action and at least one ticket")):
-        await writes.bulk([address(one)], "title", "Renamed", OWNER)
+        await writes.bulk(given, "title", "Renamed", OWNER)
 
     assert (await tickets.get(one.id)).title == "One"
 

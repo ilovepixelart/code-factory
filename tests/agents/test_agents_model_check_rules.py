@@ -238,14 +238,17 @@ def test_the_target_is_the_agents_local_connection_when_it_has_a_model() -> None
 def test_a_check_without_a_local_connection_or_a_model_is_refused(
     changes: dict[str, str], kept: list[ConnectionDefinition], why: str
 ) -> None:
+    given = agent(**changes)
     with pytest.raises(BadRequestError) as caught:
-        check_target(agent(**changes), kept)
+        check_target(given, kept)
     assert str(caught.value) == why
 
 
 def test_a_connection_that_breaks_the_rules_is_refused_with_its_name() -> None:
+    given = agent()
+    given_2 = [connection(base_url="http://10.0.0.5:1234")]
     with pytest.raises(BadRequestError) as caught:
-        check_target(agent(), [connection(base_url="http://10.0.0.5:1234")])
+        check_target(given, given_2)
     assert str(caught.value) == (
         "connection local: lm-studio connections run on this machine: "
         "the address's host is localhost or 127.0.0.1"

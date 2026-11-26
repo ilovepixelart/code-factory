@@ -50,10 +50,11 @@ async def test_open_uses_the_port_it_is_given_over_the_configured_one() -> None:
 async def test_open_refuses_a_page_off_the_board_before_it_asks_anything(page: str) -> None:
     fakes = Fakes()
 
+    service = fakes.service()
     with pytest.raises(
         BadRequestError, match=r"^the page must be a path on the board, such as /inbox$"
     ):
-        await fakes.service().open_board(page)
+        await service.open_board(page)
 
     assert (fakes.probe.asked, fakes.auth.minted, fakes.opener.opened) == ([], [], [])
 
@@ -62,11 +63,12 @@ async def test_open_with_no_board_answering_says_to_start_it_and_mints_nothing()
     fakes = Fakes()
     fakes.probe.answers = False
 
+    service = fakes.service()
     with pytest.raises(
         UnavailableError,
         match=f"^no board answers at {BASE}: start code-factory serve first$",
     ):
-        await fakes.service().open_board("/")
+        await service.open_board("/")
 
     assert (fakes.auth.minted, fakes.opener.opened) == ([], [])
 
@@ -87,11 +89,12 @@ async def test_open_with_no_browser_spends_the_nonce_and_says_how_to_sign_in(
     fakes = Fakes()
     fakes.opener.error = error
 
+    service = fakes.service()
     with pytest.raises(
         UnavailableError,
         match=f"^could not open a browser: {why}; run code-factory sign-in for the link$",
     ):
-        await fakes.service().open_board("/inbox")
+        await service.open_board("/inbox")
 
     assert (fakes.auth.minted, fakes.auth.spent) == (["nonce1"], ["nonce1"])
 
@@ -144,5 +147,6 @@ async def test_the_export_is_every_record_since_the_day_in_the_order_at_reposito
     "since", ["", "yesterday", "2026-13-01", "2026-02-30", "2026-1-1", "2026-11-01T00:00"]
 )
 async def test_the_export_refuses_what_is_not_a_day(since: str) -> None:
+    service = Fakes().service()
     with pytest.raises(BadRequestError, match=f'^"{re.escape(since)}" is not a day as YYYY-MM-DD$'):
-        await Fakes().service().audit_export(since)
+        await service.audit_export(since)

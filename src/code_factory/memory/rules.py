@@ -6,6 +6,8 @@ from datetime import date, timedelta
 from code_factory.memory.models import MemoryEntry, MemoryFields, Stage
 from code_factory.platform.errors import BadRequestError
 
+_LABEL = "label:"
+
 SLUG_WORDS = 8
 _WORD = re.compile(r"[a-z0-9]+")
 
@@ -44,9 +46,9 @@ def terms(scope: str) -> list[str]:
 
 
 def _known_term(term: str) -> bool:
-    label = term.removeprefix("label:")
-    is_label = term.startswith("label:") and bool(label)
-    is_glob = not term.startswith("label:") and any(c in term for c in "/*?[.")
+    label = term.removeprefix(_LABEL)
+    is_label = term.startswith(_LABEL) and bool(label)
+    is_glob = not term.startswith(_LABEL) and any(c in term for c in "/*?[.")
     return term in {CORE, ARCHIVE, *STAGES} or is_label or is_glob
 
 

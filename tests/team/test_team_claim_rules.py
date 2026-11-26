@@ -32,13 +32,16 @@ def test_the_default_agent_is_named_as_such() -> None:
 
 
 def test_a_held_claim_refuses_a_second_naming_its_holder() -> None:
+    given = {"CF-1": lease("writer", ("r1",), beat_ago=120)}
+    given_2 = [run("r1")]
     with pytest.raises(ClaimHeld, match=r"^writer holds this ticket$"):
-        claim({"CF-1": lease("writer", ("r1",), beat_ago=120)}, "CF-1", "coder", [run("r1")], NOW)
+        claim(given, "CF-1", "coder", given_2, NOW)
 
 
 def test_a_held_default_agent_claim_is_named_the_default_agent() -> None:
+    given = {"CF-1": lease("", (), beat_ago=59)}
     with pytest.raises(ClaimHeld, match=r"^the default agent holds this ticket$"):
-        claim({"CF-1": lease("", (), beat_ago=59)}, "CF-1", "coder", [], NOW)
+        claim(given, "CF-1", "coder", [], NOW)
 
 
 def test_a_claim_is_free_once_its_run_ended_and_the_new_one_starts_now() -> None:

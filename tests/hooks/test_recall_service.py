@@ -120,8 +120,10 @@ async def test_a_run_whose_ticket_is_gone_is_not_found() -> None:
     fakes = remembering()
     fakes.tickets.tickets.clear()
 
+    service = fakes.service()
+    actor = run_actor()
     with pytest.raises(NotFoundError):
-        await fakes.service().recall(cwd="/r", actor=run_actor(), session_id="s")
+        await service.recall(cwd="/r", actor=actor, session_id="s")
 
 
 async def test_four_hundred_requirements_stay_within_the_cap_and_say_what_was_left_out() -> None:

@@ -63,7 +63,7 @@ COMMON = frozenset(
 )
 NEGATIONS = frozenset({"never", "not", "no", "don't", "without", "stop"})
 _WORDS = re.compile(r"[^\W_]+")
-_NEGATION_WORDS = re.compile(r"[^\W_']+")
+_NEGATION_WORDS = re.compile(r"[^\W_]+(?:'[^\W_]+)*")
 _CLAUSES = re.compile(r"[.;:!?]")
 _MIN_LETTERS = 4
 

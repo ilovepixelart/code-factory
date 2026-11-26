@@ -189,7 +189,7 @@ async def _loop(name: str, every: float, work: object) -> None:
         try:
             async with asyncio.timeout(PASS_LIMIT_S):
                 await work()  # ty: ignore[not-callable]  # a coroutine function
-        except (CodeFactoryError, TimeoutError, OSError) as error:
+        except (CodeFactoryError, OSError) as error:
             logger.warning("delivery: %s failed: %s", name, error)
         await asyncio.sleep(max(every, 2.0))
 

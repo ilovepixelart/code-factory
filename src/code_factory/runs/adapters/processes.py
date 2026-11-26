@@ -99,7 +99,7 @@ class ProcessRegistry:
                     stderr=fd,
                     start_new_session=True,
                 )
-        except (OSError, TimeoutError) as error:
+        except OSError as error:
             msg = (
                 f"cannot start {argv[0]}: {getattr(error, 'strerror', None) or 'it did not start'}"
             )

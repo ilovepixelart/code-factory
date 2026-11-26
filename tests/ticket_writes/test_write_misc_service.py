@@ -33,8 +33,9 @@ async def test_a_negative_rank_and_a_missing_ticket_are_refused(
     one = await file(tickets, "One")
     with pytest.raises(BadRequestError, match=exactly("a rank is not negative")):
         await writes.set_rank(address(one), -1, OWNER)
+    given = address(one).model_copy(update={"id": "CF-999999"})
     with pytest.raises(NotFoundError, match=exactly("no such ticket")):
-        await writes.set_rank(address(one).model_copy(update={"id": "CF-999999"}), 1, OWNER)
+        await writes.set_rank(given, 1, OWNER)
     await writes.set_rank(address(one), 0, OWNER)
 
 

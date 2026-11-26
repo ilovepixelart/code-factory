@@ -12,6 +12,8 @@ from code_factory.team.adapters import GitFacts
 from code_factory.team.models import TeamAgent, TeamRun
 from code_factory.team.service.ports import TeamPorts
 
+_RUNS = "the runs"
+
 logger = logging.getLogger(__name__)
 
 PORT_TIMEOUT = 10.0
@@ -98,9 +100,9 @@ class ServiceBase:
     ) -> list[TeamRun]:
         """Every run a decision reads: the tickets', each agent's latest, today's, the claims'."""
         runs = ports.runs
-        calls = [self._read("the runs", runs.latest_runs([agent.name for agent in agents]))]
-        calls.append(self._read("the runs", runs.runs_since(now // DAY * DAY)))
+        calls = [self._read(_RUNS, runs.latest_runs([agent.name for agent in agents]))]
+        calls.append(self._read(_RUNS, runs.runs_since(now // DAY * DAY)))
         if lease_runs:
-            calls.append(self._read("the runs", runs.runs_by_ids(lease_runs)))
-        calls.extend(self._read("the runs", runs.runs_on_ticket(ticket)) for ticket in tickets)
+            calls.append(self._read(_RUNS, runs.runs_by_ids(lease_runs)))
+        calls.extend(self._read(_RUNS, runs.runs_on_ticket(ticket)) for ticket in tickets)
         return merged(*await fan_out(calls))

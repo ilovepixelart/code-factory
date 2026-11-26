@@ -133,8 +133,9 @@ def test_a_run_is_refused_every_other_ticket_with_the_same_sentence_whether_or_n
         "out_of_scope: this run is scoped to CF-12; CF-13 is not available to it. "
         "Use ask_question if you need something from another ticket."
     )
+    given = _run("build")
     with pytest.raises(ForbiddenError) as other:
-        policy.scope_ticket(_run("build"), "CF-13")
+        policy.scope_ticket(given, "CF-13")
     assert str(other.value) == expected
 
 
@@ -180,8 +181,9 @@ def test_a_run_writes_only_the_documents_of_its_stage(stage: str, writable: list
 def test_the_refusal_names_the_document_and_what_the_run_may_write_instead(
     stage: str, document: str, sentence: str
 ) -> None:
+    given = _run(stage)
     with pytest.raises(ForbiddenError) as refused:
-        policy.check_document_write(_run(stage), document)
+        policy.check_document_write(given, document)
     assert str(refused.value) == sentence
 
 

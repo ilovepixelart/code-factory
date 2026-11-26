@@ -7,6 +7,8 @@ from code_factory.platform.module import Command
 from code_factory.platform.services import Services
 from code_factory.stages.service import StageService
 
+TICKET_HELP = "CF-<n>"
+
 
 def _hold_line(hold: dict[str, str] | None) -> str:
     return "none" if hold is None else f"needs {hold['stage']}: {hold['detail']}"
@@ -16,12 +18,14 @@ def _configure(parser: argparse.ArgumentParser) -> None:
     actions = parser.add_subparsers(dest="action", required=True)
     actions.add_parser(
         "show", help="print a ticket's stage, checklist, refusals and hold"
-    ).add_argument("ticket", help="CF-<n>")
+    ).add_argument("ticket", help=TICKET_HELP)
     observe = actions.add_parser("observe", help="read git for tickets and print what changed")
-    observe.add_argument("tickets", nargs="*", metavar="CF-<n>", help="default: every live ticket")
+    observe.add_argument(
+        "tickets", nargs="*", metavar=TICKET_HELP, help="default: every live ticket"
+    )
     actions.add_parser(
         "rounds", help="print a ticket's fix rounds, halts, waits and verdicts"
-    ).add_argument("ticket", help="CF-<n>")
+    ).add_argument("ticket", help=TICKET_HELP)
 
 
 def _write(*lines: str) -> None:

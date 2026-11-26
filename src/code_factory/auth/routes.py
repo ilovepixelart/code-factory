@@ -3,7 +3,7 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse, Response
 
 from code_factory.auth.service import AuthService
@@ -30,7 +30,7 @@ def landing(asked: str) -> str:
 
 
 @router.get("/owner/{nonce}")
-async def sign_in(nonce: str, auth: AuthDep, to: str = "") -> Response:
+async def sign_in(request: Request, nonce: str, auth: AuthDep, to: str = "") -> Response:
     """Spend the link, set the owner's cookie and open the board."""
     session = await auth.redeem_sign_in_nonce(nonce, lifetime=SESSION_LIFETIME)
     if session is None:
@@ -41,6 +41,7 @@ async def sign_in(nonce: str, auth: AuthDep, to: str = "") -> Response:
         session.token.get_secret_value(),
         max_age=int(SESSION_LIFETIME.total_seconds()),
         httponly=True,
+        secure=request.url.scheme == "https",
         samesite="strict",
         path="/",
     )

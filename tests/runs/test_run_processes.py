@@ -1,6 +1,7 @@
 """Real children: a spawned run has its own group, stop ends it, a recycled pid is left alone."""
 
 import asyncio
+import contextlib
 import os
 import signal
 from collections.abc import AsyncGenerator
@@ -51,7 +52,8 @@ async def _end_with_its_child(child: asyncio.subprocess.Process) -> None:
         if await orphans.wait() == 0:
             break
         await asyncio.sleep(0.05)
-    child.kill()
+    with contextlib.suppress(ProcessLookupError):  # the shell ends by itself once its sleep does
+        child.kill()
     await child.wait()
 
 

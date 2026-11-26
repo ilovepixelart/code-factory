@@ -87,10 +87,12 @@ def test_a_choice_keeps_its_description_and_preview_within_their_limits() -> Non
     [kept, _] = check_question("q", [shown, Choice(text="b")], several=False)[1]
 
     assert (kept.description, kept.preview) == ("Cheaper.", "x = 1\n  y = 2")
+    given = [long, Choice(text="b")]
     with pytest.raises(BadRequestError, match=r"^a choice's description is at most 500 "):
-        check_question("q", [long, Choice(text="b")], several=False)
+        check_question("q", given, several=False)
+    given = [Choice(text="a", preview="p" * 4001), Choice(text="b")]
     with pytest.raises(BadRequestError, match=r"^a choice's preview is at most 4000 "):
-        check_question("q", [Choice(text="a", preview="p" * 4001), Choice(text="b")], several=False)
+        check_question("q", given, several=False)
 
 
 def test_a_topic_is_a_one_line_label_of_twelve_characters_at_most() -> None:
@@ -131,8 +133,9 @@ def test_free_text_is_kept_on_one_line() -> None:
 
 def test_text_with_a_line_break_is_refused_only_when_choices_are_offered() -> None:
     assert check_reply(question(), [], "a\nb") == ("a b", [])
+    given = question("a", "b")
     with pytest.raises(BadRequestError, match=r"^the answer holds a line break$"):
-        check_reply(question("a", "b"), [], "a\nb")
+        check_reply(given, [], "a\nb")
 
 
 def test_picks_come_back_in_the_questions_order_joined_by_commas() -> None:
@@ -141,25 +144,30 @@ def test_picks_come_back_in_the_questions_order_joined_by_commas() -> None:
 
 
 def test_a_pick_not_offered_names_the_choices_or_says_it_offers_none() -> None:
+    given = question("red", "green")
     with pytest.raises(BadRequestError, match=r"^pink is not one of its choices: red, green$"):
-        check_reply(question("red", "green"), ["pink"], "")
+        check_reply(given, ["pink"], "")
+    given = question()
     with pytest.raises(BadRequestError, match=r"^pink is not one of its choices: it offers none$"):
-        check_reply(question(), ["pink"], "")
+        check_reply(given, ["pink"], "")
 
 
 def test_two_picks_on_a_one_pick_question_are_refused() -> None:
+    given = question("red", "green")
     with pytest.raises(BadRequestError, match=r"^one choice is picked here$"):
-        check_reply(question("red", "green"), ["red", "green"], "")
+        check_reply(given, ["red", "green"], "")
 
 
 def test_neither_picks_nor_text_is_refused() -> None:
+    given = question("red")
     with pytest.raises(BadRequestError, match=r"^an answer and a question are needed$"):
-        check_reply(question("red"), [], "  ")
+        check_reply(given, [], "  ")
 
 
 def test_a_pick_with_a_line_break_is_refused() -> None:
+    given = question("red")
     with pytest.raises(BadRequestError, match=r"^a choice holds a line break$"):
-        check_reply(question("red"), ["red\n"], "")
+        check_reply(given, ["red\n"], "")
 
 
 # reply_gap: the reply link's pre-check
@@ -187,17 +195,21 @@ def test_the_shown_text_is_compared_after_stripping_both() -> None:
 
 
 def test_a_changed_question_is_a_conflict_naming_what_it_asks_now() -> None:
+    given = [question()]
     with pytest.raises(ConflictError, match=r"^the question changed: it now asks Which colour\?$"):
-        answer_target([question()], "spec", 0, "Which size?")
+        answer_target(given, "spec", 0, "Which size?")
 
 
 def test_an_empty_shown_text_and_an_unknown_position_are_refused() -> None:
+    given = [question()]
     with pytest.raises(BadRequestError, match=r"^the text of the question answered is needed$"):
-        answer_target([question()], "spec", 0, "  ")
+        answer_target(given, "spec", 0, "  ")
+    given = [question()]
     with pytest.raises(NotFoundError, match=r"^no question 3 in spec$"):
-        answer_target([question()], "spec", 3, "Which colour?")
+        answer_target(given, "spec", 3, "Which colour?")
+    given = [question()]
     with pytest.raises(NotFoundError, match=r"^no question 0 in uat$"):
-        answer_target([question()], "uat", 0, "Which colour?")
+        answer_target(given, "uat", 0, "Which colour?")
 
 
 # shapes

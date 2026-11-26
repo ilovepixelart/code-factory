@@ -6,7 +6,6 @@ from pathlib import Path
 from code_factory.git.adapters import transport
 from code_factory.git.models import (
     Conflicted,
-    FetchRefusedError,
     Landed,
     Merged,
     NotMerged,
@@ -58,7 +57,7 @@ class LandingMixin(MovesMixin):
             return stop.answer
         except TreeRedirectedError as error:
             return Refused(why=f"{ticket_id} is not a clone or worktree the board made: {error}")
-        except (FetchRefusedError, CodeFactoryError) as error:
+        except CodeFactoryError as error:
             return Refused(why=str(error))
 
     async def _branch_of(self, repository: str, ticket_id: str, folders: TreeFolders) -> str:

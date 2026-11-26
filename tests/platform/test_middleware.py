@@ -83,8 +83,9 @@ async def test_a_failure_after_the_response_started_is_logged_and_nothing_more_i
     async def send(message: Message) -> None:
         sent.append(message)
 
+    boundary = ErrorBoundary(app)
     with pytest.raises(RuntimeError, match="failed while streaming"):
-        await ErrorBoundary(app)({"type": "http"}, receive, send)
+        await boundary({"type": "http"}, receive, send)
     assert [message["type"] for message in sent] == ["http.response.start"]
     assert sent[0]["status"] == 200
     assert [r.getMessage() for r in caplog.records if r.levelno == logging.ERROR] == [

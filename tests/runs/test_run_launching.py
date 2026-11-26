@@ -122,15 +122,21 @@ async def test_the_run_gets_its_token_and_never_the_boards_settings(
 async def test_a_run_of_another_runtime_is_refused_with_what_to_do(
     app: FastAPI, tmp_path: Path
 ) -> None:
+    launcher = _launcher(app)
+    plan = await _plan(app, tmp_path, runtime="codex")
     with pytest.raises(UnavailableError, match="choose a connection in Agents"):
-        await _launcher(app).launch(await _plan(app, tmp_path, runtime="codex"))
+        await launcher.launch(plan)
+    launcher = _launcher(app)
+    plan = await _plan(app, tmp_path, runtime="unknown")
     with pytest.raises(UnavailableError, match="unsupported agent runtime"):
-        await _launcher(app).launch(await _plan(app, tmp_path, runtime="unknown"))
+        await launcher.launch(plan)
 
 
 async def test_a_board_that_is_not_served_starts_no_run(app: FastAPI, tmp_path: Path) -> None:
+    launcher = _launcher(app, base_url="")
+    plan = await _plan(app, tmp_path)
     with pytest.raises(UnavailableError) as refused:
-        await _launcher(app, base_url="").launch(await _plan(app, tmp_path))
+        await launcher.launch(plan)
     assert str(refused.value) == NOT_SERVED
 
 

@@ -27,8 +27,9 @@ async def test_qa_holdouts_never_follow_a_symlink(tmp_path: Path) -> None:
     outside.write_text("outside the private cases folder")
     (private / "CF-12.md").symlink_to(outside)
 
+    holdouts = QaHoldouts(tmp_path)
     with pytest.raises(UnavailableError, match="private QA cases"):
-        await QaHoldouts(tmp_path).cases("CF-12")
+        await holdouts.cases("CF-12")
 
 
 async def test_qa_refuses_directories_and_oversized_case_files(tmp_path: Path) -> None:
@@ -37,5 +38,6 @@ async def test_qa_refuses_directories_and_oversized_case_files(tmp_path: Path) -
     (private / "CF-12.md").mkdir()
     (private / "CF-13.md").write_bytes(b"x" * 32_769)
     for ticket in ("CF-12", "CF-13"):
+        holdouts = QaHoldouts(tmp_path)
         with pytest.raises(UnavailableError, match="private QA cases"):
-            await QaHoldouts(tmp_path).cases(ticket)
+            await holdouts.cases(ticket)

@@ -30,11 +30,11 @@ async def test_resume_deletes_the_halt_and_is_idempotent(db_session: AsyncSessio
 
 async def test_the_halt_table_holds_one_row_by_name(db_session: AsyncSession) -> None:
     await HaltRepository(db_session).halt("owner", at(0))
+    savepoint = db_session.begin_nested()
+    statement = text("insert into agent_halt (id, halted_at, by) values (2, now(), 'x')")
     with pytest.raises(IntegrityError, match="ck_agent_halt_single_row"):
-        async with db_session.begin_nested():
-            await db_session.execute(
-                text("insert into agent_halt (id, halted_at, by) values (2, now(), 'x')")
-            )
+        async with savepoint:
+            await db_session.execute(statement)
 
 
 def preview(number: int, port: int = 5001, pgid: int = 4242) -> PreviewRecord:
@@ -80,9 +80,12 @@ async def test_a_deleted_preview_is_gone_and_deleting_again_says_so(
 async def test_the_database_refuses_a_preview_with_a_signalable_pgid_of_one_or_a_bad_port(
     db_session: AsyncSession, ticket: Ticket, pgid: int, port: int, name: str
 ) -> None:
+    savepoint = db_session.begin_nested()
+    previews = PreviewRepository(db_session)
+    row = preview(ticket.number, port=port, pgid=pgid)
     with pytest.raises(IntegrityError, match=name):
-        async with db_session.begin_nested():
-            await PreviewRepository(db_session).put(preview(ticket.number, port=port, pgid=pgid))
+        async with savepoint:
+            await previews.put(row)
 
 
 async def test_a_preview_is_deleted_only_while_it_is_the_one_that_was_checked(

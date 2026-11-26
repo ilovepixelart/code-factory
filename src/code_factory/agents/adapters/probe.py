@@ -128,7 +128,9 @@ class ModelProbe:
 
     async def ask(self, request: Request) -> Answer:
         """Send one request of a model check: the status and body, or why none came back."""
-        headers = dict(line.split(": ", 1) for line in request.headers)
+        headers = {
+            name: value for name, _, value in (line.partition(": ") for line in request.headers)
+        }
         return await self._send("POST", request.address, headers, request.body, self._check_s)
 
     async def status(self, connection: ConnectionDefinition, key: SecretStr | None) -> Status:

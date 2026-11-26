@@ -128,7 +128,6 @@ async def test_an_unknown_kind_and_an_unknown_own_ticket_are_refused(
     own = await file(tickets, "Own")
     with pytest.raises(BadRequestError, match=exactly("unknown link kind sibling")):
         await writes.add_link(address(own), "sibling", own.id, OWNER)
+    given = address(own).model_copy(update={"id": "CF-999999"})
     with pytest.raises(NotFoundError, match=exactly("no such ticket")):
-        await writes.add_link(
-            address(own).model_copy(update={"id": "CF-999999"}), "parent", own.id, OWNER
-        )
+        await writes.add_link(given, "parent", own.id, OWNER)

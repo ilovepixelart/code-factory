@@ -40,6 +40,17 @@ async def test_the_link_sets_the_session_cookie_and_sends_the_owner_to_the_board
     assert {"HttpOnly", "SameSite=strict", "Path=/"} <= {p.strip() for p in cookie.split(";")}
 
 
+@pytest.mark.parametrize(("scheme", "secure"), [("https", True), ("http", False)])
+async def test_the_cookie_is_secure_exactly_when_the_link_came_over_https(
+    guarded_client: httpx.AsyncClient, auth: AuthService, scheme: str, *, secure: bool
+) -> None:
+    response = await guarded_client.get(f"{scheme}://127.0.0.1/owner/{await _nonce(auth)}")
+
+    assert response.status_code == 303
+    parts = {p.strip() for p in response.headers["set-cookie"].split(";")}
+    assert ("Secure" in parts) is secure
+
+
 async def test_the_cookie_opens_the_api_the_guard_closed(
     guarded_client: httpx.AsyncClient, auth: AuthService
 ) -> None:

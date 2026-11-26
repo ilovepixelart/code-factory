@@ -96,6 +96,8 @@ async def test_a_record_cannot_be_changed_or_removed(db_session: AsyncSession) -
         "delete from ticket_activity",
         "truncate ticket_activity",
     ):
+        savepoint = db_session.begin_nested()
+        statement_ = text(statement)
         with pytest.raises(DBAPIError, match="ticket_activity is append-only"):
-            async with db_session.begin_nested():
-                await db_session.execute(text(statement))
+            async with savepoint:
+                await db_session.execute(statement_)

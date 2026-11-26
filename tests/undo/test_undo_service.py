@@ -151,8 +151,9 @@ async def test_a_kind_registered_twice_is_a_programming_error(
 
 
 async def test_a_blank_kind_is_refused_on_register_and_on_offer(undo: UndoService) -> None:
+    given = Calls()
     with pytest.raises(ValueError, match="an undo kind is not blank"):
-        undo.register("", Calls())
+        undo.register("", given)
     with pytest.raises(ValueError, match="an undo kind is not blank"):
         await undo.offer("", {}, "n")
 
