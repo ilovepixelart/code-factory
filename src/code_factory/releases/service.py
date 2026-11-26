@@ -199,7 +199,7 @@ class ReleaseService:
     @staticmethod
     async def _refusal(
         releases: ReleaseRepository, repository: str, version: str, action: str, commit: str = ""
-    ) -> Exception:
+    ) -> NotFoundError | ConflictError:
         """Why a guarded update touched no row: no such release, or the state forbids it."""
         row = await releases.find(repository, version)
         if row is None:
