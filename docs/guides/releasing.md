@@ -10,9 +10,9 @@ repository whose merge policy permits merge commits.
    and merge approval enabled. Run `python3 scripts/check_compose.py` to verify Server mode
    sign-in and persistence. **Verify** also runs this smoke test separately on Ubuntu.
 2. Pass the full gate, dependency audits and browser smoke tests. The **Verify** workflow runs
-   them on macOS and native Ubuntu runners for x64 and arm64, each with its own PostgreSQL
-   instance. It also scans all reachable commits. Use passing jobs before claiming support for an
-   additional platform.
+   them on native Ubuntu runners for x64 and arm64, each with its own PostgreSQL instance; the
+   local gate covers macOS. It also scans all reachable commits. Use passing jobs before claiming
+   support for an additional platform.
    Ubuntu's real sandbox tests must start Bubblewrap with seccomp enabled. A runner that reaches
    the [nested user namespace failure](https://github.com/anthropics/sandbox-runtime/issues/428)
    is an open compatibility issue. Keep the sandbox enabled while investigating.
