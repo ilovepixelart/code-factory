@@ -48,7 +48,7 @@ def _provide(services: Services, resources: Resources) -> None:
     )
     services.add(SessionService, service)
     services.add(SessionSource, TeamSessions(service))
-    resources.on_stop.append(service.shutdown)
+    resources.on_stopping.append(service.shutdown)
 
 
 def _background(services: Services, tasks: BackgroundTasks) -> None:

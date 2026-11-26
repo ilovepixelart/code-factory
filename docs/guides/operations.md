@@ -27,7 +27,7 @@ sequenceDiagram
     App->>Tasks: each module's background work starts
     CLI-->>CLI: print "serving on ..." and the sign-in link
     Note over CLI,Tasks: on SIGINT, SIGTERM or end of stdin (CODE_FACTORY_STOP_AT_EOF)
-    App->>App: on_stop hooks, in order
+    App->>App: on_stopping signals, then on_stop hooks, in order
     App->>Tasks: cancel, then wait for every task
     App->>DB: dispose the engine
 ```
@@ -37,7 +37,7 @@ sequenceDiagram
 | Start | The Local and Server mode launchers migrate their own databases. `code-factory serve` checks the schema and refuses an incompatible revision | `scripts/start.sh`, `scripts/compose-entrypoint.sh`, `platform/db/schema.py` |
 | Background | Each module with background work starts its tasks in the lifespan's task group; the modules are marked in the [feature map](../reference/feature-map.md) | `platform/web/lifespan.py` |
 | A task fails | It is logged as `background task <name> failed` with the traceback; its siblings and the app keep running. Restarting `serve` starts it again | `platform/background.py` |
-| Stop | The `on_stop` hooks run first (for example running checks drain and the follower lets go), then the tasks are cancelled; open requests get `CODE_FACTORY_SHUTDOWN_TIMEOUT_S` (10) seconds | `platform/runtime.py`, `platform/cli.py` |
+| Stop | The `on_stopping` signals run first (for example the broker and the session streams are told to stop), then the `on_stop` hooks (running checks drain, the follower lets go), then the tasks are cancelled; open requests get `CODE_FACTORY_SHUTDOWN_TIMEOUT_S` (10) seconds | `platform/runtime.py`, `platform/cli.py` |
 | Agents | Runs outlive the board: stopping `serve` signals no agent process | `runs/module.py` |
 
 Stopping agents on purpose is a command, not a restart:

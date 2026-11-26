@@ -182,7 +182,7 @@ class ProcessRegistry:
             await self._reap(target.pid)
         return sent
 
-    async def end_leftovers(self, target: Target) -> None:
+    def end_leftovers(self, target: Target) -> None:
         """SIGKILL what remains of a held run's group after its leader ended.
 
         The leader's exit does not free its group's id while members remain, so the held pid is

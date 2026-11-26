@@ -204,10 +204,6 @@ class CardRunsAdapter:
         return await self._runs.cost_between(repository, start, end)
 
 
-async def _let_go(registry: ProcessRegistry) -> None:
-    registry.detach_all()  # runs outlive the board: nothing is signalled
-
-
 def _provide(
     services: Services, resources: Resources, hooks_of: Callable[[Services], HookCommandSource]
 ) -> None:
@@ -250,7 +246,7 @@ def _provide(
             services.get(RepositoryService),
         ),
     )
-    resources.on_stop.append(lambda: _let_go(registry))
+    resources.on_stopping.append(registry.detach_all)  # runs outlive the board: none is signalled
 
 
 def _background(services: Services, tasks: BackgroundTasks) -> None:

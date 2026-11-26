@@ -292,7 +292,7 @@ class Ending(Reading):
         ports = self._ports
         target = _target(run, self.exit_file_of(run))
         if target is not None:
-            await self._registry.end_leftovers(target)
+            self._registry.end_leftovers(target)
         await ports.tokens.revoke(run.id)
         stopped = state_of(run) == "stopped"
         data: dict[str, object] = {

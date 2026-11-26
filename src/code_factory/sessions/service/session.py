@@ -208,6 +208,6 @@ class SessionService:
             await asyncio.sleep(MAINTENANCE_S)
             self.maintain()
 
-    async def shutdown(self) -> None:
+    def shutdown(self) -> None:
         """End the open streams."""
         self._hub.shutdown()

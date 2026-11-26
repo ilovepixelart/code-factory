@@ -1,5 +1,6 @@
 """The board's own routes: saved views, the inbox count, repositories and templates."""
 
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import cast
 
@@ -7,6 +8,7 @@ import httpx
 import pytest
 from fastapi import FastAPI
 
+from code_factory.follower.service import QueueService
 from code_factory.platform.services import Services
 from code_factory.repositories.service import RepositoryService
 from code_factory.sample.service import SampleService
@@ -89,6 +91,20 @@ async def test_the_board_cards_count_their_open_questions(
     assert (asked[ids["Specs written"]], asked[ids["A bug in flight"]]) == (1, 0)
     filtered = (await client.get("/api/tickets?questions=1")).json()["columns"]
     assert [c["id"] for cards in filtered.values() for c in cards] == [ids["Specs written"]]
+
+
+async def test_the_board_cards_show_the_queue_the_follower_planned(
+    app: FastAPI, client: httpx.AsyncClient, ids: dict[str, str]
+) -> None:
+    plan = {ids["Specs written"]: "", ids["A bug in flight"]: "waits for a free build slot"}
+    await cast("Services", app.state.services).get(QueueService).write(plan, datetime.now(UTC))
+
+    columns = (await client.get("/api/board")).json()["columns"]
+
+    queued = {c["id"]: c.get("queue") for cards in columns.values() for c in cards}
+    assert queued[ids["Specs written"]] == "next"
+    assert queued[ids["A bug in flight"]] == "waits for a free build slot"
+    assert [i for i, q in queued.items() if q is not None and i not in plan] == []
 
 
 async def test_a_tracked_repository_is_listed_with_the_ones_tickets_are_filed_in(

@@ -34,6 +34,7 @@ from code_factory.broker.service.neighbours import AgentConnections
 from code_factory.platform.config import Settings
 from code_factory.platform.db import UnitOfWork
 from code_factory.platform.errors import NotFoundError
+from code_factory.platform.runtime import run_on_stop
 from code_factory.platform.services import Services
 from code_factory.sessions.module import module as sessions_module
 
@@ -53,8 +54,7 @@ async def test_the_module_registers_its_service_and_starts_the_listener_and_the_
                 while not (await service.status()).listening:  # noqa: ASYNC110  # polls a status
                     await asyncio.sleep(0.01)
             assert service.endpoints().proxy_url.startswith("http://127.0.0.1:")
-            for stop in resources.on_stop:
-                await stop()
+            await run_on_stop(resources)
             async with asyncio.timeout(5):
                 while resources.tasks.names:  # noqa: ASYNC110  # polls the task list
                     await asyncio.sleep(0.01)

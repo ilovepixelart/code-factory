@@ -122,7 +122,7 @@ class CommandMixin(CheckBase):
                 return
 
     def _hold(
-        self, place: Place, timing: Timing, started: Callable[[], Awaitable[None]]
+        self, place: Place, timing: Timing, started: Callable[[], Awaitable[None]] | None
     ) -> Callable[[], AbstractAsyncContextManager[None]]:
         """The container's turn and the heavy-step lock, held while its command runs."""
 
@@ -138,7 +138,8 @@ class CommandMixin(CheckBase):
             lock = await self._heavy.take(board_text(os.getpid(), str(place.tree)), bound, say)
             timing.waited = time.monotonic() - waiting
             try:
-                await started()
+                if started is not None:
+                    await started()
                 yield
             finally:
                 await self._cleanup(lock.release())
@@ -146,7 +147,7 @@ class CommandMixin(CheckBase):
         return hold
 
     async def _run_command(
-        self, place: Place, started: Callable[[], Awaitable[None]], timing: Timing
+        self, place: Place, started: Callable[[], Awaitable[None]] | None, timing: Timing
     ) -> int | None:
         """Run the command, contained as the repository asks.
 
@@ -171,7 +172,8 @@ class CommandMixin(CheckBase):
             code = await self._containers.run(ctx, self._hold(place, timing, started))
         else:
             await self._begin(row.id)
-            await started()
+            if started is not None:
+                await started()
             code = await self._runner.run(
                 Work.CHECKS, row.repository, command, place.tree, place.log, limit
             )
@@ -181,7 +183,9 @@ class CommandMixin(CheckBase):
         async with self._db() as store:
             await store.runs.start(check_id, self._now(), {})
 
-    async def _attempt_on(self, place: Place, started: Callable[[str], Awaitable[None]]) -> Attempt:
+    async def _attempt_on(
+        self, place: Place, started: Callable[[str], Awaitable[None]] | None = None
+    ) -> Attempt:
         """Judge the tree, run the command and judge it again; the log gets the closing lines."""
         row, log = place.row, place.log
         timing = Timing()
@@ -194,7 +198,8 @@ class CommandMixin(CheckBase):
 
         async def begun() -> None:
             timing.started = time.monotonic()
-            await started(before.head)
+            if started is not None:
+                await started(before.head)
 
         ended = await self._run_command(place, begun, timing)
         started_command = ended != NOT_STARTED

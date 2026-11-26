@@ -161,7 +161,7 @@ class DefinedTests:
         self._locks: dict[str, asyncio.Lock] = {}
         self._pool: ProcessPoolExecutor | None = None
 
-    async def close(self) -> None:
+    def close(self) -> None:
         """Stop the parsing process, when one started."""
         pool, self._pool = self._pool, None
         if pool is not None:

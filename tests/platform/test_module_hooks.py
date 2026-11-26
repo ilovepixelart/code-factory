@@ -110,6 +110,58 @@ async def test_on_stop_hooks_run_in_order_while_background_tasks_still_run(
     assert seen == ["first, tasks running: ['worker']", "second"]
 
 
+async def test_stop_signals_run_in_order_before_the_on_stop_hooks_while_tasks_still_run(
+    settings: Settings,
+    migrated: None,  # noqa: ARG001
+) -> None:
+    resources = build_resources(settings)
+    seen: list[str] = []
+
+    def first() -> None:
+        seen.append(f"first signal, tasks running: {resources.tasks.names}")
+
+    def second() -> None:
+        seen.append("second signal")
+
+    async def cleanup() -> None:
+        seen.append("cleanup")
+
+    async def forever() -> None:
+        await asyncio.Event().wait()
+
+    resources.on_stop.append(cleanup)
+    resources.on_stopping.extend([first, second])
+    async with running(resources) as tasks:
+        tasks.start("worker", forever)
+    assert seen == ["first signal, tasks running: ['worker']", "second signal", "cleanup"]
+
+
+async def test_a_failing_stop_signal_is_logged_and_the_rest_still_run(
+    settings: Settings,
+    migrated: None,  # noqa: ARG001
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    resources = build_resources(settings)
+    ran: list[str] = []
+
+    def fails() -> None:
+        msg = "boom"
+        raise RuntimeError(msg)
+
+    def after() -> None:
+        ran.append("after")
+
+    async def cleanup() -> None:
+        ran.append("cleanup")
+
+    resources.on_stopping.extend([fails, after])
+    resources.on_stop.append(cleanup)
+    async with running(resources):
+        pass
+    assert ran == ["after", "cleanup"]
+    assert "on_stopping signal fails failed" in caplog.text
+
+
 async def test_a_failing_on_stop_hook_is_logged_and_the_next_one_still_runs(
     settings: Settings,
     migrated: None,  # noqa: ARG001

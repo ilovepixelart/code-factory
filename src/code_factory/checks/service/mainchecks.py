@@ -35,10 +35,6 @@ SHORT = 7
 NO_TIP = "the repository has no default branch tip to check"
 
 
-async def _nothing(_head: str) -> None:
-    return None
-
-
 class _SleptError(Exception):
     """The machine slept through a failing run of the search."""
 
@@ -137,7 +133,7 @@ class MainMixin(RemoteMixin):
                 row.repository, root, row.commit, log, config.setup
             ) as space:
                 place = Place(row, root, config, space.path, space.git_dir, log, checkout=True)
-                attempt = await self._attempt_on(place, _nothing)
+                attempt = await self._attempt_on(place)
             code, asleep = attempt.ran.code, attempt.slept
             text, reading = attempt.text or "", attempt.reading
         except (SetupFailedError, CodeFactoryError) as failed:
@@ -230,7 +226,7 @@ class MainMixin(RemoteMixin):
                 place = Place(
                     row, root, config, space.path, space.git_dir, log, checkout=True, turn=False
                 )
-                ran = await self._run_command(place, _nothing_started, Timing())
+                ran = await self._run_command(place, None, Timing())
                 code = -1 if ran is None else ran
             woke = await self._opts.sleep_time() if code != 0 else None
         except CodeFactoryError:
@@ -242,7 +238,3 @@ class MainMixin(RemoteMixin):
             logger.warning("the run on %s did not start or was ended", merge[:SHORT])
             return None
         return code != 0
-
-
-async def _nothing_started() -> None:
-    return None

@@ -8,7 +8,6 @@ from code_factory.board import tables  # noqa: F401  # puts board_views on Base.
 from code_factory.board.adapters import (
     NoJobs,
     TeamOwner,
-    TeamQueue,
     TeamReads,
     TeamTickets,
 )
@@ -18,6 +17,7 @@ from code_factory.board.service import (
     BoardSources,
     CardChecks,
     CardDelivery,
+    CardQueue,
     CardRuns,
     ColumnLimits,
     MergeLedger,
@@ -33,7 +33,6 @@ from code_factory.talk.service import TalkService
 from code_factory.team.service import (
     JobSource,
     OwnerSource,
-    TeamService,
     TicketSource,
 )
 from code_factory.tickets.service import (
@@ -57,7 +56,7 @@ def board_sources(services: Services) -> BoardSources:
         stages=services.get(StageService),
         sessions=services.get(SessionService),
         releases=services.get(ReleaseService),
-        queue=TeamQueue(services.get(TeamService)),
+        queue=services.get(CardQueue),
         runs=services.get(CardRuns),
         checks=services.get(CardChecks),
         delivery=services.get(CardDelivery),

@@ -35,6 +35,7 @@ from code_factory.tickets.tables import TicketRow
 
 RECENT_RECORDS = 5
 Change = Callable[[TicketRepository, TicketRow], Awaitable[None]]
+Edit = Callable[[TicketRow], None]
 
 
 class TicketService(TicketLookups):
@@ -242,18 +243,18 @@ class TicketService(TicketLookups):
         """Give the ticket its branch (a plain branch name); it is in Build from then on."""
         name = check_branch(branch)
 
-        async def change(_tickets: TicketRepository, row: TicketRow) -> None:
+        def edit(row: TicketRow) -> None:
             row.branch = name
 
-        return await self._change(ticket, by, change)
+        return await self._change(ticket, by, edit=edit)
 
     async def clear_branch(self, ticket: str, *, by: str) -> Ticket:
         """Take the ticket's branch away."""
 
-        async def change(_tickets: TicketRepository, row: TicketRow) -> None:
+        def edit(row: TicketRow) -> None:
             row.branch = ""
 
-        return await self._change(ticket, by, change)
+        return await self._change(ticket, by, edit=edit)
 
     async def set_pull_request(self, ticket: str, pull: PullRequest, *, by: str) -> Ticket:
         """Record the ticket's pull request and its state, replacing the one it had."""
@@ -262,7 +263,7 @@ class TicketService(TicketLookups):
         async def change(tickets: TicketRepository, row: TicketRow) -> None:
             await tickets.put_pull_request(row.number, pull, now)
 
-        return await self._change(ticket, by, change)
+        return await self._change(ticket, by, change=change)
 
     async def clear_pull_request(self, ticket: str, *, by: str) -> Ticket:
         """Forget the ticket's pull request."""
@@ -270,38 +271,45 @@ class TicketService(TicketLookups):
         async def change(tickets: TicketRepository, row: TicketRow) -> None:
             await tickets.remove_pull_request(row.number)
 
-        return await self._change(ticket, by, change)
+        return await self._change(ticket, by, change=change)
 
     async def set_merged(self, ticket: str, merged: bool, *, by: str) -> Ticket:
         """Record whether the ticket's work is merged, with or without a pull request."""
 
-        async def change(_tickets: TicketRepository, row: TicketRow) -> None:
+        def edit(row: TicketRow) -> None:
             row.merged = merged
 
-        return await self._change(ticket, by, change)
+        return await self._change(ticket, by, edit=edit)
 
     async def archive(self, ticket: str, *, by: str) -> Ticket:
         """Take the ticket off the board; records `archived`."""
 
-        async def change(_tickets: TicketRepository, row: TicketRow) -> None:
+        def edit(row: TicketRow) -> None:
             row.archived = True
 
-        return await self._change(ticket, by, change, record="archived")
+        return await self._change(ticket, by, edit=edit, record="archived")
 
     async def unarchive(self, ticket: str, *, by: str) -> Ticket:
         """Put the ticket back on the board; records `restored`."""
 
-        async def change(_tickets: TicketRepository, row: TicketRow) -> None:
+        def edit(row: TicketRow) -> None:
             row.archived = False
 
-        return await self._change(ticket, by, change, record="restored")
+        return await self._change(ticket, by, edit=edit, record="restored")
 
     async def _change(
-        self, ticket: str, by: str, change: Change, record: str | None = None
+        self,
+        ticket: str,
+        by: str,
+        *,
+        edit: Edit | None = None,
+        change: Change | None = None,
+        record: str | None = None,
     ) -> Ticket:
-        """Apply `change` to the locked ticket; record `record` and a column move if it moved.
+        """Apply `edit` to the locked ticket's row, or `change` through its repository.
 
-        A change that leaves the ticket as it was writes nothing.
+        Records `record` and a column move if it moved; a change that leaves the ticket as it was
+        writes nothing.
         """
         number = ticket_number(ticket)
         async with self._uow() as session:
@@ -310,7 +318,10 @@ class TicketService(TicketLookups):
             if row is None:
                 raise not_found(number)
             before = await read_ticket(tickets, row)
-            await change(tickets, row)
+            if edit is not None:
+                edit(row)
+            if change is not None:
+                await change(tickets, row)
             await tickets.flush()
             after = await read_ticket(tickets, row)
             if after == before:

@@ -238,9 +238,9 @@ async def test_leftovers_are_killed_once_and_the_pid_is_never_signalled_again(
     signals: list[tuple[int, int]],
 ) -> None:
     target = await spawn(registry, tmp_path, "sleep 30; :")
-    await registry.end_leftovers(target)
+    registry.end_leftovers(target)
     assert signals == [(target.pid, signal.SIGKILL)]
-    await registry.end_leftovers(target)
+    registry.end_leftovers(target)
     assert await registry.send_signal(target, signal.SIGKILL) is False
     assert signals == [(target.pid, signal.SIGKILL)]
     os.killpg(target.pid, signal.SIGKILL)
@@ -265,5 +265,5 @@ async def test_the_leftovers_of_a_leader_that_exited_are_still_killed(
 ) -> None:
     target = await spawn(registry, tmp_path, "exit 0")
     assert await gone(registry, target)
-    await registry.end_leftovers(target)
+    registry.end_leftovers(target)
     assert signals == [(target.pid, signal.SIGKILL)]

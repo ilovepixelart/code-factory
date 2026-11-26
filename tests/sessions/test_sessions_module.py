@@ -32,7 +32,7 @@ async def test_the_module_registers_its_service_and_starts_three_named_tasks(
                 "sessions.listen",
                 "sessions.maintenance",
             ]
-            await services.get(SessionService).shutdown()
+            services.get(SessionService).shutdown()
     finally:
         await resources.engine.dispose()
     assert resources.tasks.names == []

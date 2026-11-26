@@ -7,6 +7,7 @@ sessions modules register the team's other ports; a class is registered once
 
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
+from typing import override
 
 from code_factory.board.models import ActivityRecord, CheckRecord, PullFacts
 from code_factory.board.rules.parts import latest_check
@@ -22,7 +23,7 @@ from code_factory.team.models import (
     TicketFacts,
     TicketRef,
 )
-from code_factory.team.service import TeamService
+from code_factory.team.service import JobSource
 from code_factory.tickets.models import ActivityEntry, Column, Ticket
 from code_factory.tickets.service import ActivityService, TicketService, describe
 
@@ -198,24 +199,10 @@ class TeamOwner:
         return items
 
 
-class NoJobs:
+class NoJobs(JobSource):
     """`JobSource` before land jobs exist: none running."""
 
+    @override
     async def running_land_jobs(self) -> list[LandJob]:
         """None."""
         return []
-
-
-class TeamQueue:
-    """`CardQueue`: the claims are the team module's; no follower plans a queue yet."""
-
-    def __init__(self, team: TeamService) -> None:
-        self._team = team
-
-    async def queue_plan(self) -> dict[str, str]:
-        """No ticket is queued."""
-        return {}
-
-    async def holders(self, ticket_ids: Sequence[str]) -> dict[str, str]:
-        """The agent holding each claimed ticket."""
-        return await self._team.holders(list(ticket_ids))

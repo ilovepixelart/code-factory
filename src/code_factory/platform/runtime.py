@@ -16,7 +16,14 @@ logger = logging.getLogger(__name__)
 
 
 async def run_on_stop(resources: Resources) -> None:
-    """Run the `on_stop` hooks in order; a failing one is logged and the rest still run."""
+    """Run the stop signals, then the `on_stop` hooks, in order; a failing one is only logged."""
+    for signal in resources.on_stopping:
+        try:
+            signal()
+        except Exception:
+            logger.exception(
+                "on_stopping signal %s failed", getattr(signal, "__name__", repr(signal))
+            )
     for hook in resources.on_stop:
         try:
             await hook()

@@ -7,10 +7,13 @@ package registries.
 """
 
 from pathlib import Path
+from typing import override
 
 import anyio
 
 from code_factory.agents.service import AgentService
+from code_factory.checks.adapters.container import CheckoutDenials
+from code_factory.platform.contained import SandboxSettings
 from code_factory.repositories.service import RepositoryService
 from code_factory.settings.service import SettingsService
 
@@ -18,7 +21,7 @@ from code_factory.settings.service import SettingsService
 BOARD_FOLDERS = (".code-factory",)
 
 
-class KitSandbox:
+class KitSandbox(SandboxSettings, CheckoutDenials):
     """The srt settings of one contained run, made by the agents kit's rules."""
 
     def __init__(
@@ -34,6 +37,7 @@ class KitSandbox:
         self._home = str(state_dir)
         self._state = self._kit.state_forms(self._home, str(state_dir.resolve()))
 
+    @override
     async def tree_settings(
         self, repository: str, tree: Path, log: Path, temporary: Path, *, reaches_hosts: bool
     ) -> str:
@@ -45,6 +49,7 @@ class KitSandbox:
             denied=await self._denied(repository, tree),
         )  # fmt: skip
 
+    @override
     async def git_settings(self, repository: str, tree: Path, log: Path, temporary: Path) -> str:
         """The board's git in `tree`, which may not write the tree's `.git`."""
         del repository  # the rules are the same for every repository
@@ -53,6 +58,7 @@ class KitSandbox:
             scratch=str(temporary), keys=[], denied=[str(tree / ".git")],
         )  # fmt: skip
 
+    @override
     async def preview_settings(
         self, repository: str, tree: Path, log: Path, temporary: Path
     ) -> str:
@@ -62,6 +68,7 @@ class KitSandbox:
             scratch=str(temporary), keys=[], denied=await self._denied(repository, tree),
         )  # fmt: skip
 
+    @override
     async def checkout_denials(self, repository: str, tree: Path) -> list[Path]:
         """What the board reads in `tree`, a checkout of its own, outside any sandbox."""
         del repository  # the board's folders have the same names in every repository

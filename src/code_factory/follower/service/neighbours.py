@@ -1,15 +1,18 @@
 """The follower ports over the owning modules' services, resolved from the registry per call."""
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
+from typing import override
 
+from code_factory.board.service import CardQueue
 from code_factory.checks.service import CheckService
 from code_factory.evals.service import JudgeService
 from code_factory.follower.models import ActiveRunFact, Card
 from code_factory.follower.rules import due_for_fix, due_for_review, failure_streak
 from code_factory.follower.rules.filing import main_failure_fields, revert_fields
 from code_factory.follower.rules.queue import Rule, reader_due, roles_due
+from code_factory.follower.service import QueueService
 from code_factory.metrics.service import MetricsService
 from code_factory.platform.services import Services
 from code_factory.repositories.service import RepositoryService
@@ -311,3 +314,19 @@ class FilingAdapter(_Neighbour):
             }
             for f in firings
         ]
+
+
+class QueueAdapter(_Neighbour, CardQueue):
+    """The board's `CardQueue`: the plan of the follower's last pass and the team's claims."""
+
+    def __init__(self, services: Services, queue: QueueService) -> None:
+        super().__init__(services)
+        self._queue = queue
+
+    @override
+    async def queue_plan(self) -> dict[str, str]:
+        return await self._queue.plan()
+
+    @override
+    async def holders(self, ticket_ids: Sequence[str]) -> dict[str, str]:
+        return await self._services.get(TeamService).holders(list(ticket_ids))

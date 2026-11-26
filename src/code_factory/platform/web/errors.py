@@ -104,6 +104,22 @@ def internal_error_response() -> JSONResponse:
     return error_response(500, INTERNAL_ERROR_SENTENCE)
 
 
+Handler = Callable[[Request, Exception], Awaitable[JSONResponse]]
+# Coroutines: Starlette awaits a coroutine handler on the loop and sends a plain one to a thread.
+_HANDLERS: dict[type[Exception], Handler] = {}
+
+
+def _handles(error: type[Exception]) -> Callable[[Handler], Handler]:
+    """Register the decorated handler as the answer to `error` and its subclasses."""
+
+    def register(handler: Handler) -> Handler:
+        _HANDLERS[error] = handler
+        return handler
+
+    return register
+
+
+@_handles(CodeFactoryError)
 async def _domain_handler(_request: Request, error: Exception) -> JSONResponse:
     if not isinstance(
         error, CodeFactoryError
@@ -112,6 +128,7 @@ async def _domain_handler(_request: Request, error: Exception) -> JSONResponse:
     return error_response(status_for(error), str(error))
 
 
+@_handles(StarletteHTTPException)
 async def _http_handler(_request: Request, error: Exception) -> JSONResponse:
     if not isinstance(error, StarletteHTTPException):  # pragma: no cover
         raise error
@@ -119,6 +136,7 @@ async def _http_handler(_request: Request, error: Exception) -> JSONResponse:
     return error_response(error.status_code, sentence, error.headers)
 
 
+@_handles(RequestValidationError)
 async def _validation_handler(_request: Request, error: Exception) -> JSONResponse:
     if not isinstance(error, RequestValidationError):  # pragma: no cover
         raise error
@@ -133,10 +151,5 @@ async def _validation_handler(_request: Request, error: Exception) -> JSONRespon
 
 def install_error_handlers(app: FastAPI) -> None:
     """Map the error classes to answers. Unexpected exceptions are caught by `ErrorBoundary`."""
-    handlers: dict[type[Exception], Callable[[Request, Exception], Awaitable[JSONResponse]]] = {
-        CodeFactoryError: _domain_handler,
-        StarletteHTTPException: _http_handler,
-        RequestValidationError: _validation_handler,
-    }
-    for cls, handler in handlers.items():
+    for cls, handler in _HANDLERS.items():
         app.add_exception_handler(cls, handler)
