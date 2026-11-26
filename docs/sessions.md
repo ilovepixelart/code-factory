@@ -20,7 +20,7 @@ flowchart LR
 
 `rules/capture.py` is run by path (`python -I -S`), never through the package: importing
 `code_factory` costs more than the hook budget and the interpreter start is its floor. It imports
-only the standard library (`tests/sessions/test_capture_script.py` walks its imports), so the
+only the standard library (`tests/integration/sessions/test_capture_script.py` walks its imports), so the
 secret patterns exist twice, here and in `platform/text/masking.py`, and a test holds them equal.
 
 - It never prints and exits 0 whatever happens. A payload it cannot record is one line in
@@ -69,7 +69,7 @@ Constraints the code cannot say:
   rebuilds older rows at start (`code-factory sessions rebuild` does it on demand).
 - The window of a session is cached in process (256 sessions); a cache that is behind the table is
   read again. A window is derived on every batch, however long: deriving 5,000 events takes about
-  2 ms at the median (target 30 ms, pinned in `tests/sessions/test_sessions_perf.py`), so the
+  2 ms at the median (target 30 ms, pinned in `tests/integration/sessions/test_sessions_perf.py`), so the
   once-per-second debounce the spec allowed for is not needed and not built.
 - A process whose spool folder is empty or missing never touches the database: the ingest task
   looks at the folder first, and checks for views older than the rules only once a spool exists.

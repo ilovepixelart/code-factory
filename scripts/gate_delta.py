@@ -17,6 +17,10 @@ ASSERTION = re.compile(r"^\s*(?:assert\b|expect\s*\(|(?:self\.)?assert[A-Z]\w*\s
 ROOTS = ("src/code_factory/", "tests/", "web/src/")
 # The fast pass runs these flows of a changed module; e2e runs only in the full gate and CI.
 TIERS = ("unit", "integration")
+# Web unit tests and their helpers run in the pipeline; component (DOM) and browser tests run
+# only on demand, so a change to them selects nothing.
+WEB_UNIT = ("web/tests/unit/", "web/tests/support/")
+WEB_ON_DEMAND = ("web/tests/component/", "web/tests/e2e/")
 INSTRUCTIONS = ("CLAUDE.md", "AGENTS.md")
 INSTRUCTION_LINES = 100
 
@@ -180,10 +184,12 @@ def affected(changed: list[str]) -> int:
     for path in changed:
         if path.endswith(".md") or path in {".gitignore", ".env.example"}:
             continue
-        if path.startswith(ROOTS[2]) and not path.startswith(
-            ("web/src/test/", "web/src/generated/")
+        if path.startswith(WEB_UNIT) or (
+            path.startswith(ROOTS[2]) and not path.startswith("web/src/generated/")
         ):
             vue = True
+        elif path.startswith(WEB_ON_DEMAND):
+            continue
         elif (targets := _module_tests(path)) is not None:
             python.update(targets)
         else:

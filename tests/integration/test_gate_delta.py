@@ -115,6 +115,28 @@ def test_affected_gate_delta_changes_select_only_its_test_file(tmp_path: Path) -
     ]
 
 
+def test_the_web_unit_tests_run_for_their_folder_and_the_dom_tests_never(tmp_path: Path) -> None:
+    repo = make_repo(tmp_path)
+    git(repo, "push", "origin", "main")
+    selected = {}
+    for path in (
+        "web/tests/unit/format.test.ts",
+        "web/tests/support/board.ts",
+        "web/tests/component/Card.test.ts",
+        "web/tests/e2e/board.spec.ts",
+    ):
+        write(repo, path, "export {}\n")
+        selected[path] = delta(repo, "affected").stdout.splitlines()
+        (repo / path).unlink()
+
+    assert selected == {
+        "web/tests/unit/format.test.ts": ["vue"],
+        "web/tests/support/board.ts": ["vue"],
+        "web/tests/component/Card.test.ts": [],
+        "web/tests/e2e/board.spec.ts": [],
+    }
+
+
 def test_delta_coverage_rejects_a_new_file_missing_from_both_reports(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     write(repo, "src/code_factory/new.py", "answer = 42\n")

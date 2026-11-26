@@ -16,7 +16,7 @@ Routes are `board/routes.py`; the service is `board/service/`; the pure rules ar
 | `archive(query)` | tickets and stage assessments, release names |
 | `month_budget`, `evidence_summary` | what the page shows, for other modules (the delivery module reads the summary) |
 
-A read writes nothing (`tests/board/test_board_page_service.py` spies on the statements) and keeps
+A read writes nothing (`tests/integration/board/test_board_page_service.py` spies on the statements) and keeps
 no cache: the number of statements is the same at 10 and at 40 tickets. The services answer in
 separate units of work, so one answer may combine states a few milliseconds apart; the next poll
 (3 s) corrects it. `board()` is an ETag over the compact body (`rules/etag.py`); the 304 is the

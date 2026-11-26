@@ -165,7 +165,7 @@ def test_the_open_setting_false_opens_nothing_even_on_a_terminal(
 
 
 def test_the_browser_test_launcher_never_opens_a_browser() -> None:
-    launcher = (Path(__file__).resolve().parents[3] / "web/e2e/fixtures.ts").read_text()
+    launcher = (Path(__file__).resolve().parents[3] / "web/tests/e2e/fixtures.ts").read_text()
     assert "CODE_FACTORY_OPEN: 'false'" in launcher
 
 

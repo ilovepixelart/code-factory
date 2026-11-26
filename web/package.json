@@ -14,7 +14,8 @@
     "unused": "knip",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run --coverage",
+    "test": "vitest run --coverage --project unit",
+    "test:component": "vitest run --project component",
     "e2e": "playwright test",
     "demo": "playwright test --config playwright.demo.config.ts",
     "perf": "playwright test --config playwright.perf.config.ts"

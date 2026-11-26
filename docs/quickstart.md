@@ -212,7 +212,7 @@ Inbox shows ready, failing and idle pull requests. Factory uses recorded run cos
 outcomes and review-role notes. Flow includes question waits and gate timing budgets. Agents are held,
 so the demo never starts a run. It never touches the `code_factory` database or a board on another
 port. Benchmarks and Self-improvement stay hidden until their data sources are available.
-`web/e2e/demo_pages.spec.ts` visits each visible page over the sample.
+`web/tests/e2e/demo_pages.spec.ts` visits each visible page over the sample.
 
 The browser tests load the smaller `board` sample (`sample-load board`) into a schema of their
 own; the same commands load either by hand:

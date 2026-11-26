@@ -1,7 +1,7 @@
 {
   "extends": "@vue/tsconfig/tsconfig.json",
   "include": [
-    "e2e/**/*.ts",
+    "tests/e2e/**/*.ts",
     "demo/**/*.ts",
     "perf/**/*.ts",
     "playwright.config.ts",

@@ -9,5 +9,5 @@ environment. Over HTTP the run holds only its own token, named in its settings a
 
 **What follows.** Runs start only on a served board. The run's environment drops every inherited
 `CODE_FACTORY_*` variable, so the board's database address and password never reach it
-(`runs/service/launching.py`, tested in `tests/runs/test_run_launching.py`). The hook routes pass the
+(`runs/service/launching.py`, tested in `tests/integration/runs/test_run_launching.py`). The hook routes pass the
 owner's cookie guard and check the bearer token themselves (`hooks/routes.py`).

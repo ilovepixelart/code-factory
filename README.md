@@ -136,7 +136,7 @@ code-factory/
 │                           # service/, adapters, repository, ports, tables, rules, models
 ├── alembic/                # One migration history for every module
 ├── web/                    # The Vue app (pnpm); built into platform/web/dist
-├── tests/                  # Mirrors the modules; contract/ holds the API and MCP contracts
+├── tests/                  # unit/, integration/, e2e/ per module; support/ helpers (docs/testing.md)
 ├── scripts/gate.sh         # The gate: static checks, then pytest and the web checks side by side
 └── docs/                   # See Documentation below
 ```

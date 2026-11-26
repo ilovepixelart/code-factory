@@ -20,7 +20,7 @@ while you edit them, which is the only reason this is a FastAPI app rather than 
 The htmx example switcher only ever does a GET for HTML, which a file on disk answers as well as a
 route, so it works in both renders.
 
-Every snippet the page shows is in `web/snippets.toml`; `tests/site/test_site_snippets.py` holds
+Every snippet the page shows is in `web/snippets.toml`; `tests/integration/site/test_site_snippets.py` holds
 each one to the board: an MCP call to the tool listings in `tests/support/golden/mcp/`, a command line to
 the `code-factory` parser, a config to the rules of `code-factory config check`. The version is
 read from the project's `pyproject.toml`.
@@ -29,7 +29,7 @@ The stylesheet is built with Tailwind's CLI, at the version the web app uses, an
 
     pnpm dlx @tailwindcss/cli@4.3.3 -i styles/input.css -o web/static/app.css --minify
 
-`tests/site/test_site_css.py` fails when the markup uses a utility the committed file lacks, which
+`tests/unit/site/test_site_css.py` fails when the markup uses a utility the committed file lacks, which
 is what a forgotten rebuild looks like. The theme tokens are the web app's
 (`web/src/styles/app.css`); copy a change there into `styles/input.css`.
 

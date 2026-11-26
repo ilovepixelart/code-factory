@@ -16,7 +16,7 @@ import {
   prepareSample,
   start,
   test,
-} from '../e2e/fixtures'
+} from '../tests/e2e/fixtures'
 
 const SAMPLE = 'demo'
 const OUT = join(ROOT, 'docs', 'demo')

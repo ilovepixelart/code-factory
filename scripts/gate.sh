@@ -124,7 +124,7 @@ except UnsafeDatabaseError as error:
   }
 }
 
-# The old name must appear in no commit message (tests/test_no_old_name.py covers files).
+# The old name must appear in no commit message (tests/unit/test_no_old_name.py covers files).
 # Words are assembled so this script does not match itself.
 OLD_NAME="whole""cycle"
 OLD_ABBREVIATION="W""C"

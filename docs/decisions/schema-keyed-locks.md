@@ -7,5 +7,5 @@ separate schemas of one database waited on each other, and so did the test worke
 schema; a lock taken in a savepoint is held until the outer transaction ends.
 
 **What follows.** With no current schema the schema part is empty rather than NULL, because a NULL
-key takes no lock at all. `tests/platform/test_advisory_locks.py` shows one name blocking within a
+key takes no lock at all. `tests/integration/platform/test_advisory_locks.py` shows one name blocking within a
 schema and not across two.

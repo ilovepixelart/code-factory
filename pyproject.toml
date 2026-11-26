@@ -173,7 +173,7 @@ include_external_packages = true
 exclude_type_checking_imports = true
 
 # Every contract is direct imports only and is named for the rule it holds. A new violation is
-# fixed, never baselined. docs/architecture.md explains each; tests/test_architecture.py runs them
+# fixed, never baselined. docs/architecture.md explains each; tests/integration/test_architecture.py runs them
 # and checks that no package under `code_factory` escapes them.
 #
 # A new module is added to `containers` of "module-layers" and nowhere else: the wildcard

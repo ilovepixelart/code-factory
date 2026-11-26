@@ -1,5 +1,5 @@
 # Every piece of code the page shows, read by web/app.py and build_static.py to render it and by
-# tests/site/test_site_snippets.py to prove it: an MCP call is checked against the tool listings
+# tests/integration/site/test_site_snippets.py to prove it: an MCP call is checked against the tool listings
 # pinned in tests/support/golden/mcp/, a command line against the real `code-factory` parser, and a
 # config.toml against the rules `code-factory config check` applies.
 #
