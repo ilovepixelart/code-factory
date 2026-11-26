@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, ubuntu-24.04, ubuntu-24.04-arm]
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     env:
@@ -40,7 +40,6 @@ jobs:
         with:
           version: '0.13.9'
       - name: Install Ubuntu runtime libraries
-        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql bubblewrap socat ripgrep libatomic1 gh
@@ -55,36 +54,30 @@ jobs:
         shell: bash
         run: |
           npm install --global pnpm@12.14.0
-          if [ "$RUNNER_OS" = macOS ]; then
-            npm install --global @anthropic-ai/sandbox-runtime@0.0.83
-            brew install postgresql@18 gitleaks
-            pg_bin="$(brew --prefix postgresql@18)/bin"
-          else
-            # Factory only starts runtimes from paths with known writers.
-            runtime_tools="$HOME/.local/code-factory-ci"
-            install -d -m 700 "$runtime_tools/bin"
-            install -m 755 "$(command -v node)" "$runtime_tools/bin/node"
-            npm install --global --prefix "$runtime_tools" @anthropic-ai/sandbox-runtime@0.0.83
-            echo "$runtime_tools/bin" >> "$GITHUB_PATH"
-            pg_bin="$(pg_config --bindir)"
-            case "$RUNNER_ARCH" in
-              X64) arch=x64 ;;
-              ARM64) arch=arm64 ;;
-              *) exit 1 ;;
-            esac
-            tool_dir="$RUNNER_TEMP/tools"
-            mkdir -p "$tool_dir"
-            (
-              cd "$tool_dir"
-              release=https://github.com/gitleaks/gitleaks/releases/download/v8.30.1
-              asset="gitleaks_8.30.1_linux_$arch.tar.gz"
-              curl --fail --silent --show-error --location --remote-name "$release/$asset"
-              curl --fail --silent --show-error --location --remote-name "$release/gitleaks_8.30.1_checksums.txt"
-              awk -v asset="$asset" '$2 == asset { print }' gitleaks_8.30.1_checksums.txt | sha256sum --check
-              tar -xzf "$asset" gitleaks
-            )
-            echo "$tool_dir" >> "$GITHUB_PATH"
-          fi
+          # Factory only starts runtimes from paths with known writers.
+          runtime_tools="$HOME/.local/code-factory-ci"
+          install -d -m 700 "$runtime_tools/bin"
+          install -m 755 "$(command -v node)" "$runtime_tools/bin/node"
+          npm install --global --prefix "$runtime_tools" @anthropic-ai/sandbox-runtime@0.0.83
+          echo "$runtime_tools/bin" >> "$GITHUB_PATH"
+          pg_bin="$(pg_config --bindir)"
+          case "$RUNNER_ARCH" in
+            X64) arch=x64 ;;
+            ARM64) arch=arm64 ;;
+            *) exit 1 ;;
+          esac
+          tool_dir="$RUNNER_TEMP/tools"
+          mkdir -p "$tool_dir"
+          (
+            cd "$tool_dir"
+            release=https://github.com/gitleaks/gitleaks/releases/download/v8.30.1
+            asset="gitleaks_8.30.1_linux_$arch.tar.gz"
+            curl --fail --silent --show-error --location --remote-name "$release/$asset"
+            curl --fail --silent --show-error --location --remote-name "$release/gitleaks_8.30.1_checksums.txt"
+            awk -v asset="$asset" '$2 == asset { print }' gitleaks_8.30.1_checksums.txt | sha256sum --check
+            tar -xzf "$asset" gitleaks
+          )
+          echo "$tool_dir" >> "$GITHUB_PATH"
           echo "$pg_bin" >> "$GITHUB_PATH"
           pg_state="$RUNNER_TEMP/code-factory-postgres"
           password="$(openssl rand -hex 24)"
@@ -98,7 +91,6 @@ jobs:
           PGPASSWORD="$password" "$pg_bin/createdb" -h 127.0.0.1 -p 54320 -U postgres code_factory_test
           printf 'CODE_FACTORY_GATE_DATABASE_URL=postgresql+asyncpg://postgres:%s@127.0.0.1:54320/code_factory_test\n' "$password" >> "$GITHUB_ENV"
       - name: Verify Linux check sandbox
-        if: runner.os == 'Linux'
         run: |
           uv sync --locked
           CODE_FACTORY_DATABASE_URL="$CODE_FACTORY_GATE_DATABASE_URL" \
@@ -142,11 +134,7 @@ jobs:
           pnpm --dir web audit
       - name: Run browser smoke tests
         run: |
-          if [ "$RUNNER_OS" = Linux ]; then
-            pnpm --dir web exec playwright install --with-deps chromium
-          else
-            pnpm --dir web exec playwright install chromium
-          fi
+          pnpm --dir web exec playwright install --with-deps chromium
           CODE_FACTORY_DATABASE_URL="$CODE_FACTORY_GATE_DATABASE_URL" CODE_FACTORY_E2E_BUILT=1 \
             pnpm --dir web exec playwright test e2e/served_app.spec.ts e2e/core_flow.spec.ts e2e/demo_pages.spec.ts --workers=2
       - name: Build and verify a clean installation
