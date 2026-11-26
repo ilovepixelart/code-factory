@@ -4,6 +4,16 @@
 
 <p align="center"><strong>From ticket to merged code, with agents.</strong></p>
 
+[![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/ilovepixelart/code-factory/main/pyproject.toml)](https://github.com/ilovepixelart/code-factory/blob/main/pyproject.toml)
+[![License](https://img.shields.io/github/license/ilovepixelart/code-factory)](https://github.com/ilovepixelart/code-factory/blob/main/LICENSE)
+\
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ilovepixelart_code-factory&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ilovepixelart_code-factory)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ilovepixelart_code-factory&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ilovepixelart_code-factory)
+\
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ilovepixelart_code-factory&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=ilovepixelart_code-factory)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ilovepixelart_code-factory&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ilovepixelart_code-factory)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ilovepixelart_code-factory&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ilovepixelart_code-factory)
+
 code-factory is a local, single-owner board that takes software work from a ticket to a merged
 GitHub pull request. Claude Code and Codex work in separate Git worktrees and use MCP tools and
 hooks to talk to the board. The owner reviews decisions in the browser. The app runs over
