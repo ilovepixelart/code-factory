@@ -76,7 +76,7 @@ class Starting(Reading):
         async with self._uow() as session:
             return await HaltRepository(session).halted() is not None
 
-    async def _check_ask(self, facts: TicketFacts, stage: str, options: StartOptions) -> None:
+    def _check_ask(self, facts: TicketFacts, stage: str, options: StartOptions) -> None:
         if options.permissions not in PERMISSION_MODES:
             msg = "unknown permission mode"
             raise BadRequestError(msg)
@@ -129,7 +129,7 @@ class Starting(Reading):
         begin = _Start(facts, stage or facts.column, options or StartOptions())
         if await self._halted():
             raise ConflictError(HALTED)
-        await self._check_ask(facts, begin.stage, begin.options)
+        self._check_ask(facts, begin.stage, begin.options)
         begin.settings = await self._ports.config.settings(facts.repository)
         claimed = await self._ports.teams.claim_for_run(ticket_id, begin.stage, begin.settings)
         begin.count = budget_rules.attempt_count(facts.parallel, begin.settings.attempts)
