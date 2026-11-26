@@ -32,7 +32,7 @@ from code_factory.factory.service import FactoryPorts, ImprovementPort
 from code_factory.follower.module import module as follower
 from code_factory.git.models import HookOutcome, TicketRef
 from code_factory.git.module import build_module as build_git
-from code_factory.git.service import GitPorts, HooksPort
+from code_factory.git.service import GitPorts, HooksPort, RepositoryDirectory, TicketPort
 from code_factory.health.module import module as health
 from code_factory.hooks.module import RunHookCommands
 from code_factory.hooks.module import module as hooks
@@ -113,15 +113,17 @@ class NoImprovements(ImprovementPort):
         return Improvements(available=False)
 
 
-class _Directory:
+class _Directory(RepositoryDirectory):
     """Git's view of the tracked repositories."""
 
     def __init__(self, services: Services) -> None:
         self._services = services
 
+    @override
     async def root_of(self, repository: str) -> Path:
         return await self._services.get(RepositoryService).get(repository)
 
+    @override
     async def by_path(self, path: Path) -> str:
         found = [
             r
@@ -134,23 +136,26 @@ class _Directory:
         return max(found, key=lambda r: len(r.path)).name
 
 
-class _GitTickets:
+class _GitTickets(TicketPort):
     """Git's view of tickets; a ticket is read by id, so the repository only scopes the call."""
 
     def __init__(self, services: Services) -> None:
         self._services = services
 
-    async def ticket(self, repository: str, ticket_id: str) -> TicketRef:  # noqa: ARG002
+    @override
+    async def ticket(self, repository: str, ticket_id: str) -> TicketRef:
         ticket = await self._services.get(TicketService).get(ticket_id)
         return TicketRef(
             id=ticket.id, title=ticket.title, kind=ticket.type, labels=ticket.labels,
             branch=ticket.branch, blocker_ids=ticket.blocked_by,
         )  # fmt: skip
 
-    async def record_branch(self, repository: str, ticket_id: str, branch: str) -> None:  # noqa: ARG002
+    @override
+    async def record_branch(self, repository: str, ticket_id: str, branch: str) -> None:
         await self._services.get(TicketService).set_branch(ticket_id, branch, by="board")
 
-    async def stack_parent(self, repository: str, ticket_id: str) -> str | None:  # noqa: ARG002
+    @override
+    async def stack_parent(self, repository: str, ticket_id: str) -> str | None:
         """The one unmerged blocker in Build or Review with a branch that waits on nothing."""
         tickets = self._services.get(TicketService)
         blockers = [await tickets.get(b) for b in (await tickets.get(ticket_id)).blocked_by]
