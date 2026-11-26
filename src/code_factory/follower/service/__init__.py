@@ -76,7 +76,7 @@ class FollowerService:
             try:
                 async with asyncio.timeout(STEP_S):
                     report[step] = await work()
-            except (CodeFactoryError, TimeoutError, OSError) as error:
+            except (CodeFactoryError, OSError) as error:
                 logger.warning("follower: step %s failed: %s", step, error)
                 report[step] = f"failed: {error}"
         return PassReport(steps=report)
@@ -157,7 +157,7 @@ class FollowerService:
             try:
                 async with asyncio.timeout(STEP_S):
                     leading = await lead()
-            except (CodeFactoryError, TimeoutError, OSError) as error:
+            except (CodeFactoryError, OSError) as error:
                 logger.warning("follower: leadership check failed: %s", error)
             else:
                 if leading:

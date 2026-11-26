@@ -40,7 +40,7 @@ class ListenConnection:
             try:
                 await self._listen_once()
                 pause = FIRST_RETRY_S
-            except OSError, TimeoutError, asyncpg.PostgresError, asyncpg.InterfaceError:
+            except OSError, asyncpg.PostgresError, asyncpg.InterfaceError:
                 logger.warning("the session listener lost its connection; retrying", exc_info=True)
             await asyncio.sleep(pause)
             pause = min(pause * 2, LAST_RETRY_S)
@@ -73,5 +73,5 @@ class ListenConnection:
         try:
             async with asyncio.timeout(CLOSE_TIMEOUT_S):
                 await connection.close()
-        except OSError, TimeoutError, asyncpg.PostgresError, asyncpg.InterfaceError:
+        except OSError, asyncpg.PostgresError, asyncpg.InterfaceError:
             connection.terminate()

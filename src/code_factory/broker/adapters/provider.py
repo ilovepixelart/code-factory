@@ -93,7 +93,7 @@ class ProviderClient:
         try:
             async with asyncio.timeout(self._budget):
                 response = await self._client.send(request, stream=True, follow_redirects=False)
-        except httpx.HTTPError, OSError, TimeoutError:
+        except httpx.HTTPError, OSError:
             raise UpstreamError("the provider could not be reached") from None
         return Upstream(response)
 

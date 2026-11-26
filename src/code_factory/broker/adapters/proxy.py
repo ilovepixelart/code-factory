@@ -77,7 +77,7 @@ class RunProxyServer:
             self._live.add(task)
         try:
             await self._serve(reader, writer)
-        except OSError, asyncio.IncompleteReadError, asyncio.LimitOverrunError, TimeoutError:
+        except OSError, asyncio.IncompleteReadError, asyncio.LimitOverrunError:
             pass  # the peer went away or sent too much: the connection closes with no relay
         finally:
             writer.close()
@@ -116,7 +116,7 @@ class RunProxyServer:
         try:
             async with asyncio.timeout(self._connect_timeout_s):
                 out_reader, out_writer = await asyncio.open_connection(host, int(port))
-        except OSError, TimeoutError:
+        except OSError:
             writer.write(_status_line(502, "the host did not answer"))
             await writer.drain()
             return
@@ -140,7 +140,7 @@ class RunProxyServer:
             async with asyncio.TaskGroup() as group:
                 group.create_task(self._copy(reader, out_writer))
                 group.create_task(self._copy(out_reader, writer))
-        except* _TunnelEnded, OSError, TimeoutError:
+        except* _TunnelEnded, OSError:
             pass  # one side ended or went idle: the group has cancelled the other
 
     async def _copy(self, source: asyncio.StreamReader, sink: asyncio.StreamWriter) -> None:

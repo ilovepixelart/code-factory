@@ -1,6 +1,5 @@
 """The Flow page: ledger rows, ticket facts, runs and branch cuts through the pure assembly."""
 
-from code_factory.metrics.adapters import GitUnavailableError
 from code_factory.metrics.models import FlowPage, MergeFact, TicketFlow, TrackedRepo
 from code_factory.metrics.repository import MetricsRepository
 from code_factory.metrics.rules.flow import InFlight, assemble_flow
@@ -23,7 +22,7 @@ class WebAddresses:
         if repo.name not in self._known:
             try:
                 self._known[repo.name] = await deps.git.origin_web(repo.path)
-            except GitUnavailableError, UnavailableError:
+            except UnavailableError:
                 return None
         return self._known[repo.name]
 
