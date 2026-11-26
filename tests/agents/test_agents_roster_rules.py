@@ -22,8 +22,9 @@ def change(**fields: object) -> AgentChange:
 
 
 def refusal(base: AgentDefinition, **fields: object) -> str:
+    given = change(**fields)
     with pytest.raises(BadRequestError) as caught:
-        apply_change(base, change(**fields), NOW)
+        apply_change(base, given, NOW)
     return str(caught.value)
 
 

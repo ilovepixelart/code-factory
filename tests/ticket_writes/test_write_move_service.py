@@ -132,8 +132,9 @@ async def test_a_move_of_a_missing_ticket_or_to_an_unknown_column_is_refused(
     writes: TicketWriteService, tickets: TicketService
 ) -> None:
     plain = await file(tickets, "Plain")
+    given = address(plain).model_copy(update={"id": "CF-999999"})
     with pytest.raises(NotFoundError, match=exactly("no such ticket")):
-        await writes.move(address(plain).model_copy(update={"id": "CF-999999"}), "spec", [], OWNER)
+        await writes.move(given, "spec", [], OWNER)
     with pytest.raises(BadRequestError, match=exactly("unknown stage later")):
         await writes.move(address(plain), "later", [f"sample/{plain.id}"], OWNER)
     assert (await tickets.get(plain.id)).rank == 0

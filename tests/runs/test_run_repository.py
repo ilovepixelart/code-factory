@@ -71,18 +71,22 @@ async def test_the_database_refuses_an_unknown_stage_by_name(
     run_repo: RunRepository, db_session: AsyncSession, ticket: Ticket
 ) -> None:
     await run_repo.insert(a_run(ticket.number))
+    savepoint = db_session.begin_nested()
+    statement = text("update runs set stage = 'deploy'")
     with pytest.raises(IntegrityError, match="ck_runs_known_stage"):
-        async with db_session.begin_nested():
-            await db_session.execute(text("update runs set stage = 'deploy'"))
+        async with savepoint:
+            await db_session.execute(statement)
 
 
 async def test_the_database_refuses_an_unknown_permission_mode_by_name(
     run_repo: RunRepository, db_session: AsyncSession, ticket: Ticket
 ) -> None:
     await run_repo.insert(a_run(ticket.number))
+    savepoint = db_session.begin_nested()
+    statement = text("update runs set permissions = 'anything'")
     with pytest.raises(IntegrityError, match="ck_runs_known_mode"):
-        async with db_session.begin_nested():
-            await db_session.execute(text("update runs set permissions = 'anything'"))
+        async with savepoint:
+            await db_session.execute(statement)
 
 
 async def test_an_end_is_won_by_the_first_and_refused_to_the_second(

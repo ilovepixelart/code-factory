@@ -143,8 +143,9 @@ async def test_a_body_stream_that_fails_raises_what_it_raised(client: ProviderCl
         raise ValueError("body ended")
 
     async with stand_in() as provider:
+        given = broken()
         with pytest.raises(ValueError, match="body ended"):
-            await client.stream_request("POST", provider.base_url, "/v1/x", [], broken())
+            await client.stream_request("POST", provider.base_url, "/v1/x", [], given)
 
 
 def api(client: ProviderClient, **more: float) -> KeyApi:

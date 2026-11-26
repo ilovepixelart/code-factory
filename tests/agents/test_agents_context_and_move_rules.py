@@ -55,8 +55,9 @@ def test_twenty_versions_are_kept_and_the_oldest_goes_on_the_21st_change() -> No
 
 def test_8000_characters_are_taken_and_8001_refused() -> None:
     assert with_context(bare(), "x" * 8000, T0).context == "x" * 8000
+    given = bare()
     with pytest.raises(BadRequestError, match=r"context is 8,001 characters"):
-        with_context(bare(), "x" * 8001, T0)
+        with_context(given, "x" * 8001, T0)
 
 
 def test_a_restored_version_becomes_current_under_its_own_time() -> None:
@@ -67,8 +68,9 @@ def test_a_restored_version_becomes_current_under_its_own_time() -> None:
 
 
 def test_restoring_an_unknown_time_says_so() -> None:
+    given = with_context(bare(), "one", at(0))
     with pytest.raises(NotFoundError) as caught:
-        restore(with_context(bare(), "one", at(0)), 5)
+        restore(given, 5)
     assert str(caught.value) == "a has no context version of 5"
 
 
@@ -96,20 +98,24 @@ def test_down_swaps_with_the_nearest_agent_below_in_the_column() -> None:
 
 
 def test_the_first_cannot_go_up_and_the_last_cannot_go_down() -> None:
+    given = roster()
     with pytest.raises(ConflictError) as first:
-        move(roster(), "a", "build", up=True)
+        move(given, "a", "build", up=True)
     assert str(first.value) == "a is already first in build"
+    given = roster()
     with pytest.raises(ConflictError) as last:
-        move(roster(), "d", "build", up=False)
+        move(given, "d", "build", up=False)
     assert str(last.value) == "d is already last in build"
 
 
 def test_an_agent_not_in_the_column_or_unknown_is_refused() -> None:
+    given = roster()
     with pytest.raises(BadRequestError) as other:
-        move(roster(), "b", "build", up=True)
+        move(given, "b", "build", up=True)
     assert str(other.value) == "b does not work build"
+    given = roster()
     with pytest.raises(NotFoundError) as unknown:
-        move(roster(), "z", "build", up=True)
+        move(given, "z", "build", up=True)
     assert str(unknown.value) == "no such agent"
 
 

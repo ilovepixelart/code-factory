@@ -48,8 +48,9 @@ async def test_a_claim_in_flight_finishes_before_the_rename_asks_and_then_refuse
     claiming = asyncio.create_task(claim())
     await read_the_roster.wait()
     renaming = asyncio.create_task(agents.edit_agent("a", AgentChange(name="b")))
+    asked = claimer.asked.wait()
     with pytest.raises(TimeoutError):
-        await asyncio.wait_for(claimer.asked.wait(), 1)
+        await asyncio.wait_for(asked, 1)
     release.set()
     await claiming
     with pytest.raises(ConflictError):

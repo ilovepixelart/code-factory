@@ -128,8 +128,9 @@ async def test_a_result_of_another_runner_is_refused_and_leaves_the_claim_with_i
     checks: CheckService, activity: ActivityService, started: Ticket, pull: str
 ) -> None:
     claim = await claimed(checks, "r1")
+    given = result(claim)
     with pytest.raises(ConflictError, match="is not yours: claim again"):
-        await checks.accept("r2", REPO, started.id, pull, result(claim))
+        await checks.accept("r2", REPO, started.id, pull, given)
     assert await checks.beat("r1", REPO, started.id, pull)
     assert await checks_records(activity, started) == []
 
@@ -143,8 +144,9 @@ async def test_a_result_for_a_head_that_moved_is_refused_and_gives_the_claim_up(
 ) -> None:
     claim = await claimed(checks)
     forge.heads[:] = [PullHead(repository=REPO, ticket_id=started.id, head="f" * 40)]
+    given = result(claim)
     with pytest.raises(ConflictError, match="head moved since the claim"):
-        await checks.accept("r1", REPO, started.id, pull, result(claim))
+        await checks.accept("r1", REPO, started.id, pull, given)
     assert await checks_records(activity, started) == []
     assert not await checks.beat("r1", REPO, started.id, pull)
     assert not await checks.left_to_runners(REPO, started.id, pull)
@@ -155,8 +157,9 @@ async def test_a_result_naming_another_head_is_refused_and_gives_the_claim_up(
 ) -> None:
     claim = await claimed(checks)
     other = claim.model_copy(update={"head": "e" * 40})
+    given = result(other)
     with pytest.raises(ConflictError, match="another head than"):
-        await checks.accept("r1", REPO, started.id, pull, result(other))
+        await checks.accept("r1", REPO, started.id, pull, given)
     assert await checks_records(activity, started) == []
     assert not await checks.beat("r1", REPO, started.id, pull)
 

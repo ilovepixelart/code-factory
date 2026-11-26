@@ -112,8 +112,9 @@ async def test_links_read_back_as_ids_in_the_order_written(tickets: TicketServic
 
 
 async def test_a_link_to_a_ticket_that_does_not_exist_is_refused(tickets: TicketService) -> None:
+    given = new("Orphan", parent="CF-999999")
     with pytest.raises(BadRequestError, match="CF-999999 does not exist"):
-        await tickets.create(new("Orphan", parent="CF-999999"), by=OWNER)
+        await tickets.create(given, by=OWNER)
 
 
 async def test_a_ticket_cannot_link_to_itself(tickets: TicketService) -> None:

@@ -47,11 +47,13 @@ async def test_a_connection_lists_whether_its_key_is_set_and_never_the_key(
 
 async def test_a_connection_added_twice_or_off_the_rules_is_refused(agents: AgentService) -> None:
     await agents.add_connection(conn(name="local", kind="ollama"))
+    given = conn(name="local", kind="ollama")
     with pytest.raises(ConflictError) as taken:
-        await agents.add_connection(conn(name="local", kind="ollama"))
+        await agents.add_connection(given)
     assert str(taken.value) == "a connection named local is defined"
+    given = conn(name="x", kind="ollama", base_url="http://10.0.0.5")
     with pytest.raises(BadRequestError):
-        await agents.add_connection(conn(name="x", kind="ollama", base_url="http://10.0.0.5"))
+        await agents.add_connection(given)
 
 
 async def test_a_used_connection_cannot_be_removed_but_can_be_renamed(agents: AgentService) -> None:

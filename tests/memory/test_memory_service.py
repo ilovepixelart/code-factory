@@ -45,8 +45,9 @@ async def test_the_same_words_on_the_same_day_get_the_next_number(memory: Memory
 
 
 async def test_an_entry_without_a_source_is_refused(memory: MemoryService) -> None:
+    given = rule("No source", source="")
     with pytest.raises(BadRequestError, match="an entry needs a source"):
-        await memory.add(rule("No source", source=""), by=OWNER)
+        await memory.add(given, by=OWNER)
 
 
 async def test_an_unknown_entry_is_not_found(memory: MemoryService) -> None:
@@ -64,8 +65,9 @@ async def test_an_entry_that_supersedes_another_retires_it(memory: MemoryService
 async def test_superseding_an_entry_that_does_not_exist_is_refused_and_writes_nothing(
     memory: MemoryService,
 ) -> None:
+    given = rule("Replaces nothing", supersedes=["2026-01-01-nothing"])
     with pytest.raises(BadRequestError, match="no entry 2026-01-01-nothing to supersede"):
-        await memory.add(rule("Replaces nothing", supersedes=["2026-01-01-nothing"]), by=OWNER)
+        await memory.add(given, by=OWNER)
     assert await memory.search("Replaces nothing") == []
 
 

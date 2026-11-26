@@ -43,16 +43,18 @@ async def test_an_added_agent_is_listed_with_its_notice_and_an_undo(agents: Agen
 
 async def test_a_name_taken_is_a_conflict_with_the_boards_sentence(agents: AgentService) -> None:
     await agents.add_agent(change(name="writer"))
+    given = change(name="writer")
     with pytest.raises(ConflictError) as caught:
-        await agents.add_agent(change(name="writer"))
+        await agents.add_agent(given)
     assert str(caught.value) == "an agent named writer is defined"
 
 
 async def test_an_agent_off_the_model_is_refused_and_nothing_is_stored(
     agents: AgentService,
 ) -> None:
+    given = change(name="writer", runtime="pi")
     with pytest.raises(BadRequestError):
-        await agents.add_agent(change(name="writer", runtime="pi"))
+        await agents.add_agent(given)
     assert await names(agents) == []
 
 
@@ -103,8 +105,9 @@ async def test_a_rename_asks_every_guard_and_is_refused_with_what_they_hold(
     await agents.add_agent(change(name="old"))
     agents.register_rename_guard(Claims())
     agents.register_rename_guard(Runs())
+    given = change(name="new")
     with pytest.raises(ConflictError) as caught:
-        await agents.edit_agent("old", change(name="new"))
+        await agents.edit_agent("old", given)
     assert str(caught.value) == (
         "old holds a claim on CF-3 and has 2 runs, so it cannot be renamed; "
         "add a new agent named new instead"
@@ -158,8 +161,9 @@ async def test_the_undo_of_a_rename_asks_the_guards_about_the_name_it_would_leav
 
 async def test_a_rename_onto_another_agents_name_is_a_conflict(agents: AgentService) -> None:
     await three(agents)
+    given = change(name="b")
     with pytest.raises(ConflictError) as caught:
-        await agents.edit_agent("a", change(name="b"))
+        await agents.edit_agent("a", given)
     assert str(caught.value) == "an agent named b is defined"
 
 
@@ -251,12 +255,14 @@ async def test_a_context_version_is_restored_with_the_day_and_minute_in_the_noti
 async def test_an_agent_names_a_connection_that_is_defined_and_suits_its_runtime(
     agents: AgentService,
 ) -> None:
+    given = change(name="a", connection="gone")
     with pytest.raises(BadRequestError) as caught:
-        await agents.add_agent(change(name="a", connection="gone"))
+        await agents.add_agent(given)
     assert str(caught.value) == "no connection named gone"
     await agents.add_connection(ConnectionChange(name="login", kind="codex-login", base_url=""))
+    given = change(name="a", connection="login")
     with pytest.raises(BadRequestError):
-        await agents.add_agent(change(name="a", connection="login"))
+        await agents.add_agent(given)
     await agents.add_agent(change(name="a", runtime="codex", connection="login"))
     assert (await agents.get_agent("a")).connection == "login"
 

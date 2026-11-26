@@ -77,10 +77,11 @@ async def test_a_setup_that_fails_removes_the_snapshot_and_names_its_log(
     workspaces: Workspaces, root: Path, state: Path
 ) -> None:
     head = git(root, "rev-parse", "HEAD")
+    snapshot = workspaces.snapshot(REPO, head, "CF-1", Setup("exit 7", 30))
     with pytest.raises(
         SetupFailedError, match=r"^the snapshot's setup failed with exit code 7; see "
     ):
-        async with workspaces.snapshot(REPO, head, "CF-1", Setup("exit 7", 30)):
+        async with snapshot:
             pytest.fail("the block must not run")
     assert not list((root / TREES).glob("check-*"))
     assert any((state / "checks").glob("check-*.setup.log"))

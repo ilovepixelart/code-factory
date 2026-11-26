@@ -101,8 +101,9 @@ async def test_the_app_refuses_to_start_on_a_data_format_it_cannot_read(
     message: str,
 ) -> None:
     monkeypatch.setattr(schema_module, "DATA_FORMAT_VERSION", patched_format)
+    lifespan = running_lifespan(create_app(settings, guarded=False))
     with pytest.raises(SchemaMismatchError) as raised:
-        async with running_lifespan(create_app(settings, guarded=False)):
+        async with lifespan:
             pytest.fail("the app started on a database it cannot read")
     assert str(raised.value) == message
 
@@ -113,8 +114,9 @@ async def test_the_app_does_not_migrate_a_database_that_is_behind(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(schema_module, "EXPECTED_REVISION", "a_newer_revision")
+    lifespan = running_lifespan(create_app(settings, guarded=False))
     with pytest.raises(SchemaMismatchError, match="code-factory db upgrade"):
-        async with running_lifespan(create_app(settings, guarded=False)):
+        async with lifespan:
             pytest.fail("the app started on a database that is behind")
     assert (await read_schema_state(db_session)).revision == EXPECTED_REVISION
 
@@ -122,8 +124,9 @@ async def test_the_app_does_not_migrate_a_database_that_is_behind(
 async def test_an_unreachable_database_stops_the_app_with_one_sentence_and_no_password(
     offline_settings: Settings,
 ) -> None:
+    lifespan = running_lifespan(create_app(offline_settings, guarded=False))
     with pytest.raises(DatabaseUnavailableError) as raised:
-        async with running_lifespan(create_app(offline_settings, guarded=False)):
+        async with lifespan:
             pytest.fail("the app started without a database")
     message = str(raised.value)
     assert message.startswith("the database at 127.0.0.1:1/never_connected is not reachable (")

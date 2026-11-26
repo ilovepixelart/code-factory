@@ -195,10 +195,10 @@ async def test_an_error_of_the_permission_service_reaches_the_caller() -> None:
     fakes = Fakes()
     fakes.permissions.error = LookupError("no such run")
 
+    service = fakes.service()
+    actor = run_actor()
     with pytest.raises(LookupError, match="no such run"):
-        await fakes.service().permission(
-            run_actor(), REQUEST, sandboxed=False, alive=open_connection
-        )
+        await service.permission(actor, REQUEST, sandboxed=False, alive=open_connection)
 
     assert fakes.tickets.recorded == []
 

@@ -58,8 +58,9 @@ async def test_a_unit_waits_its_time_for_a_repository_and_then_says_the_board_is
 ) -> None:
     first, second = fresh("lock-a"), fresh("lock-b")
     async with committed.unit([first, second], wait=GIVE_UP_S):
+        unit = committed.unit([second], wait=0.2)
         with pytest.raises(UnavailableError, match="the board is busy; try again"):
-            async with committed.unit([second], wait=0.2):
+            async with unit:
                 pytest.fail("the lock was not held")
 
 

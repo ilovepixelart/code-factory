@@ -36,8 +36,9 @@ async def test_a_url_with_a_password_never_asks_the_keychain() -> None:
 
 
 def test_no_password_anywhere_says_how_to_add_one_and_never_the_url() -> None:
+    given = _settings("postgresql+asyncpg://board@127.0.0.1/x_test")
     with pytest.raises(SettingsError) as refused:
-        create_engine(_settings("postgresql+asyncpg://board@127.0.0.1/x_test"), lambda _a: None)
+        create_engine(given, lambda _a: None)
     assert str(refused.value) == (
         "CODE_FACTORY_DATABASE_URL names no password and the keychain holds none for board: add "
         "it with security add-generic-password -a board -s code-factory-postgres -w"

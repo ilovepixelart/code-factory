@@ -150,8 +150,9 @@ async def test_a_listing_with_an_ended_token_is_refused_too() -> None:
 
 
 def test_an_access_names_at_most_one_of_a_token_and_an_actor() -> None:
+    verifier = FakeVerifier({})
     with pytest.raises(ValueError, match="at most one"):
-        Access(verifier=FakeVerifier({}), token="cfr_x", actor=BUILD)  # noqa: S106
+        Access(verifier=verifier, token="cfr_x", actor=BUILD)  # noqa: S106
 
 
 class UnreachableVerifier:

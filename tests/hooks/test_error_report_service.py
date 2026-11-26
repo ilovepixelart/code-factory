@@ -73,15 +73,17 @@ async def test_a_repeat_is_counted_on_the_ticket_with_its_message() -> None:
 async def test_a_report_with_no_one_line_fingerprint_is_a_bad_request() -> None:
     fakes = Fakes()
 
+    service = fakes.service()
     with pytest.raises(BadRequestError, match=r"^a report needs a one-line fingerprint$"):
-        await fakes.service().report_error("sample", {"fingerprint": "a\nb"}, NOW)
+        await service.report_error("sample", {"fingerprint": "a\nb"}, NOW)
 
     assert fakes.tickets.bugs == []
 
 
 async def test_an_untracked_repository_is_not_found() -> None:
+    service = Fakes().service()
     with pytest.raises(NotFoundError, match="nowhere"):
-        await Fakes().service().report_error("nowhere", REPORT, NOW)
+        await service.report_error("nowhere", REPORT, NOW)
 
 
 async def test_a_secret_in_the_message_never_reaches_the_ticket() -> None:

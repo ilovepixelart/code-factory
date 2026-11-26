@@ -101,8 +101,9 @@ def test_a_module_provides_the_serve_command_with_the_app_factory(
 def test_the_other_platform_commands_are_untouched_by_a_serving_module(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
+    given = _serving_module("serving", [])
     with pytest.raises(SystemExit) as raised:
-        _main(_serving_module("serving", []), argv=["--help"])
+        _main(given, argv=["--help"])
     assert raised.value.code == 0
     out = capsys.readouterr().out
     assert "serve, the module's way" in out
@@ -111,8 +112,10 @@ def test_the_other_platform_commands_are_untouched_by_a_serving_module(
 
 
 def test_two_modules_cannot_both_provide_serve() -> None:
+    given = _serving_module("first", [])
+    given_2 = _serving_module("second", [])
     with pytest.raises(ValueError, match="serve is provided by both first and second"):
-        _main(_serving_module("first", []), _serving_module("second", []), argv=["serve"])
+        _main(given, given_2, argv=["serve"])
 
 
 async def test_the_startup_sign_in_link_names_the_bound_listener(
