@@ -123,10 +123,7 @@ jobs:
             -Dsonar.python.version=3.14
             -Dsonar.python.coverage.reportPaths=coverage/python.xml
             -Dsonar.javascript.lcov.reportPaths=coverage/web.info
-            -Dsonar.sources=src,web/src
-            -Dsonar.tests=tests,web/src
-            -Dsonar.exclusions=web/src/**/*.test.ts,web/src/test/**,web/src/generated/**
-            -Dsonar.test.inclusions=tests/**,web/src/**/*.test.ts,web/src/test/**
+            -Dsonar.exclusions=web/src/components/ui/**,web/src/styles/shadcn-vue.css,web/src/generated/**,src/code_factory/platform/web/static/docs-assets/swagger-ui/**,site/web/static/code.css,site/web/static/js/htmx.min.js
       - name: Audit the locked dependencies
         run: |
           sh scripts/audit.sh
