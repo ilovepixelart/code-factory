@@ -1,9 +1,9 @@
 """The code-factory landing page.
 
-One set of Jinja templates, rendered two ways: this app while editing them, and
-`build_static.py` for the static files. Both read the snippets from `snippets.toml`, the file
-`tests/site/test_site_snippets.py` holds to the board, so the page cannot show code the board
-refuses.
+One set of Jinja templates, rendered two ways: this app while editing them, and `build_static.py`
+for the static files. Both read the snippets from `snippets.toml`, the file
+`tests/integration/site/test_site_snippets.py` holds to the board, so the page cannot show code the
+board refuses.
 """
 
 import hashlib

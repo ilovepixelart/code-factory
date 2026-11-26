@@ -5,7 +5,7 @@ requests, cycle time, cost per pull request, scorer cards, self-improvement pull
 stores nothing (no table, no migration, no setting): every answer is computed on each read from
 five ports in `factory/ports.py`, so a figure cannot drift from the module that owns its fact.
 Routes are in `factory/routes.py` (`/api/factory/*`); the figures are pure functions in
-`factory/rules/`, each pinned by the hand-worked fixture in `tests/factory/factory_values.py`.
+`factory/rules/`, each pinned by the hand-worked fixture in `tests/support/factory_values.py`.
 
 ## Providers
 

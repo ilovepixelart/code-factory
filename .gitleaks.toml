@@ -10,12 +10,12 @@ id = "aws-access-token"
 [[rules.allowlists]]
 condition = "AND"
 regexes = ["^[A]KIAABCDEFGHIJKLMNOP$"]
-paths = ["^tests/golden/sessions/capture_cases\\.json$", "^tests/platform/text/test_masking\\.py$", "^tests/sessions/test_capture_record\\.py$", "^tests/sessions/test_capture_script\\.py$"]
+paths = ["^tests/golden/sessions/capture_cases\\.json$", "^tests/platform/text/test_masking\\.py$", "^tests/sessions/test_capture_record\\.py$", "^tests/sessions/test_capture_script\\.py$", "^tests/support/golden/sessions/capture_cases\\.json$", "^tests/unit/platform/text/test_masking\\.py$", "^tests/unit/sessions/test_capture_record\\.py$", "^tests/integration/sessions/test_capture_script\\.py$"]
 
 [[rules.allowlists]]
 condition = "AND"
 regexes = ["^[A]SIAABCDEFGHIJKLMNOP$"]
-paths = ["^tests/platform/text/test_screen\\.py$"]
+paths = ["^tests/platform/text/test_screen\\.py$", "^tests/unit/platform/text/test_screen\\.py$"]
 
 [[rules]]
 id = "generic-api-key"
@@ -23,14 +23,14 @@ id = "generic-api-key"
 [[rules.allowlists]]
 condition = "AND"
 regexes = ["^[0]123456789abcdef0123456789abcdef$"]
-paths = ["^tests/git/test_git_tree_rules\\.py$"]
+paths = ["^tests/git/test_git_tree_rules\\.py$", "^tests/unit/git/test_git_tree_rules\\.py$"]
 
 [[rules.allowlists]]
 condition = "AND"
 regexes = ["^[s]k\\-or\\-v1\\-1234567890$"]
-paths = ["^tests/broker/test_broker_run_key_rules\\.py$"]
+paths = ["^tests/broker/test_broker_run_key_rules\\.py$", "^tests/unit/broker/test_broker_run_key_rules\\.py$"]
 
 [[rules.allowlists]]
 condition = "AND"
 regexes = ["^[s]k\\-or\\-v1\\-runkey\\-1234$"]
-paths = ["^tests/broker/test_broker_provider_adapter\\.py$"]
+paths = ["^tests/broker/test_broker_provider_adapter\\.py$", "^tests/integration/broker/test_broker_provider_adapter\\.py$", "^tests/unit/broker/test_broker_provider_adapter_unit\\.py$"]

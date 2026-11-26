@@ -98,7 +98,7 @@ unset CODE_FACTORY_GATE_DATABASE_URL CODE_FACTORY_DATABASE_URL
 
 prepare_database() {
   if [ -n "$runner_database_url" ]; then
-    CODE_FACTORY_GATE_DATABASE_URL=$runner_database_url PYTHONPATH=tests uv run --no-sync python -c '
+    CODE_FACTORY_GATE_DATABASE_URL=$runner_database_url PYTHONPATH=tests/support uv run --no-sync python -c '
 import os
 from database_guard import UnsafeDatabaseError, assert_test_database
 
@@ -124,7 +124,7 @@ except UnsafeDatabaseError as error:
   }
 }
 
-# The old name must appear in no commit message (tests/test_no_old_name.py covers files).
+# The old name must appear in no commit message (tests/unit/test_no_old_name.py covers files).
 # Words are assembled so this script does not match itself.
 OLD_NAME="whole""cycle"
 OLD_ABBREVIATION="W""C"

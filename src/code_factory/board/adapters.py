@@ -2,7 +2,7 @@
 
 Tickets, repositories and talk answer the team; land jobs are empty. The agents, runs, checks and
 sessions modules register the team's other ports; a class is registered once
-(`tests/test_composition.py`).
+(`tests/unit/test_composition.py`).
 """
 
 from collections.abc import Awaitable, Callable, Sequence

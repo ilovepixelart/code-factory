@@ -52,7 +52,7 @@ def mutations(data: bytes, changed: set[int]) -> list[Mutation]:
     return sorted(result, key=lambda mutation: (mutation.line, mutation.start))
 
 
-def run_tests(snapshot: Path, suite: str, deadline: float) -> int | None:
+def run_tests(snapshot: Path, suite: tuple[str, ...], deadline: float) -> int | None:
     """Run one bounded test suite against the disposable copy."""
     remaining = min(SUITE_SECONDS, deadline - time.monotonic())
     if remaining <= 0:
@@ -65,7 +65,7 @@ def run_tests(snapshot: Path, suite: str, deadline: float) -> int | None:
     env["PYTHONPATH"] = os.pathsep.join(entries)
     try:
         return subprocess.run(  # noqa: S603  # a selected in-repo test directory, no shell
-            [sys.executable, "-m", "pytest", "-q", "-o", "addopts=", "--", suite],
+            [sys.executable, "-m", "pytest", "-q", "-o", "addopts=", "--", *suite],
             cwd=snapshot,
             env=env,
             stdout=subprocess.DEVNULL,
@@ -89,8 +89,12 @@ def candidates(base: str) -> list[tuple[str, str, Mutation]]:
         ).returncode:
             continue
         module = file.relative_to("src/code_factory").parts[0]
-        suite = f"tests/{module}"
-        if Path(suite).is_dir():
+        suite = tuple(
+            folder
+            for folder in (f"tests/unit/{module}", f"tests/integration/{module}")
+            if Path(folder).is_dir()
+        )
+        if suite:
             result.extend(
                 (path, suite, mutation)
                 for mutation in mutations(file.read_bytes(), changed_lines(base, path))

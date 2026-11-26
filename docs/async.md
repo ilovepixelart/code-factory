@@ -53,7 +53,7 @@ its source page.
 12. Debug mode logs callbacks slower than 100 ms (`loop.slow_callback_duration`; asyncio-dev).
     The test suite runs without it: it made the suite about a fifth slower, and on loaded machines
     only a threshold of seconds did not flake. Blocking calls are caught by the static checks (ruff
-    ASYNC rules and `tests/test_event_loop_blocking.py`); turn debug mode on by hand to look for one.
+    ASYNC rules and `tests/integration/test_event_loop_blocking.py`); turn debug mode on by hand to look for one.
 
 ## Subprocesses
 
@@ -114,12 +114,12 @@ its source page.
 
 | Rule | Held by |
 |---|---|
-| 2, 3 (owned tasks, one failure does not end the group) | `platform/background.py`, `tests/platform/test_background.py` |
+| 2, 3 (owned tasks, one failure does not end the group) | `platform/background.py`, `tests/unit/platform/test_background.py` |
 | 5 (CancelledError propagates) | ruff `ASYNC`, `BLE` and `TRY` rules; no `except BaseException` in `src/` |
-| 6 (timeouts on outside awaits) | `platform/db/engine.py` `ping` under `asyncio.timeout`; `tests/health/test_health_routes.py` (a server that never answers) |
-| 9 (no blocking call in `async def`) | ruff `ASYNC2xx`, `tests/test_event_loop_blocking.py` |
-| 12, 25 (no debug mode in the suite, warnings are errors) | `filterwarnings = ["error"]` in `pyproject.toml`; blocking calls by ruff `ASYNC2xx` and `tests/test_event_loop_blocking.py` |
+| 6 (timeouts on outside awaits) | `platform/db/engine.py` `ping` under `asyncio.timeout`; `tests/integration/health/test_health_routes.py` (a server that never answers) |
+| 9 (no blocking call in `async def`) | ruff `ASYNC2xx`, `tests/integration/test_event_loop_blocking.py` |
+| 12, 25 (no debug mode in the suite, warnings are errors) | `filterwarnings = ["error"]` in `pyproject.toml`; blocking calls by ruff `ASYNC2xx` and `tests/integration/test_event_loop_blocking.py` |
 | 21 (context variables) | `platform.logging.request_id_var`, set by a pure ASGI layer (`platform/web/middleware.py`) |
-| 22 (sessions) | `platform/db/unit_of_work.py` (one session per use case), `tests/platform/test_unit_of_work.py`; the engine is disposed in `platform/runtime.py` |
-| 23 (logging never blocks the loop) | `platform/logging.py` `setup_logging` (queue and listener thread), `tests/platform/test_logging.py` |
-| 26 (shutdown) | uvicorn's graceful shutdown; `tests/platform/test_serve.py` sends SIGTERM to a real server |
+| 22 (sessions) | `platform/db/unit_of_work.py` (one session per use case), `tests/integration/platform/test_unit_of_work.py`; the engine is disposed in `platform/runtime.py` |
+| 23 (logging never blocks the loop) | `platform/logging.py` `setup_logging` (queue and listener thread), `tests/unit/platform/test_logging.py` |
+| 26 (shutdown) | uvicorn's graceful shutdown; `tests/e2e/platform/test_serve.py` sends SIGTERM to a real server |

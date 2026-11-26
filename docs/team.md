@@ -24,10 +24,10 @@ alone reports live tokens.
 
 - Every write to claims runs under two locks, taken in this order: an `asyncio.Lock` of the
   process, then a Postgres advisory lock (`repository.LOCK_KEY`). Without the advisory lock two
-  tickets read the same free agent (`tests/team/test_team_concurrency.py` shows it with two services over committed
+  tickets read the same free agent (`tests/integration/team/test_team_concurrency.py` shows it with two services over committed
   sessions, which the savepoint fixture cannot). Without the process lock, claims waiting for the
   advisory lock each hold a pooled connection that the lock holder's own port reads need
-  (`tests/team/test_team_claims_pool.py`, a pool of two).
+  (`tests/integration/team/test_team_claims_pool.py`, a pool of two).
 - `claim_for_run` reads agents and runs, claims and picks in that one transaction. A run that ends
   after its claim was taken again calls `end_claim(ticket, run_id=...)`, which refuses to delete a
   claim the run is not recorded under.
@@ -52,6 +52,6 @@ drop the oldest commits, which are the ones first commits need).
 
 Models serialise as the web app reads them with `model_dump(by_alias=True)`: `Cycle.from_` is
 `from` and `Peek.kind` is `type`. `Doing` and `Last` leave out their unset keys. The shape of the
-page is pinned by `tests/golden/team/now.json` and checked against `web/src/lib/teamNow.ts`
-(`tests/team/test_team_page_wire.py`); regenerate the golden with `CODE_FACTORY_BLESS=1` and read
+page is pinned by `tests/support/golden/team/now.json` and checked against `web/src/lib/teamNow.ts`
+(`tests/unit/team/test_team_page_wire.py`); regenerate the golden with `CODE_FACTORY_BLESS=1` and read
 the diff.

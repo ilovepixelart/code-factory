@@ -48,17 +48,17 @@ The MCP server mounted in the HTTP app has no lifespan of its own: the app's sta
 
 MCP tool errors: a `CodeFactoryError` reaches the model as its sentence (the same one the HTTP
 API answers); any other exception reaches it as FastMCP's masked sentence and is logged with its
-traceback (`platform/mcp/errors.py`, `tests/platform/test_mcp_server.py`).
+traceback (`platform/mcp/errors.py`, `tests/integration/platform/test_mcp_server.py`).
 
 MCP access: every call has an `Actor` (`platform/identity.py`): over HTTP the bearer token verified
 by `ActorTokenVerifier` (401 otherwise), over stdio `CODE_FACTORY_MCP_TOKEN` verified again on every
 call, in process a fixed actor. `Guard` (`platform/mcp/access.py`) lists only the tools the actor's
 role and run stage may call and refuses the rest; the table is `platform/mcp/policy.py`, the matrix
-it must equal is written out in `tests/platform/test_mcp_policy.py`. Tokens are issued, verified and
+it must equal is written out in `tests/unit/platform/test_mcp_policy.py`. Tokens are issued, verified and
 revoked by the `auth` module (`auth_tokens` holds SHA-256 digests only); a tool reads the caller with
 `current_actor()` and scopes a ticket with `policy.scope_ticket`. The tool list is pinned by
-`tests/golden/mcp/*.json` (names, descriptions, schemas, hints, order; `CODE_FACTORY_BLESS=1` rewrites
-them and the diff is read), and `tests/platform/test_mcp_surface.py` holds the rules every tool
+`tests/support/golden/mcp/*.json` (names, descriptions, schemas, hints, order; `CODE_FACTORY_BLESS=1` rewrites
+them and the diff is read), and `tests/integration/platform/test_mcp_surface.py` holds the rules every tool
 follows. A listener may accept only some roles (`Access.roles`): the runner's address takes run
 tokens only.
 
@@ -122,7 +122,7 @@ the block, do the slow work, open a second block to write the result.
 ## Import contracts
 
 Declared under `[tool.importlinter]` in `pyproject.toml`: direct imports, type-only imports
-excluded, each named for its rule. `tests/test_architecture.py` runs them (`use_cases.lint_imports`,
+excluded, each named for its rule. `tests/integration/test_architecture.py` runs them (`use_cases.lint_imports`,
 60 s timeout), so `pytest` alone fails on a violation; `uv run lint-imports` prints the detail. A
 new violation is fixed, never baselined. Wildcard contracts match every `code_factory.<name>`
 package, so a new module joins them without an edit; only `module-layers` lists modules.
@@ -141,7 +141,7 @@ package, so a new module joins them without an edit; only `module-layers` lists 
 | `sqlalchemy-only-at-the-db-edge` | sqlalchemy and asyncpg only in `*.tables`, `*.repository`, `platform.db` and `platform.config` (URL parsing) |
 | `edges-never-touch-the-database` | `*.routes` and `*.tools` never import `platform.db`; a service holds the unit of work |
 
-Import-linter checks only what a contract names, so `tests/test_architecture.py` also fails for a
+Import-linter checks only what a contract names, so `tests/integration/test_architecture.py` also fails for a
 package under `code_factory` missing from `module-layers`, a file in a module that has no layer
 name, and a module whose tables `app` does not import. `Module` names the framework types under
 `TYPE_CHECKING` only, which the contracts exclude. Each contract was proven by adding one
@@ -151,7 +151,7 @@ violating import, seeing the test fail with that contract named, and removing it
 
 `platform/text/` holds the pure helpers every module shares (moments, words, JSON layout, markdown,
 secret masking, the outbound screen, paging, name patterns); its public names are `__all__` of
-`platform/text/__init__.py`, pinned by `tests/platform/text/test_exports.py`. Callers import from
+`platform/text/__init__.py`, pinned by `tests/unit/platform/text/test_exports.py`. Callers import from
 `code_factory.platform.text`, never from its files. Gotchas the code cannot say:
 
 - `render_markdown`, `masked` and `screen_words` on text longer than `INLINE_LIMIT` characters run
@@ -168,7 +168,7 @@ Pure ASGI layers, outermost first (`platform/web/middleware.py`): `RequestId` (c
 header, access record), `SecurityHeaders` (strict Content-Security-Policy: scripts same-origin only, styles may be inline for the chart),
 `HostGuard` (400 unless `Host` is `localhost`, `127.0.0.1` or `[::1]` on the configured port: DNS
 rebinding; a page asked on `localhost` or `[::1]` moves to `127.0.0.1` with a 308, where the session
-cookie lives; the mounted MCP server also validates `Origin`, `tests/platform/test_host_guard.py`),
+cookie lives; the mounted MCP server also validates `Origin`, `tests/integration/platform/test_host_guard.py`),
 `ErrorBoundary` (the catch-all: logs the exception with the request id, answers a 500 problem
 whose detail is `internal error`). The catch-all is a layer, not an `Exception` handler, because
 Starlette runs that handler outside every user layer and its answer would lack the request id and
@@ -177,7 +177,7 @@ error answer is RFC 9457 problem+json with the sentence as `detail` (see `docs/a
 
 Swagger UI is a static page plus same-origin files (`platform/web/static`, `platform/web/docs.py`), because
 FastAPI's default page loads from a CDN and starts with an inline script. The files are the
-`swagger-ui-dist` release pinned in `tests/platform/test_docs.py`, copied verbatim with their licence. No
+`swagger-ui-dist` release pinned in `tests/integration/platform/test_docs.py`, copied verbatim with their licence. No
 maintained PyPI package ships them (`swagger-ui-bundle`'s last release is from 2023).
 
 ## Migrations
@@ -197,7 +197,7 @@ recipe in the Alembic cookbook, "Using asyncio with Alembic"
 | 5 | Autogenerate is a draft: every generated file is read and edited by hand (the template says so); server defaults, enum changes, renames and backfills are written explicitly; schema and data migrations are separate revisions (`create schema_info`, then `seed schema_info`) | review; `test_downgrading_the_data_revision_...` covers the data revision on its own |
 | 6 | Revision files are `YYYYMMDD_HHMM_<rev>_<slug>.py` (`file_template` in `alembic.ini`) with a descriptive message | `test_every_revision_has_a_downgrade_and_a_readable_sortable_file_name` |
 | 7 | Postgres types: `timestamptz` for every time, `text` not `varchar(n)` without a real limit, `jsonb` for document-shaped data (with a comment saying why it is not columns), `NOT NULL` by default, explicit `ON DELETE` on every foreign key, an index on every foreign key column; keys: `bigint` identity for tables of many rows, a constant for the single-row `schema_info` (`platform/db/tables.py`) | `test_columns_use_the_postgres_types_the_rules_ask_for`, `test_every_foreign_key_column_is_indexed` |
-| 8 | The app never migrates at startup: it reads the revision and the data format version and refuses to start with the repair sentence; `code-factory db upgrade` is the one way, `db check` reports; the read is bounded by `CODE_FACTORY_SCHEMA_CHECK_TIMEOUT_S` (5 s) and says the database is busy when a migration holds the lock | `tests/platform/test_schema_check.py`, `tests/platform/test_cli.py` |
+| 8 | The app never migrates at startup: it reads the revision and the data format version and refuses to start with the repair sentence; `code-factory db upgrade` is the one way, `db check` reports; the read is bounded by `CODE_FACTORY_SCHEMA_CHECK_TIMEOUT_S` (5 s) and says the database is busy when a migration holds the lock | `tests/integration/platform/test_schema_check.py`, `tests/unit/platform/test_cli.py` |
 | 9 | Async engine through the documented recipe | `alembic/env.py`; every test that migrates |
 
 `EXPECTED_REVISION` in `platform/db/schema.py` is the head the app expects; `test_history_is_one_line_...`

@@ -56,7 +56,7 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py314"
-src = ["src", "tests"]
+src = ["src", "tests/support"]
 extend-exclude = ["src/code_factory/platform/web/static"]
 
 [tool.ruff.format]
@@ -95,7 +95,7 @@ max-complexity = 15
     "INP001",  # test folders are not packages to import
 ]
 "src/code_factory/checks/adapters/standins.py" = ["D102"]  # stand-ins implement a port; its docstring says what they do
-"tests/checks/**" = [
+"tests/{unit,integration,e2e}/checks/**" = [
     "ASYNC240", # tests read and write tmp_path files, never under load
     "PLR0913",  # a test's arguments are its injected fixtures
     "PLR0917",
@@ -128,6 +128,8 @@ known-first-party = ["code_factory"]
 
 [tool.ty.environment]
 python-version = "3.14"
+# The backend tests import their shared helpers by name from tests/support.
+extra-paths = ["tests/support"]
 
 [tool.ty.src]
 include = ["src", "tests"]
@@ -145,6 +147,8 @@ unsound-assignment = "ignore"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# The backend tests import their shared helpers by name from tests/support.
+pythonpath = ["tests/support"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 timeout = 30
@@ -169,7 +173,7 @@ include_external_packages = true
 exclude_type_checking_imports = true
 
 # Every contract is direct imports only and is named for the rule it holds. A new violation is
-# fixed, never baselined. docs/architecture.md explains each; tests/test_architecture.py runs them
+# fixed, never baselined. docs/architecture.md explains each; tests/integration/test_architecture.py runs them
 # and checks that no package under `code_factory` escapes them.
 #
 # A new module is added to `containers` of "module-layers" and nowhere else: the wildcard

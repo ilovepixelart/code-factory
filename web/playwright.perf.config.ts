@@ -1,5 +1,5 @@
 import { defineConfig } from '@playwright/test'
-import { OWNER_TOKEN } from './e2e/owner'
+import { OWNER_TOKEN } from './tests/e2e/owner'
 
 // The board's performance tests (web/perf, CF-552): on demand, never in the gate, one at a time so
 // no test's load shows in another's times.

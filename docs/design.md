@@ -29,26 +29,26 @@ breach and passes the correct form.
 
 | Rule | Test |
 |---|---|
-| Colours are the theme's semantic tokens (`bg-primary`, `text-muted-foreground`, `border-border`); no palette colour, no `white` or `black`, no arbitrary colour, no `dark:` override | `web/src/design.test.ts` |
-| `class` on a component that has variants (`Button`, `Badge`, `Alert`, `Card`, `Item`, `Toggle`, `ToggleGroupItem`, `Empty`, `Kbd`) is for layout only: its colour and type come from its variant and size | `web/src/design.test.ts` |
-| No daisyUI class and none of the board's old tokens (`btn`, `badge-*`, `menu`, `pill`, `surface`, `base-200`, `stage-*`, `label-*`, `tone-*`, ...) | `web/src/design.test.ts` |
-| `gap-*`, never `space-x-*` or `space-y-*` | `web/src/design.test.ts` |
-| Icons are `HugeiconsIcon` with an icon object from `@hugeicons/core-free-icons`; inside a shadcn-vue component an icon takes no size class (the component sizes it) | `web/src/design.test.ts` |
-| A titled `Empty` shows its icon in `EmptyMedia variant="icon"` | `web/src/design.test.ts` |
-| An `EmptyTitle` is a short title (no colon, one sentence, at most 50 characters); the sentence goes in `EmptyDescription` | `web/src/design.test.ts` |
-| One surface level: no `Card`, bordered box or component that draws one inside a `Card`, a `Sheet`'s or a `Dialog`'s content | `web/src/design.test.ts` |
-| A section is a `SectionCard`, a list section shows its count, an `Empty` sits in its section's `empty` slot | `web/src/anatomy.test.ts` |
-| A list of `Item`s uses default Items in an `ItemGroup`. Records with their own details or actions use `ContentCard` surfaces with a gap between records. The configured agents use two cards per row from `md` | `web/src/design.test.ts` |
-| A button is `Button` (a sidebar entry `SidebarMenuButton`); an icon-only `Button` carries `aria-label`; a `Button` that does not submit says `type="button"` (one inside a `*Trigger as-child` takes the trigger's) | `web/src/buttons.test.ts` |
-| A control is `Input`, `Textarea`, `NativeSelect`, `Checkbox`, `Switch`, `RadioGroup`, ... inside the Field family; an error under it is `FieldError` | `web/src/fields.test.ts` |
-| A status word is `StatusBadge` (`web/src/components/StatusBadge.vue`), never a `Badge` given a status variant; its words open with a capital. Loading is `Spinner`, a callout is `Alert`, an empty state is `Empty` | `web/src/states.test.ts` |
-| A card's or a ticket's status words start with a capital (`Checks passed`, `Blocked by CF-2`, a pull request's `Open`), as its delivery status does; a label, a type or a priority keeps the case it was written in | `web/src/components/TicketCard.words.test.ts` |
-| A menu is `DropdownMenu` (or `Popover` for a form), a switch between views `Tabs` or `ToggleGroup`, a disclosure `Collapsible`, a table `Table`, and a data table the shared `DataTable` (`web/src/components/data-table/`, shadcn-vue's Data Table on TanStack Table v9: sort, filter and page in the address, a Columns menu, row selection); `Table` directly only for the short fixed lists the test names | `web/src/structures.test.ts` |
-| Tables share a rounded card surface at `text-sm`, a muted header and divider-free rows (`web/src/components/data-table/look.ts`). The toolbar sits above the table when it has a filter, a Columns menu or mobile sorting (filter left, Columns and Sort right), a footer under it only when rows can be chosen ("n of m row(s) selected.") or there is a second page (the range, Previous and Next as outline buttons); amounts right-aligned in medium weight, other figures right-aligned; every header that sorts shows a faint up-down mark until it is the sort; an sr-only caption names each table | `web/src/components/data-table/DataTable.test.ts` |
-| Filtering: a page whose table is the page (Tickets List, Archive) filters from the header's search box; a table inside a section filters from its own box only when it can run past one page (Flow's Recently merged and Stuck), and then says "No ... matches" in the table and counts "n of m" in its section. Paging: a table pages when its rows can grow without bound; a fixed top N says so instead (Most expensive pull requests). The Columns menu only where a table has more columns than a person reads at once (the Tickets List, kept per browser; Recently merged). Below 768 px the Tickets List, Archive and wide Factory tables show rows as separate cards. Factory cards label their fields and offer a sort menu. Other tables scroll sideways within their surface, with the far edge faded | `web/src/components/data-table/DataTable.test.ts`, `web/src/components/TicketList.test.ts`, `web/src/pages/FlowPage.test.ts` |
+| Colours are the theme's semantic tokens (`bg-primary`, `text-muted-foreground`, `border-border`); no palette colour, no `white` or `black`, no arbitrary colour, no `dark:` override | `web/tests/unit/design.test.ts` |
+| `class` on a component that has variants (`Button`, `Badge`, `Alert`, `Card`, `Item`, `Toggle`, `ToggleGroupItem`, `Empty`, `Kbd`) is for layout only: its colour and type come from its variant and size | `web/tests/unit/design.test.ts` |
+| No daisyUI class and none of the board's old tokens (`btn`, `badge-*`, `menu`, `pill`, `surface`, `base-200`, `stage-*`, `label-*`, `tone-*`, ...) | `web/tests/unit/design.test.ts` |
+| `gap-*`, never `space-x-*` or `space-y-*` | `web/tests/unit/design.test.ts` |
+| Icons are `HugeiconsIcon` with an icon object from `@hugeicons/core-free-icons`; inside a shadcn-vue component an icon takes no size class (the component sizes it) | `web/tests/unit/design.test.ts` |
+| A titled `Empty` shows its icon in `EmptyMedia variant="icon"` | `web/tests/unit/design.test.ts` |
+| An `EmptyTitle` is a short title (no colon, one sentence, at most 50 characters); the sentence goes in `EmptyDescription` | `web/tests/unit/design.test.ts` |
+| One surface level: no `Card`, bordered box or component that draws one inside a `Card`, a `Sheet`'s or a `Dialog`'s content | `web/tests/unit/design.test.ts` |
+| A section is a `SectionCard`, a list section shows its count, an `Empty` sits in its section's `empty` slot | `web/tests/unit/anatomy.test.ts` |
+| A list of `Item`s uses default Items in an `ItemGroup`. Records with their own details or actions use `ContentCard` surfaces with a gap between records. The configured agents use two cards per row from `md` | `web/tests/unit/design.test.ts` |
+| A button is `Button` (a sidebar entry `SidebarMenuButton`); an icon-only `Button` carries `aria-label`; a `Button` that does not submit says `type="button"` (one inside a `*Trigger as-child` takes the trigger's) | `web/tests/unit/buttons.test.ts` |
+| A control is `Input`, `Textarea`, `NativeSelect`, `Checkbox`, `Switch`, `RadioGroup`, ... inside the Field family; an error under it is `FieldError` | `web/tests/unit/fields.test.ts` |
+| A status word is `StatusBadge` (`web/src/components/StatusBadge.vue`), never a `Badge` given a status variant; its words open with a capital. Loading is `Spinner`, a callout is `Alert`, an empty state is `Empty` | `web/tests/unit/states.test.ts` |
+| A card's or a ticket's status words start with a capital (`Checks passed`, `Blocked by CF-2`, a pull request's `Open`), as its delivery status does; a label, a type or a priority keeps the case it was written in | `web/tests/component/components/TicketCard.words.test.ts` |
+| A menu is `DropdownMenu` (or `Popover` for a form), a switch between views `Tabs` or `ToggleGroup`, a disclosure `Collapsible`, a table `Table`, and a data table the shared `DataTable` (`web/src/components/data-table/`, shadcn-vue's Data Table on TanStack Table v9: sort, filter and page in the address, a Columns menu, row selection); `Table` directly only for the short fixed lists the test names | `web/tests/unit/structures.test.ts` |
+| Tables share a rounded card surface at `text-sm`, a muted header and divider-free rows (`web/src/components/data-table/look.ts`). The toolbar sits above the table when it has a filter, a Columns menu or mobile sorting (filter left, Columns and Sort right), a footer under it only when rows can be chosen ("n of m row(s) selected.") or there is a second page (the range, Previous and Next as outline buttons); amounts right-aligned in medium weight, other figures right-aligned; every header that sorts shows a faint up-down mark until it is the sort; an sr-only caption names each table | `web/tests/component/components/data-table/DataTable.test.ts` |
+| Filtering: a page whose table is the page (Tickets List, Archive) filters from the header's search box; a table inside a section filters from its own box only when it can run past one page (Flow's Recently merged and Stuck), and then says "No ... matches" in the table and counts "n of m" in its section. Paging: a table pages when its rows can grow without bound; a fixed top N says so instead (Most expensive pull requests). The Columns menu only where a table has more columns than a person reads at once (the Tickets List, kept per browser; Recently merged). Below 768 px the Tickets List, Archive and wide Factory tables show rows as separate cards. Factory cards label their fields and offer a sort menu. Other tables scroll sideways within their surface, with the far edge faded | `web/tests/component/components/data-table/DataTable.test.ts`, `web/tests/component/components/TicketList.test.ts`, `web/tests/component/pages/FlowPage.test.ts` |
 
 A guard with an allowlist names a reason per file and fails for a listed file that no longer
-offends (`web/src/test/guard.ts`), so a list only shrinks.
+offends (`web/tests/support/guard.ts`), so a list only shrinks.
 
 The rest of the critical rules hold in review: `size-*` when width and height are equal,
 `truncate`, `cn()` for conditional classes, Items inside an `ItemGroup`, menu items inside their
@@ -64,13 +64,13 @@ before it sends them keeps them in VeeValidate field rules (`AgentForm`, `Connec
 
 ## Page anatomy
 
-Every page is built in one order; `web/src/anatomy.test.ts` and `web/src/design.test.ts` hold it.
+Every page is built in one order; `web/tests/unit/anatomy.test.ts` and `web/tests/unit/design.test.ts` hold it.
 
 | Part | How it is built |
 |---|---|
 | Header | The page title on the left; the page's actions on the right, the primary action last (`#header-controls` in `web/src/App.vue`) |
 | Toolbar | Filters and the range, under the header, only when there is something to filter |
-| Section | `SectionCard` (`web/src/components/SectionCard.vue`), flat on the inset page panel, no `Card` around it: a heading row of the title, the count when the section is a list and the section's action, then its content. Space separates adjacent sections. A description is no line of its own: an info mark beside the title shows it on hover (`title`), and it is the section's `aria-describedby`, so it adds no tab stop. A heading is the title and count; anything else earns its place or goes one hover or click away. A file draws a `Card` only for a surface that is not a section (metric tiles, the agent cards, a ticket on the board), listed with its reason in `web/src/anatomy.test.ts` |
+| Section | `SectionCard` (`web/src/components/SectionCard.vue`), flat on the inset page panel, no `Card` around it: a heading row of the title, the count when the section is a list and the section's action, then its content. Space separates adjacent sections. A description is no line of its own: an info mark beside the title shows it on hover (`title`), and it is the section's `aria-describedby`, so it adds no tab stop. A heading is the title and count; anything else earns its place or goes one hover or click away. A file draws a `Card` only for a surface that is not a section (metric tiles, the agent cards, a ticket on the board), listed with its reason in `web/tests/unit/anatomy.test.ts` |
 | Content | Record lists use full-width card surfaces with space between them. Tables share column headers for comparing records. Each row is laid out by `Item`'s own parts and never a `grid` or `flex` of its own (`a_row_is_laid_out_by_its_Item_parts`): `ItemHeader` for its context line (a ticket and an age), `ItemContent` with `ItemTitle` and `ItemDescription`, `ItemActions` with one emphasised action (`secondary`, or the page's first `default`) and the rest `ghost`, `ItemFooter` for an error; a table is `Table`. One surface level: no `Card`, no bordered box and no component that draws one inside a `Card` or a `Sheet`'s or `Dialog`'s content, except the table's own surface |
 | Empty | The section's `Empty` in `SectionCard`'s `empty` slot uses a card below the toolbar. Its icon, title and description share the card's horizontal center. |
 | Loading | `ReadState` until the first answer (its call sites and props stay as they are) |
@@ -92,7 +92,7 @@ hugeicons (preset code `aAxkum`; the owner's choice, 2026-11-24). From `web/`:
 The board's own values sit in the same `:root` and `.dark` blocks, as the guide adds a colour (one
 CSS file, never a second): the status colours, the eight categorical colours, the 6 px radius, and
 the contrast fixes WCAG asks where the preset falls short (listed below). A preset switch rewrites
-the preset's own names, so `web/src/theme.test.ts` measures each again. In the dark theme no one
+the preset's own names, so `web/tests/unit/theme.test.ts` measures each again. In the dark theme no one
 step of the preset's indigo holds both white text at 4.5:1 and a ring at 3:1 on a card, so the
 primary takes its `0.511` step and the ring its `0.585` step.
 
@@ -112,8 +112,8 @@ a colour:
 | Text, secondary text | `foreground`, `muted-foreground` |
 | Page, card, quiet fill, rule | `background`, `card`, `muted`, `border` |
 | The one primary action of a screen, a link, the focus ring | `primary` indigo (`Button` `default`), `ring` |
-| Status colours | `success`, `warning` and `info` beside shadcn-vue's `destructive`, set for both themes in `web/src/styles/app.css` and mapped in `@theme inline`; each is at least 4.5:1 on the card and on its own badge wash (`web/src/theme.test.ts` holds the tokens) |
-| Contrast | the preset's tokens, set over them only where WCAG asks: `--input` and `--ring` at least 3:1 on the page and a card (control borders and the focus ring), `--muted-foreground` at least 4.5:1 on the page, a card and `--muted`, `--destructive` at least 4.5:1 on its badge wash; `web/src/theme.test.ts` measures each in both themes |
+| Status colours | `success`, `warning` and `info` beside shadcn-vue's `destructive`, set for both themes in `web/src/styles/app.css` and mapped in `@theme inline`; each is at least 4.5:1 on the card and on its own badge wash (`web/tests/unit/theme.test.ts` holds the tokens) |
+| Contrast | the preset's tokens, set over them only where WCAG asks: `--input` and `--ring` at least 3:1 on the page and a card (control borders and the focus ring), `--muted-foreground` at least 4.5:1 on the page, a card and `--muted`, `--destructive` at least 4.5:1 on its badge wash; `web/tests/unit/theme.test.ts` measures each in both themes |
 | A status word | `StatusBadge`: its tone from the status map and its words from `statusWord` (sentence case; a word the map names reads its own, as `blocked` reads Waiting on you), both in `web/src/lib/status_tone.ts`; a status the map does not know takes `tone` and its own words, and a label made of a name (a delivery's agent) is shown as written. The tones are `Badge` variants from `TONE_VARIANTS`: done (finished, approved, merged) `success`, under way (working, running, an open pull request, checks running) `info`, waiting on someone (waiting, waiting on you, stale, uncommitted, conflict) `warning`, failed `destructive`, at rest (idle, ended, closed, draft) `outline`; `success`, `warning` and `info` in `components/ui/badge` are a neutral outline with a dot in the tone's colour and the word in `foreground` (colour always beside a word, never a dot alone); `destructive` keeps shadcn-vue's red tint so a failure stands out |
 | A fixed word (a ticket's type and priority, a memory entry's kind) | in sentence case on screen, through `sentence` in `web/src/lib/format.ts`, wherever it shows (a card, a list cell, a select, a filter, a menu); the value sent and the address keep the word as it is; a label or a name people chose is shown as written |
 | Status in plain text | an error `text-destructive`; a warning `text-foreground` among `text-muted-foreground`; success reads as plain text (the status colours are for badges and dots) |
@@ -124,8 +124,8 @@ a colour:
 
 ## Type scale
 
-One size per role. A size is set only together with its role's classes; `web/src/design.test.ts`
-(`every_text_size_a_screen_sets_is_a_role`, with the roles in `web/src/test/typeRoles.ts`) fails
+One size per role. A size is set only together with its role's classes; `web/tests/unit/design.test.ts`
+(`every_text_size_a_screen_sets_is_a_role`, with the roles in `web/tests/support/typeRoles.ts`) fails
 on any other size, or a size with a line height, outside the generated `components/ui` files and
 the `/design` samples.
 

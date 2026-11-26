@@ -5,7 +5,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { expect, serve, test } from '../e2e/fixtures'
+import { expect, serve, test } from '../tests/e2e/fixtures'
 import budgets from './budgets.json' with { type: 'json' }
 
 const TIMES = 5

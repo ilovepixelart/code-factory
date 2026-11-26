@@ -22,5 +22,5 @@
     "checkUnknownEvents": false,
     "dataAttributes": ["data-*", "aria-description"]
   },
-  "exclude": ["src/**/*.test.ts", "src/test/**"]
+  "exclude": []
 }

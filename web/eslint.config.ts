@@ -69,7 +69,6 @@ export default withVueTs(
     // A function and a file a reader can hold (CF-458, CF-535); tests read as specifications and
     // are left out.
     files: ['src/**/*.ts', 'src/**/*.vue'],
-    ignores: ['src/**/*.test.ts', 'src/test/**'],
     rules: {
       'max-lines-per-function': ['error', { max: 80, skipBlankLines: true, skipComments: true }],
       // A component or module a reader can take in at once (CF-535).
@@ -138,7 +137,7 @@ export default withVueTs(
   },
   {
     ...playwright.configs['flat/recommended'],
-    files: ['e2e/**/*.ts'],
+    files: ['tests/e2e/**/*.ts'],
     rules: {
       ...playwright.configs['flat/recommended'].rules,
       'playwright/expect-expect': [

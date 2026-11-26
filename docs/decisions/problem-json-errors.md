@@ -10,5 +10,5 @@ way, and the sentence is written for the person who caused it.
 
 **What follows.** Services raise the platform's error classes (`platform/errors.py`); the status
 follows from the class (`platform/web/errors.py`) and no route maps errors itself. MCP tools give the
-same sentence as a tool error (`platform/mcp/errors.py`). `tests/platform/test_api_errors.py` holds
+same sentence as a tool error (`platform/mcp/errors.py`). `tests/integration/platform/test_api_errors.py` holds
 the shape.

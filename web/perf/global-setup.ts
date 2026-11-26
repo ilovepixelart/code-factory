@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { ROOT } from '../e2e/fixtures'
+import { ROOT } from '../tests/e2e/fixtures'
 
 /** Build the app and the release binary, the build the owner runs, before any timing. */
 export default function globalSetup(): void {

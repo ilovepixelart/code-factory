@@ -49,7 +49,7 @@ their own). A change (any method but GET, HEAD, OPTIONS) from another origin (`O
 `/api/agent-definitions`, `/api/agent-context` and `/api/connections` also need an `Origin`.
 Swagger and the OpenAPI document are behind the guard. `/mcp` is outside it: it takes the auth
 module's bearer tokens (an owner's, or a run's bound to its ticket and stage), checked on every
-request, with host and origin protection; `tests/auth/test_auth_mcp_http.py` holds both protocol
+request, with host and origin protection; `tests/integration/auth/test_auth_mcp_http.py` holds both protocol
 revisions, 2025-11-25 and 2026-07-28, to it.
 
 MCP tokens are opaque and issued by the board itself, not through the specification's OAuth
@@ -103,8 +103,8 @@ run a review of a completed local Build before shipping.
 
 ## The contract harness
 
-`tests/contract/contract_catalogue.py` lists every route the web app calls with the module that
-answers it and the golden (`tests/golden/formats`) or hand spec its answer is judged against.
+`tests/support/contract_catalogue.py` lists every route the web app calls with the module that
+answers it and the golden (`tests/support/golden/formats`) or hand spec its answer is judged against.
 `contract_shapes.py` compares shape (keys, their order, types, nullability, optional keys across list
 elements), never values. `test_contract_catalogue.py` fails for a call in `web/src` missing from the
 catalogue, and for a route served before its module left `PENDING_OWNERS` (or the reverse);
@@ -112,14 +112,14 @@ catalogue, and for a route served before its module left `PENDING_OWNERS` (or th
 
 ## Browser tests
 
-`web/e2e` starts `uv run code-factory serve` per test with `CODE_FACTORY_PORT=0` (a free port,
+`web/tests/e2e` starts `uv run code-factory serve` per test with `CODE_FACTORY_PORT=0` (a free port,
 printed) and `CODE_FACTORY_STOP_AT_EOF=1` (the server stops when its stdin closes, so a killed test
 worker takes its board with it). Each board has a schema of its own in the test database named by
 `CODE_FACTORY_DATABASE_URL` (the role cannot create databases): `code-factory sample-prepare`
 creates and migrates the schema named by `CODE_FACTORY_DB_SCHEMA`, `sample-load <name>` fills it
 through the services, `sample-drop` removes it. The three refuse a database whose name does not end
 in `_test` and the default schema. Every sample holds the owner's fixed session, which
-`web/e2e/owner.ts` sends as the cookie.
+`web/tests/e2e/owner.ts` sends as the cookie.
 
 ```sh
 export CODE_FACTORY_DATABASE_URL=...   # a database ending in _test

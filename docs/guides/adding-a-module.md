@@ -4,7 +4,7 @@ A module is one domain area: one package under `src/code_factory/`, each file a 
 downward only (`module` > `routes | tools | cli` > `service` > `adapters | repository | ports` >
 `tables` > `rules` > `models`); another module is reached only through its `service` and `models`;
 `platform` imports no module. The contracts are in `pyproject.toml` (`[tool.importlinter]`) and run
-by `tests/test_architecture.py`.
+by `tests/integration/test_architecture.py`.
 
 1. Create `src/code_factory/<name>/` with the files it needs, and a `module.py` building
    `Module(name=..., provide=..., router=..., register_tools=..., commands=..., background=...)`.
@@ -15,7 +15,7 @@ by `tests/test_architecture.py`.
    `uv run alembic revision --autogenerate -m "..."`; read and edit the draft (`timestamptz`, `text`,
    `NOT NULL`, indexed foreign keys, schema and data in separate revisions), and set
    `EXPECTED_REVISION` in `platform/db/schema.py` to the new head.
-5. Tests in `tests/<name>/`, file names unique across `tests/`. `tests/test_architecture.py` fails
+5. Tests in `tests/<name>/`, file names unique across `tests/`. `tests/integration/test_architecture.py` fails
    when step 3 or 4 is forgotten.
 6. `uv run code-factory docs --out docs/reference` regenerates the module map, the feature map, the
    database tables and the commands page; the tests fail until the committed pages match.

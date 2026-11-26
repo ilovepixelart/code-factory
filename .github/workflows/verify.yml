@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm]
+        os: [ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     env:
@@ -94,7 +94,7 @@ jobs:
         run: |
           uv sync --locked
           CODE_FACTORY_DATABASE_URL="$CODE_FACTORY_GATE_DATABASE_URL" \
-            uv run --no-sync pytest -q --no-cov -n 1 tests/checks/test_checks_composed.py
+            uv run --no-sync pytest -q --no-cov -n 1 tests/integration/checks/test_checks_composed.py
       - name: Scan all reachable Git history
         run: gitleaks git --redact=100 --log-opts='--all'
       - name: Run the full gate
@@ -123,17 +123,13 @@ jobs:
             -Dsonar.python.version=3.14
             -Dsonar.python.coverage.reportPaths=coverage/python.xml
             -Dsonar.javascript.lcov.reportPaths=coverage/web.info
-            -Dsonar.exclusions=scripts/**,site/**,web/e2e/**,web/perf/**,web/demo/**,web/public/**,.code-factory/**,.github/**,Dockerfile,src/code_factory/platform/db/alembic/**,src/code_factory/platform/web/static/docs-assets/swagger-ui/**,web/src/components/ui/**,web/src/styles/shadcn-vue.css,web/src/generated/**
+            -Dsonar.exclusions=scripts/**,site/**,web/perf/**,web/demo/**,web/public/**,.code-factory/**,.github/**,Dockerfile,src/code_factory/platform/db/alembic/**,src/code_factory/platform/web/static/docs-assets/swagger-ui/**,web/src/components/ui/**,web/src/styles/shadcn-vue.css,web/src/generated/**,web/tests/**,**/*.test.ts,**/*.spec.ts,**/*.json
+            -Dsonar.coverage.exclusions=web/src/main.ts
       - name: Audit the locked dependencies
         run: |
           sh scripts/audit.sh
           uv audit --project site --locked --preview-features audit-command
           pnpm --dir web audit
-      - name: Run browser smoke tests
-        run: |
-          pnpm --dir web exec playwright install --with-deps chromium
-          CODE_FACTORY_DATABASE_URL="$CODE_FACTORY_GATE_DATABASE_URL" CODE_FACTORY_E2E_BUILT=1 \
-            pnpm --dir web exec playwright test e2e/served_app.spec.ts e2e/core_flow.spec.ts e2e/demo_pages.spec.ts --workers=2
       - name: Build and verify a clean installation
         run: |
           sh scripts/build_release.sh

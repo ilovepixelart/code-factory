@@ -79,14 +79,14 @@ code-factory
 │   └── tables
 │       └── repositories
 ├── talk: Questions, answers, comments, owner messages and news for a running agent.
-│   ├── MCP tools (each caller's list is in tests/golden/mcp/)
+│   ├── MCP tools (each caller's list is in tests/support/golden/mcp/)
 │   └── tables
 │       ├── talk_news_marks
 │       ├── talk_posts
 │       ├── talk_question_answers
 │       └── talk_questions
 ├── tickets: Tickets: their fields, the facts their column is read from, documents and activity.
-│   ├── MCP tools (each caller's list is in tests/golden/mcp/)
+│   ├── MCP tools (each caller's list is in tests/support/golden/mcp/)
 │   ├── tables
 │   │   ├── ticket_activity
 │   │   ├── ticket_documents
@@ -116,7 +116,7 @@ code-factory
 │       ├── git_merge_checks
 │       └── git_trees
 ├── memory: Memory: the owner's standing rules, decisions and lessons, and the agents' proposals.
-│   ├── MCP tools (each caller's list is in tests/golden/mcp/)
+│   ├── MCP tools (each caller's list is in tests/support/golden/mcp/)
 │   ├── tables
 │   │   └── memory_entries
 │   └── routes

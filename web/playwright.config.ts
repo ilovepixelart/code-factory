@@ -1,12 +1,12 @@
 import { defineConfig } from '@playwright/test'
-import { OWNER_TOKEN } from './e2e/owner'
+import { OWNER_TOKEN } from './tests/e2e/owner'
 
-// The Vue board's browser tests on the server (web/e2e): each test serves a fresh sample on
+// The Vue board's browser tests on the server (web/tests/e2e): each test serves a fresh sample on
 // its own port, so they run side by side. Scrollbars drawn, as the owner sees them: headless
 // Chromium hides them unless `--hide-scrollbars` is left out.
 export default defineConfig({
-  testDir: 'e2e',
-  globalSetup: './e2e/global-setup.ts',
+  testDir: 'tests/e2e',
+  globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: true,
   reporter: [['list']],
   timeout: 60_000,
@@ -16,7 +16,7 @@ export default defineConfig({
     // about 3 times the slowest step measured). A call passing its own `timeout` keeps it.
     actionTimeout: 10_000,
     viewport: { width: 1600, height: 900 },
-    // The owner's sign-in cookie for every board these tests start (e2e/owner.ts):
+    // The owner's sign-in cookie for every board these tests start (tests/e2e/owner.ts):
     // a cookie is not bound to a port, so one covers them all; the board sets it on the one
     // loopback name it prints, so both are held (CF-1438).
     storageState: {

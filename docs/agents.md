@@ -91,9 +91,9 @@ The board also files bug tickets by itself (`follower` step `file_failures`): on
 of a default branch's own checks, named by the commit that broke it (else the last that passed),
 and one per reverted merge in the Flow range, each with `caused_by` the ticket it came from.
 
-The tasks and prompts name only tools of the run-build tool list (`tests/golden/mcp`); a test
+The tasks and prompts name only tools of the run-build tool list (`tests/support/golden/mcp`); a test
 compares them. The settings and hook output is checked against the golden files in
-`tests/golden/agents`.
+`tests/support/golden/agents`.
 
 Only the runtimes `claude` and `codex` exist. The previous implementation's builders for omp, pi,
 opencode and acp (`omp_settings`, `acp_settings`, `pi_files`, `acp_hosts`, `opencode_config`) and
