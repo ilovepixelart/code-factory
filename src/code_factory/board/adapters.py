@@ -22,7 +22,6 @@ from code_factory.team.models import (
     TicketFacts,
     TicketRef,
 )
-from code_factory.team.service import TeamService
 from code_factory.tickets.models import ActivityEntry, Column, Ticket
 from code_factory.tickets.service import ActivityService, TicketService, describe
 
@@ -204,18 +203,3 @@ class NoJobs:
     async def running_land_jobs(self) -> list[LandJob]:
         """None."""
         return []
-
-
-class TeamQueue:
-    """`CardQueue`: the claims are the team module's; no follower plans a queue yet."""
-
-    def __init__(self, team: TeamService) -> None:
-        self._team = team
-
-    async def queue_plan(self) -> dict[str, str]:
-        """No ticket is queued."""
-        return {}
-
-    async def holders(self, ticket_ids: Sequence[str]) -> dict[str, str]:
-        """The agent holding each claimed ticket."""
-        return await self._team.holders(list(ticket_ids))
