@@ -131,6 +131,9 @@ def review(base: str, changed: list[str]) -> int:
 
 
 def _module_tests(path: str) -> str | None:
+    if path in {"scripts/gate_delta.py", "tests/test_gate_delta.py"}:
+        target = "tests/test_gate_delta.py"
+        return target if Path(target).is_file() and Path(path).is_file() else None
     if path.startswith(ROOTS[0]):
         module, _, rest = path.removeprefix(ROOTS[0]).partition("/")
         target = f"tests/{module}"
