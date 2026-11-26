@@ -2,6 +2,8 @@
 
 from datetime import UTC, datetime
 
+import pytest
+
 from code_factory.memory.models import MemoryEntry
 from code_factory.memory_extras.models import Merge, Pair, Retire
 from code_factory.memory_extras.rules import (
@@ -49,6 +51,21 @@ def test_a_negation_on_the_shared_subject_marks_the_pair_as_a_possible_contradic
         many(
             (SQUASH, "Squash ticket branches before landing them through the merge queue"),
             (QUEUE, "Never let the merge queue take ticket branches unsquashed"),
+        ),
+        frozenset(),
+        NOW,
+    )
+    assert [(p.terms, p.contradicts) for p in found] == [
+        (("branches", "merge", "queue", "ticket"), True)
+    ]
+
+
+@pytest.mark.parametrize("apostrophe", ["'", "\N{RIGHT SINGLE QUOTATION MARK}"])
+def test_a_dont_on_the_shared_subject_is_a_negation(apostrophe: str) -> None:
+    found = pairs(
+        many(
+            (SQUASH, "Squash ticket branches before landing them through the merge queue"),
+            (QUEUE, f"Don{apostrophe}t let the merge queue take ticket branches unsquashed"),
         ),
         frozenset(),
         NOW,
