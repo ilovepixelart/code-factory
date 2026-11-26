@@ -24,16 +24,19 @@ if TYPE_CHECKING:
 class Resources:
     """What a module's service may be built from; `tasks` starts work once the app runs.
 
-    `on_stop` is a list a module appends to in `provide`: each awaitable runs once, in order, when
-    the app stops and before the background tasks are cancelled, so work that must finish first
-    (draining running checks) still has its tasks. A hook bounds its own wait; a failing one is
-    logged and the rest still run.
+    A module appends to two lists in `provide`. `on_stopping` holds plain callables that tell a
+    service to stop (set an event, end streams); `on_stop` holds awaitables that clean up (drain
+    running checks, close a client). When the app stops, every signal runs, then every cleanup,
+    each list in order and before the background tasks are cancelled, so work that must finish
+    first still has its tasks. A cleanup bounds its own wait; a failing hook is logged and the
+    rest still run.
     """
 
     settings: Settings
     engine: AsyncEngine
     uow: UnitOfWork
     tasks: BackgroundTasks
+    on_stopping: list[Callable[[], None]] = field(default_factory=list)
     on_stop: list[Callable[[], Awaitable[None]]] = field(default_factory=list)
 
 

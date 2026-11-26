@@ -194,4 +194,4 @@ async def test_a_large_listing_is_parsed_in_a_process_and_names_the_same_tests()
         }
         assert tests._pool is not None
     finally:
-        await tests.close()
+        tests.close()

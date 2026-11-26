@@ -75,9 +75,11 @@ A module's `module.py` builds one `platform.module.Module`; every field but `nam
 | `background(services, tasks)` | called once when the HTTP app starts, after the schema check: start the module's long-lived work with `tasks.start(name, work)`; not called for the stdio MCP server or a command |
 | `serve_command(create_app)` | at most one module: builds the `serve` command in place of the platform's plain one; `create_app(settings, served=...)` takes the `Served` the listener bound |
 
-`Resources.on_stop` is a list a module appends awaitables to in `provide`: they run in order when
-the app stops, before the background tasks are cancelled (draining running work), and a failing one
-is logged without stopping the rest. `Served` (`platform/served.py`) is registered by
+A module stops its work through two lists it appends to in `provide`: `Resources.on_stopping`
+holds plain callables that tell a service to stop (set an event, end streams, let runs go), and
+`Resources.on_stop` holds awaitables that clean up (draining running checks). When the app stops,
+every signal runs, then every cleanup, each list in order and before the background tasks are
+cancelled; a failing one is logged without stopping the rest. `Served` (`platform/served.py`) is registered by
 `app.build_services` in every process; `Served.none()` stands for one that serves nothing.
 
 `app.py` holds `MODULES`, builds every `provide` in that order (a module that uses another's service

@@ -318,7 +318,7 @@ class BrokerService:
         self._proxies.clear()
         await self.aclose()
 
-    async def shutdown(self) -> None:
+    def shutdown(self) -> None:
         """Ask `serve` and `sweep_loop` to end: the app calls this when it stops."""
         self.stopping.set()
 

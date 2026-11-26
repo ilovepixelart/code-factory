@@ -27,7 +27,7 @@ def _provide(services: Services, resources: Resources) -> None:
     )
     memory.add_preparation(extras.prepare_admission)
     services.add(MemoryExtrasService, extras)
-    resources.on_stop.append(tests.close)
+    resources.on_stopping.append(tests.close)
 
 
 module = Module(name="memory_extras", provide=_provide, commands=(memory_command,))

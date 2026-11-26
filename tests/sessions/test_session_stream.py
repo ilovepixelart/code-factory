@@ -210,7 +210,7 @@ async def test_open_streams_finish_within_a_second_of_the_service_shutting_down(
     await asyncio.sleep(0.2)
     assert service.open_streams == 3
     started = time.perf_counter()
-    await service.shutdown()
+    service.shutdown()
     await asyncio.wait_for(asyncio.gather(*readers), 1.0)
     assert time.perf_counter() - started < 1.0
     assert service.open_streams == 0
