@@ -15,8 +15,8 @@ from gate_delta import git
 from code_factory.platform.config import DATABASE_URL_VARIABLE, load_settings, parse_database_url
 
 ROOT = Path(__file__).resolve().parents[1]
-SUITE = ROOT / "tests/runs/test_run_lifecycle_replay.py"
-LIVE = ROOT / "tests/runs/live_run_lifecycle.py"
+SUITE = ROOT / "tests/integration/runs/test_run_lifecycle_replay.py"
+LIVE = ROOT / "tests/support/live_run_lifecycle.py"
 CASE_COUNT = 4
 TIMEOUT = 60
 MAX_REPORT_BYTES = 1_000_000

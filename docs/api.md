@@ -104,7 +104,7 @@ run a review of a completed local Build before shipping.
 ## The contract harness
 
 `tests/contract/contract_catalogue.py` lists every route the web app calls with the module that
-answers it and the golden (`tests/golden/formats`) or hand spec its answer is judged against.
+answers it and the golden (`tests/support/golden/formats`) or hand spec its answer is judged against.
 `contract_shapes.py` compares shape (keys, their order, types, nullability, optional keys across list
 elements), never values. `test_contract_catalogue.py` fails for a call in `web/src` missing from the
 catalogue, and for a route served before its module left `PENDING_OWNERS` (or the reverse);

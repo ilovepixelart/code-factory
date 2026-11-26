@@ -52,6 +52,6 @@ drop the oldest commits, which are the ones first commits need).
 
 Models serialise as the web app reads them with `model_dump(by_alias=True)`: `Cycle.from_` is
 `from` and `Peek.kind` is `type`. `Doing` and `Last` leave out their unset keys. The shape of the
-page is pinned by `tests/golden/team/now.json` and checked against `web/src/lib/teamNow.ts`
+page is pinned by `tests/support/golden/team/now.json` and checked against `web/src/lib/teamNow.ts`
 (`tests/team/test_team_page_wire.py`); regenerate the golden with `CODE_FACTORY_BLESS=1` and read
 the diff.

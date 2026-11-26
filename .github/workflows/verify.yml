@@ -94,7 +94,7 @@ jobs:
         run: |
           uv sync --locked
           CODE_FACTORY_DATABASE_URL="$CODE_FACTORY_GATE_DATABASE_URL" \
-            uv run --no-sync pytest -q --no-cov -n 1 tests/checks/test_checks_composed.py
+            uv run --no-sync pytest -q --no-cov -n 1 tests/integration/checks/test_checks_composed.py
       - name: Scan all reachable Git history
         run: gitleaks git --redact=100 --log-opts='--all'
       - name: Run the full gate

@@ -26,6 +26,6 @@ Access: add the tool to `TOOLS` in `platform/mcp/policy.py` with who may call it
 ticket with `scope.scope_ticket` (which also holds a coordinator to its repository), never
 `policy.scope_ticket` directly. `tests/platform/test_mcp_policy.py` holds the access matrix by hand.
 
-The tool lists each caller sees are pinned in `tests/golden/mcp/`. After a change, read the failing
+The tool lists each caller sees are pinned in `tests/support/golden/mcp/`. After a change, read the failing
 diff, then bless it: `CODE_FACTORY_BLESS=1 uv run pytest --no-cov tests/platform/test_mcp_surface.py`.
 A build run's list stays under 15,000 bytes of what the model reads.

@@ -15,6 +15,8 @@ SCRIPT_SKIP = re.compile(
 PY_SKIP = re.compile(r"(?:^|\.)(?:skip|skipIf|skipUnless|skipif|xfail|skipTest)$")
 ASSERTION = re.compile(r"^\s*(?:assert\b|expect\s*\(|(?:self\.)?assert[A-Z]\w*\s*\()")
 ROOTS = ("src/code_factory/", "tests/", "web/src/")
+# The fast pass runs these flows of a changed module; e2e runs only in the full gate and CI.
+TIERS = ("unit", "integration")
 INSTRUCTIONS = ("CLAUDE.md", "AGENTS.md")
 INSTRUCTION_LINES = 100
 
@@ -104,21 +106,39 @@ def facts(path: str, text: str) -> tuple[Counter[str], Counter[str], int]:
 
 
 def review(base: str, changed: list[str]) -> int:
-    """Block obvious removal and skip additions. Warn about assertion-count changes."""
+    """Block obvious removal and skip additions. Warn about assertion-count changes.
+
+    Tests, skips and assertions are compared across every changed test file together, so a
+    test file that moves or splits keeps its own; a file changed in place is also compared alone.
+    """
     before: Counter[str] = Counter()
     after: Counter[str] = Counter()
-    refused = False
+    skips_before: Counter[str] = Counter()
+    skips_after: Counter[str] = Counter()
+    where: dict[str, str] = {}
+    asserted = [0, 0]
     for path in filter(test_file, changed):
-        old, no_skips, was = facts(path, previous(base, path))
-        new, skipped, now = facts(path, current(path))
+        old_text, new_text = previous(base, path), current(path)
+        old, no_skips, was = facts(path, old_text)
+        new, skipped, now = facts(path, new_text)
         before.update(old)
         after.update(new)
-        if added := skipped - no_skips:
-            refused = True
-            for marker in sorted(added):
-                print(f"Test delta: {path!r} adds a new skip or expected failure ({marker[:120]}).")
-        if now < was:
+        skips_before.update(no_skips)
+        skips_after.update(skipped)
+        where.update(dict.fromkeys(skipped, path))
+        asserted[0] += was
+        asserted[1] += now
+        if old_text and new_text and now < was:
             print(f"Warning: {path!r} has fewer assertion lines ({was} to {now}).")
+    refused = False
+    for marker in sorted(skips_after - skips_before):
+        refused = True
+        print(
+            f"Test delta: {where[marker]!r} adds a new skip or expected failure ({marker[:120]})."
+        )
+    if asserted[1] < asserted[0]:
+        was, now = asserted
+        print(f"Warning: the changed tests have fewer assertion lines ({was} to {now}).")
     if deleted := before - after:
         refused = True
         for name in sorted(deleted):
@@ -130,15 +150,18 @@ def review(base: str, changed: list[str]) -> int:
     return int(refused)
 
 
-def _module_tests(path: str) -> str | None:
-    if path in {"scripts/gate_delta.py", "tests/test_gate_delta.py"}:
-        target = "tests/test_gate_delta.py"
-        return target if Path(target).is_file() and Path(path).is_file() else None
+def _module_tests(path: str) -> list[str] | None:
+    """The unit and integration folders of a changed module, or the changed test file itself."""
+    if path in {"scripts/gate_delta.py", "tests/integration/test_gate_delta.py"}:
+        target = "tests/integration/test_gate_delta.py"
+        return [target] if Path(target).is_file() and Path(path).is_file() else None
     if path.startswith(ROOTS[0]):
         module, _, rest = path.removeprefix(ROOTS[0]).partition("/")
-        target = f"tests/{module}"
-        if rest and module != "platform" and Path(target).is_dir():
-            return target
+        targets = [
+            f"tests/{tier}/{module}" for tier in TIERS if Path(f"tests/{tier}/{module}").is_dir()
+        ]
+        if rest and module != "platform" and targets:
+            return targets
     if (
         path.startswith(ROOTS[1])
         and "/" in path.removeprefix(ROOTS[1])
@@ -146,7 +169,7 @@ def _module_tests(path: str) -> str | None:
         and re.fullmatch(r"[A-Za-z0-9_./-]+", path)
         and Path(path).is_file()
     ):
-        return path
+        return [path]
     return None
 
 
@@ -161,8 +184,8 @@ def affected(changed: list[str]) -> int:
             ("web/src/test/", "web/src/generated/")
         ):
             vue = True
-        elif (target := _module_tests(path)) is not None:
-            python.add(target)
+        elif (targets := _module_tests(path)) is not None:
+            python.update(targets)
         else:
             print("full")
             return 0

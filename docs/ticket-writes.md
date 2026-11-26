@@ -6,7 +6,7 @@ column. `TicketWriteService` (`service/`) is the one write path for the app, the
 modules that file tickets; it holds each change to the board's rules in the sentences the app
 shows (`rules/`, pure) and writes it, with its activity, in one transaction through
 `TicketService.unit`. The rules are tested against the recorded session in
-`tests/golden/formats/writes` (`tests/ticket_writes/test_write_golden_replay.py`).
+`tests/support/golden/formats/writes` (`tests/ticket_writes/test_write_golden_replay.py`).
 
 ## How a change is made
 

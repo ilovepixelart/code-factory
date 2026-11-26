@@ -21,7 +21,7 @@ The htmx example switcher only ever does a GET for HTML, which a file on disk an
 route, so it works in both renders.
 
 Every snippet the page shows is in `web/snippets.toml`; `tests/site/test_site_snippets.py` holds
-each one to the board: an MCP call to the tool listings in `tests/golden/mcp/`, a command line to
+each one to the board: an MCP call to the tool listings in `tests/support/golden/mcp/`, a command line to
 the `code-factory` parser, a config to the rules of `code-factory config check`. The version is
 read from the project's `pyproject.toml`.
 

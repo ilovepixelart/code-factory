@@ -57,7 +57,7 @@ role and run stage may call and refuses the rest; the table is `platform/mcp/pol
 it must equal is written out in `tests/platform/test_mcp_policy.py`. Tokens are issued, verified and
 revoked by the `auth` module (`auth_tokens` holds SHA-256 digests only); a tool reads the caller with
 `current_actor()` and scopes a ticket with `policy.scope_ticket`. The tool list is pinned by
-`tests/golden/mcp/*.json` (names, descriptions, schemas, hints, order; `CODE_FACTORY_BLESS=1` rewrites
+`tests/support/golden/mcp/*.json` (names, descriptions, schemas, hints, order; `CODE_FACTORY_BLESS=1` rewrites
 them and the diff is read), and `tests/platform/test_mcp_surface.py` holds the rules every tool
 follows. A listener may accept only some roles (`Access.roles`): the runner's address takes run
 tokens only.
