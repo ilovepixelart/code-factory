@@ -10,7 +10,7 @@ import sys
 from collections.abc import AsyncGenerator, Sequence
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from code_factory.about.module import module as about
 from code_factory.agents.module import module as agents
@@ -28,11 +28,11 @@ from code_factory.evals.module import ScorerAnswers
 from code_factory.evals.module import module as evals
 from code_factory.factory.models import Improvements
 from code_factory.factory.module import build_module as build_factory
-from code_factory.factory.service import FactoryPorts
+from code_factory.factory.service import FactoryPorts, ImprovementPort
 from code_factory.follower.module import module as follower
 from code_factory.git.models import HookOutcome, TicketRef
 from code_factory.git.module import build_module as build_git
-from code_factory.git.service import GitPorts
+from code_factory.git.service import GitPorts, HooksPort
 from code_factory.health.module import module as health
 from code_factory.hooks.module import RunHookCommands
 from code_factory.hooks.module import module as hooks
@@ -104,10 +104,11 @@ factory = build_factory(_factory_ports)
 runs = build_runs(RunHookCommands)
 
 
-class NoImprovements:
+class NoImprovements(ImprovementPort):
     """Self-improvement pull requests: nothing produces them yet."""
 
-    async def newest(self, limit: int) -> Improvements:  # noqa: ARG002
+    @override
+    async def newest(self, limit: int) -> Improvements:
         """Not available."""
         return Improvements(available=False)
 
@@ -164,13 +165,15 @@ class _GitTickets:
         return parent.branch if in_flight and parent.branch and not waiting else None
 
 
-class _NoSetup:
+class _NoSetup(HooksPort):
     """No setup command until a module owns one."""
 
-    async def setup_command(self, repository: str) -> str | None:  # noqa: ARG002
+    @override
+    async def setup_command(self, repository: str) -> str | None:
         return None
 
-    async def run_setup(self, repository: str, ticket_id: str, tree: Path) -> HookOutcome:  # noqa: ARG002
+    @override
+    async def run_setup(self, repository: str, ticket_id: str, tree: Path) -> HookOutcome:
         return HookOutcome(code=0)
 
 

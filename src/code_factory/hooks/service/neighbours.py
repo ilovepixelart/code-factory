@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, override
 
 from code_factory.auth.models import TokenKind
 from code_factory.auth.service import AuthService
@@ -15,6 +15,7 @@ from code_factory.hooks.ports import (
     NewBug,
     NewsFact,
     TicketFacts,
+    Tickets,
 )
 from code_factory.memory_extras.models import TicketContext
 from code_factory.memory_extras.service import MemoryExtrasService
@@ -119,35 +120,42 @@ class RunsAdapter(_Neighbour):
             return None
 
 
-class TicketsAdapter(_Neighbour):
+class TicketsAdapter(_Neighbour, Tickets):
     """Tickets, their history and new bug tickets."""
 
+    @override
     async def get(self, ticket_id: str) -> TicketFacts:
         """`Tickets.get` of the hooks ports."""
         return _facts(await self._services.get(TicketService).get(ticket_id))
 
+    @override
     async def by_branch(self, repository: str, branch: str) -> TicketFacts | None:
         """`Tickets.by_branch` of the hooks ports."""
         found = await self._services.get(TicketService).find_by_branch(repository, branch)
         return _facts(found) if found else None
 
-    async def requirements(self, ticket_id: str) -> list[str]:  # noqa: ARG002
+    @override
+    async def requirements(self, ticket_id: str) -> list[str]:
         """`Tickets.requirements` of the hooks ports."""
         return []  # no module keeps a requirements table yet
 
+    @override
     async def record(self, ticket_id: str, kind: str, data: dict[str, object], by: str) -> None:
         """`Tickets.record` of the hooks ports."""
         await self._services.get(TicketService).record_activity(ticket_id, kind, data, by=by)
 
+    @override
     async def by_source(self, repository: str, source: str) -> TicketFacts | None:
         """`Tickets.by_source` of the hooks ports."""
         found = await self._services.get(TicketService).find_by_source(repository, source)
         return _facts(found) if found else None
 
+    @override
     async def reports(self, ticket_id: str) -> int:
         """`Tickets.reports` of the hooks ports."""
         return len(await self._records(ticket_id, ["reported"]))
 
+    @override
     async def create_bug(self, bug: NewBug) -> str:
         """`Tickets.create_bug` of the hooks ports."""
         new = NewTicket(
@@ -160,6 +168,7 @@ class TicketsAdapter(_Neighbour):
         )
         return (await self._services.get(TicketService).create(new, by="board")).id
 
+    @override
     async def activity(self) -> list[tuple[str, Activity]]:
         """`Tickets.activity` of the hooks ports."""
         found: list[tuple[str, Activity]] = []
