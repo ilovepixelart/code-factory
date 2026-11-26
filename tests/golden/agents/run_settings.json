@@ -1,0 +1,317 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "mcp__code-factory"
+    ],
+    "deny": [
+      "Read(~/.ssh)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.config/gh)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.docker/config.json/**)",
+      "Read(~/.netrc)",
+      "Read(~/.netrc/**)",
+      "Read(~/.npmrc)",
+      "Read(~/.npmrc/**)",
+      "Read(~/.pypirc)",
+      "Read(~/.pypirc/**)",
+      "Read(~/.git-credentials)",
+      "Read(~/.git-credentials/**)",
+      "Read(~/.omp)",
+      "Read(~/.omp/**)",
+      "Read(~/.local/share/opencode/auth.json)",
+      "Read(~/.local/share/opencode/auth.json/**)",
+      "Read(~/.kube)",
+      "Read(~/.kube/**)",
+      "Read(~/.azure)",
+      "Read(~/.azure/**)",
+      "Read(~/.pi/agent)",
+      "Read(~/.pi/agent/**)",
+      "Read(~/.codex)",
+      "Read(~/.codex/**)",
+      "Read(~/.claude)",
+      "Read(~/.claude/**)",
+      "Read(~/.claude.json)",
+      "Read(~/.claude.json/**)",
+      "Edit(./.claude/**)",
+      "Write(./.claude/**)",
+      "Read(/{home})",
+      "Read(/{home}/**)",
+      "Edit(/{home})",
+      "Edit(/{home}/**)"
+    ]
+  },
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" gate permission",
+            "timeout": 600
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" recall"
+          }
+        ],
+        "matcher": "startup|resume|clear|compact"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": [],
+      "strictAllowlist": true,
+      "allowLocalBinding": false
+    },
+    "filesystem": {
+      "denyRead": [
+        "{home}"
+      ],
+      "allowWrite": [],
+      "denyWrite": [
+        "{home}"
+      ]
+    },
+    "credentials": {
+      "files": [
+        {
+          "path": "~/.ssh",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.aws",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.gnupg",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.config/gh",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.docker/config.json",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.netrc",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.npmrc",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.pypirc",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.git-credentials",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.omp",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.local/share/opencode/auth.json",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.kube",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.azure",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.pi/agent",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.codex",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.claude",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.claude.json",
+          "mode": "deny"
+        }
+      ],
+      "envVars": [
+        {
+          "name": "GITHUB_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "GH_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "NPM_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_SESSION_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "ANTHROPIC_API_KEY",
+          "mode": "deny"
+        },
+        {
+          "name": "ANTHROPIC_AUTH_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "CLAUDE_CODE_OAUTH_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "CODE_FACTORY_MCP_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "OTEL_EXPORTER_OTLP_HEADERS",
+          "mode": "deny"
+        },
+        {
+          "name": "OTEL_EXPORTER_OTLP_LOGS_HEADERS",
+          "mode": "deny"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,3 @@
+{"available": true, "cards": [
+  {"repository": "sample", "name": "ran-tests", "question": "Did the agent run the tests before finishing?", "yes": 3, "no": 1, "unclear": 1, "asked": 5, "pass_rate": 0.75, "average_score": null, "window": {"from": 1793664000, "to": 1794268800}}
+]}

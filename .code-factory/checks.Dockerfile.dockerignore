@@ -1,0 +1,10 @@
+**
+!pyproject.toml
+!uv.lock
+!.python-version
+!web/
+!web/package.json
+!web/pnpm-lock.yaml
+!web/pnpm-workspace.yaml
+!.code-factory/
+!.code-factory/checks-entrypoint.sh

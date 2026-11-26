@@ -1,0 +1,912 @@
+{
+  "today": "2026-09-21",
+  "columns": {
+    "spec": [
+      {
+        "id": "AB-1",
+        "title": "Other repository, first",
+        "type": "feature",
+        "branch": "",
+        "repository": "second",
+        "stage": "spec",
+        "evidence_stage": "spec",
+        "description": "",
+        "labels": [],
+        "priority": "",
+        "assignee": "",
+        "due": "",
+        "blocked": "",
+        "archived": false,
+        "rank": 1,
+        "stage_since": "",
+        "checklist": [
+          0,
+          0
+        ],
+        "open_questions": 0,
+        "sessions": [],
+        "runs": [
+          {
+            "id": "eeeeeeeeeeee",
+            "stage": "spec",
+            "iteration": 3,
+            "loop": true,
+            "max_iterations": 12,
+            "attempt": 0,
+            "agent": "",
+            "started_at": 1790000950.0
+          }
+        ],
+        "repository_path": "{second}",
+        "declared": "",
+        "parent": "",
+        "due_state": "",
+        "days_in_column": null,
+        "links": {
+          "open_blockers": [],
+          "children": 0,
+          "children_done": 0
+        },
+        "check": null,
+        "pull": null,
+        "due_date": null,
+        "spent": 0.0,
+        "budget": null,
+        "halted": "",
+        "limited_until": null,
+        "hold": {
+          "stage": "spec",
+          "detail": "a branch",
+          "summary": "a branch"
+        },
+        "subagents": []
+      },
+      {
+        "id": "AB-2",
+        "title": "Other repository, second",
+        "type": "feature",
+        "branch": "",
+        "repository": "second",
+        "stage": "spec",
+        "evidence_stage": "spec",
+        "description": "",
+        "labels": [
+          "ui"
+        ],
+        "priority": "",
+        "assignee": "",
+        "due": "",
+        "blocked": "",
+        "archived": false,
+        "rank": 0,
+        "stage_since": "",
+        "checklist": [
+          0,
+          0
+        ],
+        "open_questions": 0,
+        "sessions": [],
+        "runs": [],
+        "repository_path": "{second}",
+        "declared": "",
+        "parent": "",
+        "due_state": "",
+        "days_in_column": null,
+        "links": {
+          "open_blockers": [],
+          "children": 0,
+          "children_done": 0
+        },
+        "check": {
+          "passed": false,
+          "commit": "fedcba9876543"
+        },
+        "pull": null,
+        "due_date": null,
+        "spent": 0,
+        "budget": null,
+        "halted": "",
+        "limited_until": null,
+        "hold": {
+          "stage": "spec",
+          "detail": "a branch",
+          "summary": "a branch"
+        },
+        "subagents": []
+      },
+      {
+        "id": "CF-1",
+        "title": "Questions waiting",
+        "type": "feature",
+        "branch": "",
+        "repository": "sample",
+        "stage": "spec",
+        "evidence_stage": "spec",
+        "description": "- [x] one\n- [ ] two\n- [ ] three",
+        "labels": [],
+        "priority": "",
+        "assignee": "",
+        "due": "",
+        "blocked": "",
+        "archived": false,
+        "rank": 0,
+        "stage_since": "",
+        "checklist": [
+          1,
+          3
+        ],
+        "open_questions": 3,
+        "sessions": [],
+        "runs": [],
+        "repository_path": "{root}",
+        "declared": "",
+        "parent": "",
+        "due_state": "",
+        "days_in_column": null,
+        "links": {
+          "open_blockers": [],
+          "children": 2,
+          "children_done": 0
+        },
+        "check": null,
+        "pull": null,
+        "due_date": null,
+        "spent": 0.5,
+        "budget": 5.0,
+        "halted": "agent failed (exit 1)",
+        "limited_until": null,
+        "hold": {
+          "stage": "spec",
+          "detail": "a branch",
+          "summary": "a branch"
+        },
+        "subagents": []
+      },
+      {
+        "id": "CF-3",
+        "title": "Worked on main",
+        "type": "feature",
+        "branch": "main",
+        "repository": "sample",
+        "stage": "spec",
+        "evidence_stage": "build",
+        "description": "",
+        "labels": [
+          "agents"
+        ],
+        "priority": "low",
+        "assignee": "",
+        "due": "",
+        "blocked": "",
+        "archived": false,
+        "rank": 0,
+        "stage_since": "2026-09-20T08:00:00Z",
+        "checklist": [
+          0,
+          0
+        ],
+        "open_questions": 0,
+        "sessions": [],
+        "runs": [],
+        "repository_path": "{root}",
+        "declared": "spec",
+        "parent": "CF-1",
+        "due_state": "",
+        "days_in_column": 1,
+        "links": {
+          "open_blockers": [
+            "CF-2"
+          ],
+          "children": 0,
+          "children_done": 0
+        },
+        "check": null,
+        "pull": null,
+        "due_date": null,
+        "spent": 0,
+        "budget": 5.0,
+        "halted": "",
+        "limited_until": null,
+        "hold": {
+          "stage": "build",
+          "detail": "a commit on main",
+          "summary": "a commit on main"
+        },
+        "subagents": []
+      }
+    ],
+    "build": [
+      {
+        "id": "CF-2",
+        "title": "A bug in flight",
+        "type": "bug",
+        "branch": "feat/CF-2",
+        "repository": "sample",
+        "stage": "build",
+        "evidence_stage": "build",
+        "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+        "labels": [
+          "ui",
+          "agents"
+        ],
+        "priority": "high",
+        "assignee": "alex",
+        "due": "2026-10-10",
+        "blocked": "waiting on design",
+        "archived": false,
+        "rank": 1,
+        "stage_since": "2026-10-01T09:00:00Z",
+        "checklist": [
+          0,
+          0
+        ],
+        "open_questions": 0,
+        "sessions": [
+          {
+            "session_id": "s-rest",
+            "state": "idle"
+          }
+        ],
+        "runs": [
+          {
+            "id": "aaaaaaaaaaaa",
+            "stage": "build",
+            "iteration": 2,
+            "loop": true,
+            "max_iterations": 8,
+            "attempt": 0,
+            "agent": "",
+            "started_at": 1790000500.0
+          }
+        ],
+        "repository_path": "{root}",
+        "declared": "",
+        "parent": "CF-1",
+        "due_state": "",
+        "days_in_column": -10,
+        "links": {
+          "open_blockers": [],
+          "children": 0,
+          "children_done": 0
+        },
+        "check": {
+          "passed": true,
+          "commit": "1234567abcdef"
+        },
+        "pull": {
+          "state": "open",
+          "review": "approved",
+          "ci": "failed",
+          "head": "1234567abcdef",
+          "url": "https://github.com/o/r/pull/2",
+          "at": "1790000000.0"
+        },
+        "due_date": "2026-10-10",
+        "spent": 4.25,
+        "budget": 2.5,
+        "halted": "",
+        "limited_until": null,
+        "hold": {
+          "stage": "build",
+          "detail": "a commit on feat/CF-2",
+          "summary": "a commit on feat/CF-2"
+        },
+        "subagents": []
+      }
+    ],
+    "review": [],
+    "merged": []
+  },
+  "problems": [
+    {
+      "repository": "sample",
+      "file": ".code-factory/tickets/broken/ticket.md",
+      "path": "{root}/.code-factory/tickets/broken/ticket.md",
+      "reason": "no front matter"
+    }
+  ],
+  "totals": {
+    "spec": 4,
+    "build": 1,
+    "review": 0,
+    "merged": 0
+  },
+  "limits": {
+    "spec": 1
+  },
+  "options": {
+    "type": [
+      "bug",
+      "feature"
+    ],
+    "priority": [
+      "high",
+      "low"
+    ],
+    "label": [
+      "agents",
+      "ui"
+    ],
+    "assignee": [
+      "alex"
+    ],
+    "repository": [
+      "sample",
+      "second"
+    ]
+  },
+  "views": {
+    "": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "type=bug": {
+      "columns": {
+        "spec": [],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-2"
+      ]
+    },
+    "label=ui&label=agents": {
+      "columns": {
+        "spec": [
+          "AB-2",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-2",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "priority=high&priority=low": {
+      "columns": {
+        "spec": [
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "assignee=alex": {
+      "columns": {
+        "spec": [],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-2"
+      ]
+    },
+    "repository=second": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2"
+        ],
+        "build": [],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2"
+      ]
+    },
+    "blocked=1": {
+      "columns": {
+        "spec": [],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-2"
+      ]
+    },
+    "agent=1": {
+      "columns": {
+        "spec": [
+          "AB-1"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "CF-2"
+      ]
+    },
+    "questions=1": {
+      "columns": {
+        "spec": [
+          "CF-1"
+        ],
+        "build": [],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-1"
+      ]
+    },
+    "type=feature&questions=1": {
+      "columns": {
+        "spec": [
+          "CF-1"
+        ],
+        "build": [],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-1"
+      ]
+    },
+    "unknown=x&type=": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "lanes=repository": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": [
+        [
+          "sample",
+          {
+            "spec": [
+              "CF-1",
+              "CF-3"
+            ],
+            "build": [
+              "CF-2"
+            ],
+            "review": [],
+            "merged": []
+          }
+        ],
+        [
+          "second",
+          {
+            "spec": [
+              "AB-1",
+              "AB-2"
+            ],
+            "build": [],
+            "review": [],
+            "merged": []
+          }
+        ]
+      ],
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "lanes=assignee": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": [
+        [
+          "alex",
+          {
+            "spec": [],
+            "build": [
+              "CF-2"
+            ],
+            "review": [],
+            "merged": []
+          }
+        ],
+        [
+          "Unassigned",
+          {
+            "spec": [
+              "AB-1",
+              "AB-2",
+              "CF-1",
+              "CF-3"
+            ],
+            "build": [],
+            "review": [],
+            "merged": []
+          }
+        ]
+      ],
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "lanes=assignee&type=feature": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [],
+        "review": [],
+        "merged": []
+      },
+      "lanes": [
+        [
+          "Unassigned",
+          {
+            "spec": [
+              "AB-1",
+              "AB-2",
+              "CF-1",
+              "CF-3"
+            ],
+            "build": [],
+            "review": [],
+            "merged": []
+          }
+        ]
+      ],
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3"
+      ]
+    },
+    "lanes=nonsense": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "sort=title": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-2",
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3"
+      ]
+    },
+    "sort=title&dir=desc": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-3",
+        "CF-1",
+        "AB-2",
+        "AB-1",
+        "CF-2"
+      ]
+    },
+    "sort=id&dir=desc": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-3",
+        "CF-2",
+        "CF-1",
+        "AB-2",
+        "AB-1"
+      ]
+    },
+    "sort=stage": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "sort=priority": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-2",
+        "CF-3",
+        "AB-1",
+        "AB-2",
+        "CF-1"
+      ]
+    },
+    "sort=priority&dir=desc": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "sort=assignee": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "sort=repository&dir=desc": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    },
+    "sort=type": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "CF-2",
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3"
+      ]
+    },
+    "sort=nonsense&dir=desc": {
+      "columns": {
+        "spec": [
+          "AB-1",
+          "AB-2",
+          "CF-1",
+          "CF-3"
+        ],
+        "build": [
+          "CF-2"
+        ],
+        "review": [],
+        "merged": []
+      },
+      "lanes": null,
+      "rows": [
+        "AB-1",
+        "AB-2",
+        "CF-1",
+        "CF-3",
+        "CF-2"
+      ]
+    }
+  }
+}

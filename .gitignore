@@ -1,0 +1,24 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+web/dist/
+node_modules/
+.env
+.env.local
+.env.*.local
+
+# Browser tests and coverage
+test-results/
+playwright-report/
+playwright/.cache/
+coverage/
+.pnpm-store/
+.code-factory/worktrees/
+
+# Research notes and reports
+.research/

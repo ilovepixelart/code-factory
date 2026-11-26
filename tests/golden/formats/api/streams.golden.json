@@ -1,0 +1,28 @@
+[
+  {
+    "after": "0",
+    "events": 4,
+    "chunks": [
+      "id: 1\ndata: {\"seq\": 1, \"session_id\": \"\", \"agent_id\": null, \"event\": \"Notification\", \"captured_at\": 1790000990.0, \"payload\": {\"hook_event_name\": \"Notification\", \"message\": \"no session\", \"_captured_at\": 1790000990.0}}\n\n",
+      "id: 2\ndata: {\"seq\": 2, \"session_id\": \"s-block\", \"agent_id\": null, \"event\": \"SessionStart\", \"captured_at\": 1790000800.0, \"payload\": {\"session_id\": \"s-block\", \"hook_event_name\": \"SessionStart\", \"cwd\": \"{root}\", \"source\": \"startup\", \"transcript_path\": \"{home}/transcripts/s-block.jsonl\", \"_captured_at\": 1790000800.0}}\n\n",
+      "id: 3\ndata: {\"seq\": 3, \"session_id\": \"s-block\", \"agent_id\": null, \"event\": \"UserPromptSubmit\", \"captured_at\": 1790000810.0, \"payload\": {\"session_id\": \"s-block\", \"hook_event_name\": \"UserPromptSubmit\", \"prompt\": \"Edit it\", \"_captured_at\": 1790000810.0}}\n\n",
+      "id: 4\ndata: {\"seq\": 4, \"session_id\": \"s-block\", \"agent_id\": null, \"event\": \"PreToolUse\", \"captured_at\": 1790000820.0, \"payload\": {\"session_id\": \"s-block\", \"hook_event_name\": \"PreToolUse\", \"tool_name\": \"Edit\", \"tool_use_id\": \"t3\", \"tool_input\": {\"file_path\": \"/x/a.py\"}, \"_captured_at\": 1790000820.0}}\n\n"
+    ]
+  },
+  {
+    "after": "3",
+    "events": 2,
+    "chunks": [
+      "id: 4\ndata: {\"seq\": 4, \"session_id\": \"s-block\", \"agent_id\": null, \"event\": \"PreToolUse\", \"captured_at\": 1790000820.0, \"payload\": {\"session_id\": \"s-block\", \"hook_event_name\": \"PreToolUse\", \"tool_name\": \"Edit\", \"tool_use_id\": \"t3\", \"tool_input\": {\"file_path\": \"/x/a.py\"}, \"_captured_at\": 1790000820.0}}\n\n",
+      "id: 5\ndata: {\"seq\": 5, \"session_id\": \"s-block\", \"agent_id\": null, \"event\": \"PermissionRequest\", \"captured_at\": 1790000821.0, \"payload\": {\"session_id\": \"s-block\", \"hook_event_name\": \"PermissionRequest\", \"tool_name\": \"Edit\", \"_captured_at\": 1790000821.0}}\n\n"
+    ]
+  },
+  {
+    "last_event_id": "5",
+    "events": 2,
+    "chunks": [
+      "id: 6\ndata: {\"seq\": 6, \"session_id\": \"s-block2\", \"agent_id\": null, \"event\": \"SessionStart\", \"captured_at\": 1790000850.0, \"payload\": {\"session_id\": \"s-block2\", \"hook_event_name\": \"SessionStart\", \"cwd\": \"{root}-detached\", \"source\": \"startup\", \"_captured_at\": 1790000850.0}}\n\n",
+      "id: 7\ndata: {\"seq\": 7, \"session_id\": \"s-block2\", \"agent_id\": null, \"event\": \"UserPromptSubmit\", \"captured_at\": 1790000860.0, \"payload\": {\"session_id\": \"s-block2\", \"hook_event_name\": \"UserPromptSubmit\", \"prompt\": \"Run it\", \"_captured_at\": 1790000860.0}}\n\n"
+    ]
+  }
+]

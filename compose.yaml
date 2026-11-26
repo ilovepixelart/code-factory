@@ -1,0 +1,68 @@
+name: code-factory-docker
+
+services:
+  credentials:
+    image: postgres:18-bookworm
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        if [ ! -s /credentials/postgres-password ]; then
+          umask 077
+          temp=$$(mktemp /credentials/password.XXXXXX)
+          od -An -N24 -tx1 /dev/urandom | tr -d ' \n' > "$$temp"
+          test "$$(wc -c < "$$temp")" -eq 48
+          chmod 444 "$$temp"
+          mv "$$temp" /credentials/postgres-password
+        fi
+    volumes:
+      - credentials:/credentials
+
+  db:
+    image: postgres:18-bookworm
+    depends_on:
+      credentials:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_DB: code_factory
+      POSTGRES_USER: code_factory
+      POSTGRES_PASSWORD_FILE: /credentials/postgres-password
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "code_factory", "-d", "code_factory"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - postgres:/var/lib/postgresql
+      - credentials:/credentials:ro
+
+  factory:
+    image: ${CODE_FACTORY_IMAGE:-code-factory:local}
+    build: .
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      CODE_FACTORY_HOST: 0.0.0.0
+      CODE_FACTORY_PORT: "${CODE_FACTORY_COMPOSE_PORT:-4000}"
+      CODE_FACTORY_OPEN: "false"
+      CODE_FACTORY_STATE_DIR: /data/state
+      CODE_FACTORY_RUN_DIR: /data/run
+      CODE_FACTORY_RELEASES_DIR: /data/releases
+    ports:
+      - "127.0.0.1:${CODE_FACTORY_COMPOSE_PORT:-4000}:${CODE_FACTORY_COMPOSE_PORT:-4000}"
+    volumes:
+      - state:/data
+      - repositories:/repositories
+      - credentials:/credentials:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; from urllib.request import urlopen; urlopen('http://127.0.0.1:' + os.environ['CODE_FACTORY_PORT'] + '/api/ready', timeout=2).close()"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  credentials:
+  postgres:
+  repositories:
+  state:

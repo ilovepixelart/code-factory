@@ -1,0 +1,62 @@
+{
+  "ascii": {
+    "default": "{\"at\": \"2026-10-04T10:00:00Z\", \"kind\": \"comment\", \"text\": \"hello\"}",
+    "compact": "{\"at\":\"2026-10-04T10:00:00Z\",\"kind\":\"comment\",\"text\":\"hello\"}",
+    "indent": "{\n  \"at\": \"2026-10-04T10:00:00Z\",\n  \"kind\": \"comment\",\n  \"text\": \"hello\"\n}"
+  },
+  "key-order": {
+    "default": "{\"b\": 1, \"a\": 2, \"c\": {\"z\": 1, \"y\": 2}}",
+    "compact": "{\"b\":1,\"a\":2,\"c\":{\"z\":1,\"y\":2}}",
+    "indent": "{\n  \"b\": 1,\n  \"a\": 2,\n  \"c\": {\n    \"z\": 1,\n    \"y\": 2\n  }\n}"
+  },
+  "accents": {
+    "default": "{\"text\": \"caf\\u00e9 na\\u00efve \\u00d6l\\u00e7ek\"}",
+    "compact": "{\"text\":\"caf\\u00e9 na\\u00efve \\u00d6l\\u00e7ek\"}",
+    "indent": "{\n  \"text\": \"caf\\u00e9 na\\u00efve \\u00d6l\\u00e7ek\"\n}"
+  },
+  "astral": {
+    "default": "{\"text\": \"ship \\ud83d\\ude80 now\", \"cjk\": \"\\u6f22\\u5b57\"}",
+    "compact": "{\"text\":\"ship \\ud83d\\ude80 now\",\"cjk\":\"\\u6f22\\u5b57\"}",
+    "indent": "{\n  \"text\": \"ship \\ud83d\\ude80 now\",\n  \"cjk\": \"\\u6f22\\u5b57\"\n}"
+  },
+  "controls": {
+    "default": "{\"text\": \"a\\u0000b\\u001fc\\u007fd\\ttab\\nnl\\rcr\\bbs\\fff\\\"q\\\\b/s\\u2028ls\"}",
+    "compact": "{\"text\":\"a\\u0000b\\u001fc\\u007fd\\ttab\\nnl\\rcr\\bbs\\fff\\\"q\\\\b/s\\u2028ls\"}",
+    "indent": "{\n  \"text\": \"a\\u0000b\\u001fc\\u007fd\\ttab\\nnl\\rcr\\bbs\\fff\\\"q\\\\b/s\\u2028ls\"\n}"
+  },
+  "floats": {
+    "default": "[1.0, 0.1, 1e+16, 1000000000000000.0, 1e-07, 0.0001, 1e-05, 123456789.123456, -0.0, 5e-324, 1.7976931348623157e+308, 2.5e-10, 1712345678.123456]",
+    "compact": "[1.0,0.1,1e+16,1000000000000000.0,1e-07,0.0001,1e-05,123456789.123456,-0.0,5e-324,1.7976931348623157e+308,2.5e-10,1712345678.123456]",
+    "indent": "[\n  1.0,\n  0.1,\n  1e+16,\n  1000000000000000.0,\n  1e-07,\n  0.0001,\n  1e-05,\n  123456789.123456,\n  -0.0,\n  5e-324,\n  1.7976931348623157e+308,\n  2.5e-10,\n  1712345678.123456\n]"
+  },
+  "integers": {
+    "default": "[0, -5, 9007199254740993, 18446744073709551615, -9223372036854775808]",
+    "compact": "[0,-5,9007199254740993,18446744073709551615,-9223372036854775808]",
+    "indent": "[\n  0,\n  -5,\n  9007199254740993,\n  18446744073709551615,\n  -9223372036854775808\n]"
+  },
+  "scalars": {
+    "default": "[true, false, null, \"\", 0.5]",
+    "compact": "[true,false,null,\"\",0.5]",
+    "indent": "[\n  true,\n  false,\n  null,\n  \"\",\n  0.5\n]"
+  },
+  "empty": {
+    "default": "{\"list\": [], \"object\": {}, \"nested\": [[], {}, [[]]]}",
+    "compact": "{\"list\":[],\"object\":{},\"nested\":[[],{},[[]]]}",
+    "indent": "{\n  \"list\": [],\n  \"object\": {},\n  \"nested\": [\n    [],\n    {},\n    [\n      []\n    ]\n  ]\n}"
+  },
+  "nested": {
+    "default": "{\"winner\": 2, \"attempts\": [{\"attempt\": 1, \"passed\": true, \"lines\": 10, \"cost\": 0.5}, {\"attempt\": 2, \"passed\": false, \"lines\": 3, \"cost\": null}]}",
+    "compact": "{\"winner\":2,\"attempts\":[{\"attempt\":1,\"passed\":true,\"lines\":10,\"cost\":0.5},{\"attempt\":2,\"passed\":false,\"lines\":3,\"cost\":null}]}",
+    "indent": "{\n  \"winner\": 2,\n  \"attempts\": [\n    {\n      \"attempt\": 1,\n      \"passed\": true,\n      \"lines\": 10,\n      \"cost\": 0.5\n    },\n    {\n      \"attempt\": 2,\n      \"passed\": false,\n      \"lines\": 3,\n      \"cost\": null\n    }\n  ]\n}"
+  },
+  "top-string": {
+    "default": "\"plain\"",
+    "compact": "\"plain\"",
+    "indent": "\"plain\""
+  },
+  "top-empty-list": {
+    "default": "[]",
+    "compact": "[]",
+    "indent": "[]"
+  }
+}

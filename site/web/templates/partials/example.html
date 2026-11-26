@@ -1,0 +1,26 @@
+{# The example browser: one window. The examples sit in a sidebar under the titlebar the way an
+   editor lists files, and the selected one names the window. Tabs and code are one fragment, so
+   htmx swaps both together and the server owns which is selected. #}
+{% set root = base | default('') %}
+<div id="examples-window" class="min-w-0">
+  <div class="flex items-center gap-1.5 px-3 py-2.5 border-b border-border bg-muted/60">
+    <span class="size-2.5 rounded-full bg-muted-foreground/40"></span>
+    <span class="size-2.5 rounded-full bg-muted-foreground/40"></span>
+    <span class="size-2.5 rounded-full bg-muted-foreground/40"></span>
+    <span class="ml-2 font-mono text-xs text-muted-foreground truncate">{{ examples[chosen].title }}</span>
+  </div>
+  <div class="grid sm:grid-cols-[minmax(0,200px)_minmax(0,1fr)] min-w-0">
+    <nav class="border-b sm:border-b-0 sm:border-r border-border bg-muted/30 p-2 flex sm:block gap-1 overflow-x-auto">
+      {% for key, entry in examples.items() %}
+        <button type="button"
+                hx-get="{{ root }}/examples/{{ key }}{{ '.html' if static | default(false) }}"
+                hx-target="#examples-window" hx-swap="outerHTML"
+                class="btn btn-sm w-auto sm:w-full justify-start whitespace-nowrap
+                       {{ 'bg-secondary text-secondary-foreground' if key == chosen else 'btn-ghost text-muted-foreground' }}">
+          {{ entry.title }}
+        </button>
+      {% endfor %}
+    </nav>
+    <pre class="code min-w-0 p-4 font-mono text-sm leading-relaxed overflow-x-auto"><code>{{ examples[chosen] | code | safe }}</code></pre>
+  </div>
+</div>

@@ -1,0 +1,1856 @@
+[
+  {
+    "path": "/api/tickets",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [
+          {
+            "id": "AB-1",
+            "title": "Other repository, first",
+            "type": "feature",
+            "branch": "",
+            "repository": "second",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "",
+            "labels": [],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": [
+              {
+                "id": "eeeeeeeeeeee",
+                "stage": "spec",
+                "iteration": 3
+              }
+            ]
+          },
+          {
+            "id": "AB-2",
+            "title": "Other repository, second",
+            "type": "feature",
+            "branch": "",
+            "repository": "second",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "",
+            "labels": [
+              "ui"
+            ],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": []
+          },
+          {
+            "id": "CF-1",
+            "title": "Questions waiting",
+            "type": "feature",
+            "branch": "",
+            "repository": "sample",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "- [x] one\n- [ ] two\n- [ ] three",
+            "labels": [],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "",
+            "checklist": [
+              1,
+              3
+            ],
+            "open_questions": 3,
+            "sessions": [],
+            "runs": []
+          },
+          {
+            "id": "CF-3",
+            "title": "Worked on main",
+            "type": "feature",
+            "branch": "main",
+            "repository": "sample",
+            "stage": "spec",
+            "evidence_stage": "build",
+            "description": "",
+            "labels": [
+              "agents"
+            ],
+            "priority": "low",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "2026-09-20T08:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": []
+          }
+        ],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?type=bug",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?label=ui&label=nothing",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [
+          {
+            "id": "AB-2",
+            "title": "Other repository, second",
+            "type": "feature",
+            "branch": "",
+            "repository": "second",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "",
+            "labels": [
+              "ui"
+            ],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": []
+          }
+        ],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?priority=high&priority=low",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [
+          {
+            "id": "CF-3",
+            "title": "Worked on main",
+            "type": "feature",
+            "branch": "main",
+            "repository": "sample",
+            "stage": "spec",
+            "evidence_stage": "build",
+            "description": "",
+            "labels": [
+              "agents"
+            ],
+            "priority": "low",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "2026-09-20T08:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": []
+          }
+        ],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?assignee=alex",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?repository=sample",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [
+          {
+            "id": "CF-1",
+            "title": "Questions waiting",
+            "type": "feature",
+            "branch": "",
+            "repository": "sample",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "- [x] one\n- [ ] two\n- [ ] three",
+            "labels": [],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "",
+            "checklist": [
+              1,
+              3
+            ],
+            "open_questions": 3,
+            "sessions": [],
+            "runs": []
+          },
+          {
+            "id": "CF-3",
+            "title": "Worked on main",
+            "type": "feature",
+            "branch": "main",
+            "repository": "sample",
+            "stage": "spec",
+            "evidence_stage": "build",
+            "description": "",
+            "labels": [
+              "agents"
+            ],
+            "priority": "low",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "2026-09-20T08:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": []
+          }
+        ],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?repository=other",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [],
+        "build": [],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?blocked=1",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?agent=1",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [
+          {
+            "id": "AB-1",
+            "title": "Other repository, first",
+            "type": "feature",
+            "branch": "",
+            "repository": "second",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "",
+            "labels": [],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": [
+              {
+                "id": "eeeeeeeeeeee",
+                "stage": "spec",
+                "iteration": 3
+              }
+            ]
+          }
+        ],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?questions=1",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [
+          {
+            "id": "CF-1",
+            "title": "Questions waiting",
+            "type": "feature",
+            "branch": "",
+            "repository": "sample",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "- [x] one\n- [ ] two\n- [ ] three",
+            "labels": [],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "",
+            "checklist": [
+              1,
+              3
+            ],
+            "open_questions": 3,
+            "sessions": [],
+            "runs": []
+          }
+        ],
+        "build": [],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/tickets?unknown=x&type=",
+    "status": 200,
+    "body": {
+      "columns": {
+        "spec": [
+          {
+            "id": "AB-1",
+            "title": "Other repository, first",
+            "type": "feature",
+            "branch": "",
+            "repository": "second",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "",
+            "labels": [],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": [
+              {
+                "id": "eeeeeeeeeeee",
+                "stage": "spec",
+                "iteration": 3
+              }
+            ]
+          },
+          {
+            "id": "AB-2",
+            "title": "Other repository, second",
+            "type": "feature",
+            "branch": "",
+            "repository": "second",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "",
+            "labels": [
+              "ui"
+            ],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": []
+          },
+          {
+            "id": "CF-1",
+            "title": "Questions waiting",
+            "type": "feature",
+            "branch": "",
+            "repository": "sample",
+            "stage": "spec",
+            "evidence_stage": "spec",
+            "description": "- [x] one\n- [ ] two\n- [ ] three",
+            "labels": [],
+            "priority": "",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "",
+            "checklist": [
+              1,
+              3
+            ],
+            "open_questions": 3,
+            "sessions": [],
+            "runs": []
+          },
+          {
+            "id": "CF-3",
+            "title": "Worked on main",
+            "type": "feature",
+            "branch": "main",
+            "repository": "sample",
+            "stage": "spec",
+            "evidence_stage": "build",
+            "description": "",
+            "labels": [
+              "agents"
+            ],
+            "priority": "low",
+            "assignee": "",
+            "due": "",
+            "blocked": "",
+            "archived": false,
+            "rank": 0,
+            "stage_since": "2026-09-20T08:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [],
+            "runs": []
+          }
+        ],
+        "build": [
+          {
+            "id": "CF-2",
+            "title": "A bug in flight",
+            "type": "bug",
+            "branch": "feat/CF-2",
+            "repository": "sample",
+            "stage": "build",
+            "evidence_stage": "build",
+            "description": "A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long enough to be cut. A description long e…",
+            "labels": [
+              "ui",
+              "agents"
+            ],
+            "priority": "high",
+            "assignee": "alex",
+            "due": "2026-10-10",
+            "blocked": "waiting on design",
+            "archived": false,
+            "rank": 1,
+            "stage_since": "2026-10-01T09:00:00Z",
+            "checklist": [
+              0,
+              0
+            ],
+            "open_questions": 0,
+            "sessions": [
+              {
+                "session_id": "s-rest",
+                "state": "idle"
+              }
+            ],
+            "runs": [
+              {
+                "id": "aaaaaaaaaaaa",
+                "stage": "build",
+                "iteration": 2
+              }
+            ]
+          }
+        ],
+        "review": [],
+        "merged": []
+      },
+      "problems": [
+        {
+          "repository": "sample",
+          "file": ".code-factory/tickets/broken/ticket.md",
+          "path": "{root}/.code-factory/tickets/broken/ticket.md",
+          "reason": "no front matter"
+        }
+      ]
+    }
+  },
+  {
+    "path": "/api/sessions",
+    "status": 200,
+    "body": [
+      {
+        "session_id": "s-block",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "blocked",
+        "last_event_at": 1790000821.0,
+        "age_seconds": 179.0,
+        "stale": false,
+        "current_action": {
+          "tool": "Edit",
+          "summary": "/x/a.py",
+          "started_at": 1790000820.0,
+          "elapsed_seconds": 180.0,
+          "tool_use_id": "t3"
+        },
+        "subagents": [],
+        "last_prompt": "Edit it",
+        "turn_started_at": 1790000810.0,
+        "turn_tool_calls": 1,
+        "doing": "waiting on you",
+        "doing_since": null
+      },
+      {
+        "session_id": "s-block2",
+        "cwd": "{root}-detached",
+        "repository": "sample",
+        "branch": "dcf92c3f",
+        "state": "blocked",
+        "last_event_at": 1790000871.0,
+        "age_seconds": 129.0,
+        "stale": false,
+        "current_action": {
+          "tool": "Bash",
+          "summary": "make",
+          "started_at": 1790000870.0,
+          "elapsed_seconds": 130.0,
+          "tool_use_id": "t10"
+        },
+        "subagents": [],
+        "last_prompt": "Run it",
+        "turn_started_at": 1790000860.0,
+        "turn_tool_calls": 1,
+        "doing": "waiting on you",
+        "doing_since": null
+      },
+      {
+        "session_id": "zz",
+        "cwd": "{root}/sub",
+        "repository": "sample",
+        "branch": "main",
+        "state": "working",
+        "last_event_at": 1790000990.5,
+        "age_seconds": 9.5,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "",
+        "turn_started_at": null,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      },
+      {
+        "session_id": "",
+        "cwd": "",
+        "repository": "",
+        "branch": "",
+        "state": "working",
+        "last_event_at": 1790000990.0,
+        "age_seconds": 10.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "",
+        "turn_started_at": null,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      },
+      {
+        "session_id": "s-sub",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "working",
+        "last_event_at": 1790000980.0,
+        "age_seconds": 20.0,
+        "stale": false,
+        "current_action": {
+          "tool": "Task",
+          "summary": "Plan it",
+          "started_at": 1790000980.0,
+          "elapsed_seconds": 20.0,
+          "tool_use_id": "t8"
+        },
+        "subagents": [
+          {
+            "agent_id": "a1",
+            "agent_type": "Explore",
+            "running": false,
+            "stale": false,
+            "current_action": null,
+            "last_event_at": 1790000913.0
+          },
+          {
+            "agent_id": "a2",
+            "agent_type": "Plan",
+            "running": true,
+            "stale": false,
+            "current_action": {
+              "tool": "Write",
+              "summary": "/very/long…",
+              "started_at": 1790000941.0,
+              "elapsed_seconds": 59.0,
+              "tool_use_id": "t7"
+            },
+            "last_event_at": 1790000941.0
+          }
+        ],
+        "last_prompt": "Explore",
+        "turn_started_at": 1790000905.0,
+        "turn_tool_calls": 3,
+        "doing": "Task Plan it",
+        "doing_since": null
+      },
+      {
+        "session_id": "s-work",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "working",
+        "last_event_at": 1790000970.0,
+        "age_seconds": 30.0,
+        "stale": false,
+        "current_action": {
+          "tool": "Read",
+          "summary": "/x/app.py",
+          "started_at": 1790000970.0,
+          "elapsed_seconds": 30.0,
+          "tool_use_id": "t2"
+        },
+        "subagents": [],
+        "last_prompt": "Fix the bug",
+        "turn_started_at": 1790000710.0,
+        "turn_tool_calls": 2,
+        "doing": "Read /x/app.py",
+        "doing_since": null
+      },
+      {
+        "session_id": "s-rest",
+        "cwd": "{root}-wt",
+        "repository": "sample",
+        "branch": "feat/CF-2",
+        "state": "idle",
+        "last_event_at": 1790000630.0,
+        "age_seconds": 370.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "Rest",
+        "turn_started_at": 1790000610.0,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      },
+      {
+        "session_id": "s-idle",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "idle",
+        "last_event_at": 1790000150.0,
+        "age_seconds": 850.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "No, do not",
+        "turn_started_at": 1790000140.0,
+        "turn_tool_calls": 0,
+        "doing": "last call: Bash ls",
+        "doing_since": 1790000131.0
+      },
+      {
+        "session_id": "s-stale",
+        "cwd": "/nowhere/place",
+        "repository": "place",
+        "branch": "",
+        "state": "ended",
+        "last_event_at": 1789997010.0,
+        "age_seconds": 3990.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "Long job",
+        "turn_started_at": 1789997010.0,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      },
+      {
+        "session_id": "s-end",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "ended",
+        "last_event_at": 1789996020.0,
+        "age_seconds": 4980.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "Bye",
+        "turn_started_at": 1789996010.0,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      }
+    ]
+  },
+  {
+    "path": "/api/sessions/s-work/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "s-work",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "working",
+        "last_event_at": 1790000970.0,
+        "age_seconds": 30.0,
+        "stale": false,
+        "current_action": {
+          "tool": "Read",
+          "summary": "/x/app.py",
+          "started_at": 1790000970.0,
+          "elapsed_seconds": 30.0,
+          "tool_use_id": "t2"
+        },
+        "subagents": [],
+        "last_prompt": "Fix the bug",
+        "turn_started_at": 1790000710.0,
+        "turn_tool_calls": 2,
+        "doing": "Read /x/app.py",
+        "doing_since": null
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 38,
+          "at": 1790000700.0,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "startup",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "prompt",
+          "seq": 39,
+          "at": 1790000710.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "Fix the bug",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "tool",
+          "seq": 40,
+          "at": 1790000720.0,
+          "agent_id": null,
+          "title": "Bash",
+          "detail": "uv run pytest",
+          "duration_seconds": 1.2,
+          "status": "done"
+        },
+        {
+          "kind": "tool",
+          "seq": 42,
+          "at": 1790000970.0,
+          "agent_id": null,
+          "title": "Read",
+          "detail": "/x/app.py",
+          "duration_seconds": null,
+          "status": "running"
+        }
+      ],
+      "total": 4,
+      "earlier_prompts": 0
+    }
+  },
+  {
+    "path": "/api/sessions/s-block/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "s-block",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "blocked",
+        "last_event_at": 1790000821.0,
+        "age_seconds": 179.0,
+        "stale": false,
+        "current_action": {
+          "tool": "Edit",
+          "summary": "/x/a.py",
+          "started_at": 1790000820.0,
+          "elapsed_seconds": 180.0,
+          "tool_use_id": "t3"
+        },
+        "subagents": [],
+        "last_prompt": "Edit it",
+        "turn_started_at": 1790000810.0,
+        "turn_tool_calls": 1,
+        "doing": "waiting on you",
+        "doing_since": null
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 2,
+          "at": 1790000800.0,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "startup",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "prompt",
+          "seq": 3,
+          "at": 1790000810.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "Edit it",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "tool",
+          "seq": 4,
+          "at": 1790000820.0,
+          "agent_id": null,
+          "title": "Edit",
+          "detail": "/x/a.py",
+          "duration_seconds": null,
+          "status": "waiting"
+        }
+      ],
+      "total": 3,
+      "earlier_prompts": 0
+    }
+  },
+  {
+    "path": "/api/sessions/s-idle/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "s-idle",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "idle",
+        "last_event_at": 1790000150.0,
+        "age_seconds": 850.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "No, do not",
+        "turn_started_at": 1790000140.0,
+        "turn_tool_calls": 0,
+        "doing": "last call: Bash ls",
+        "doing_since": 1790000131.0
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 13,
+          "at": 1790000100.0,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "startup",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "prompt",
+          "seq": 14,
+          "at": 1790000110.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "Look",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "tool",
+          "seq": 15,
+          "at": 1790000120.0,
+          "agent_id": null,
+          "title": "Grep",
+          "detail": "TODO",
+          "duration_seconds": 1.0,
+          "status": "failed"
+        },
+        {
+          "kind": "notification",
+          "seq": 17,
+          "at": 1790000122.0,
+          "agent_id": null,
+          "title": "idle_prompt",
+          "detail": "Waiting",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "stop",
+          "seq": 18,
+          "at": 1790000130.0,
+          "agent_id": null,
+          "title": "Turn ended",
+          "detail": "Done looking",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "tool",
+          "seq": 19,
+          "at": 1790000131.0,
+          "agent_id": null,
+          "title": "Bash",
+          "detail": "ls",
+          "duration_seconds": null,
+          "status": "denied"
+        },
+        {
+          "kind": "prompt",
+          "seq": 21,
+          "at": 1790000140.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "No, do not",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "stop",
+          "seq": 22,
+          "at": 1790000150.0,
+          "agent_id": null,
+          "title": "Turn ended",
+          "detail": "",
+          "duration_seconds": null,
+          "status": ""
+        }
+      ],
+      "total": 8,
+      "earlier_prompts": 0
+    }
+  },
+  {
+    "path": "/api/sessions/s-end/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "s-end",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "ended",
+        "last_event_at": 1789996020.0,
+        "age_seconds": 4980.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "Bye",
+        "turn_started_at": 1789996010.0,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 10,
+          "at": 1789996000.0,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "startup",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "prompt",
+          "seq": 11,
+          "at": 1789996010.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "Bye",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "session_end",
+          "seq": 12,
+          "at": 1789996020.0,
+          "agent_id": null,
+          "title": "Session ended",
+          "detail": "logout",
+          "duration_seconds": null,
+          "status": ""
+        }
+      ],
+      "total": 3,
+      "earlier_prompts": 0
+    }
+  },
+  {
+    "path": "/api/sessions/s-stale/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "s-stale",
+        "cwd": "/nowhere/place",
+        "repository": "place",
+        "branch": "",
+        "state": "ended",
+        "last_event_at": 1789997010.0,
+        "age_seconds": 3990.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "Long job",
+        "turn_started_at": 1789997010.0,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 27,
+          "at": 1789997000.0,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "resume",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "prompt",
+          "seq": 28,
+          "at": 1789997010.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "Long job",
+          "duration_seconds": null,
+          "status": ""
+        }
+      ],
+      "total": 2,
+      "earlier_prompts": 0
+    }
+  },
+  {
+    "path": "/api/sessions/s-sub/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "s-sub",
+        "cwd": "{root}",
+        "repository": "sample",
+        "branch": "main",
+        "state": "working",
+        "last_event_at": 1790000980.0,
+        "age_seconds": 20.0,
+        "stale": false,
+        "current_action": {
+          "tool": "Task",
+          "summary": "Plan it",
+          "started_at": 1790000980.0,
+          "elapsed_seconds": 20.0,
+          "tool_use_id": "t8"
+        },
+        "subagents": [
+          {
+            "agent_id": "a1",
+            "agent_type": "Explore",
+            "running": false,
+            "stale": false,
+            "current_action": null,
+            "last_event_at": 1790000913.0
+          },
+          {
+            "agent_id": "a2",
+            "agent_type": "Plan",
+            "running": true,
+            "stale": false,
+            "current_action": {
+              "tool": "Write",
+              "summary": "/very/long…",
+              "started_at": 1790000941.0,
+              "elapsed_seconds": 59.0,
+              "tool_use_id": "t7"
+            },
+            "last_event_at": 1790000941.0
+          }
+        ],
+        "last_prompt": "Explore",
+        "turn_started_at": 1790000905.0,
+        "turn_tool_calls": 3,
+        "doing": "Task Plan it",
+        "doing_since": null
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 29,
+          "at": 1790000900.0,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "startup",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "prompt",
+          "seq": 30,
+          "at": 1790000905.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "Explore",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "subagent_start",
+          "seq": 31,
+          "at": 1790000910.0,
+          "agent_id": "a1",
+          "title": "Explore",
+          "detail": "",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "tool",
+          "seq": 32,
+          "at": 1790000911.0,
+          "agent_id": "a1",
+          "title": "Glob",
+          "detail": "**/*.py",
+          "duration_seconds": 1.0,
+          "status": "done"
+        },
+        {
+          "kind": "subagent_stop",
+          "seq": 34,
+          "at": 1790000913.0,
+          "agent_id": "a1",
+          "title": "Explore",
+          "detail": "",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "subagent_start",
+          "seq": 35,
+          "at": 1790000940.0,
+          "agent_id": "a2",
+          "title": "Plan",
+          "detail": "",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "tool",
+          "seq": 36,
+          "at": 1790000941.0,
+          "agent_id": "a2",
+          "title": "Write",
+          "detail": "/very/long…",
+          "duration_seconds": null,
+          "status": "running"
+        },
+        {
+          "kind": "tool",
+          "seq": 37,
+          "at": 1790000980.0,
+          "agent_id": null,
+          "title": "Task",
+          "detail": "Plan it",
+          "duration_seconds": null,
+          "status": "running"
+        }
+      ],
+      "total": 8,
+      "earlier_prompts": 0
+    }
+  },
+  {
+    "path": "/api/sessions/zz/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "zz",
+        "cwd": "{root}/sub",
+        "repository": "sample",
+        "branch": "main",
+        "state": "working",
+        "last_event_at": 1790000990.5,
+        "age_seconds": 9.5,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "",
+        "turn_started_at": null,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 43,
+          "at": 1790000990.5,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "",
+          "duration_seconds": null,
+          "status": ""
+        }
+      ],
+      "total": 1,
+      "earlier_prompts": 0
+    }
+  },
+  {
+    "path": "/api/sessions/nope/timeline",
+    "status": 404,
+    "body": {
+      "error": "no such session"
+    }
+  },
+  {
+    "path": "/api/stream?after=x",
+    "status": 400,
+    "body": "after must be an integer"
+  },
+  {
+    "path": "/api/sessions/s-rest/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "s-rest",
+        "cwd": "{root}-wt",
+        "repository": "sample",
+        "branch": "feat/CF-2",
+        "state": "idle",
+        "last_event_at": 1790000630.0,
+        "age_seconds": 370.0,
+        "stale": false,
+        "current_action": null,
+        "subagents": [],
+        "last_prompt": "Rest",
+        "turn_started_at": 1790000610.0,
+        "turn_tool_calls": 0,
+        "doing": "",
+        "doing_since": null
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 23,
+          "at": 1790000600.0,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "startup",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "prompt",
+          "seq": 24,
+          "at": 1790000610.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "Rest",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "stop",
+          "seq": 25,
+          "at": 1790000620.0,
+          "agent_id": null,
+          "title": "Turn ended",
+          "detail": "",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "notification",
+          "seq": 26,
+          "at": 1790000630.0,
+          "agent_id": null,
+          "title": "idle_prompt",
+          "detail": "Still here",
+          "duration_seconds": null,
+          "status": ""
+        }
+      ],
+      "total": 4,
+      "earlier_prompts": 0
+    }
+  },
+  {
+    "path": "/api/sessions/s-block2/timeline",
+    "status": 200,
+    "body": {
+      "session": {
+        "session_id": "s-block2",
+        "cwd": "{root}-detached",
+        "repository": "sample",
+        "branch": "dcf92c3f",
+        "state": "blocked",
+        "last_event_at": 1790000871.0,
+        "age_seconds": 129.0,
+        "stale": false,
+        "current_action": {
+          "tool": "Bash",
+          "summary": "make",
+          "started_at": 1790000870.0,
+          "elapsed_seconds": 130.0,
+          "tool_use_id": "t10"
+        },
+        "subagents": [],
+        "last_prompt": "Run it",
+        "turn_started_at": 1790000860.0,
+        "turn_tool_calls": 1,
+        "doing": "waiting on you",
+        "doing_since": null
+      },
+      "entries": [
+        {
+          "kind": "session_start",
+          "seq": 6,
+          "at": 1790000850.0,
+          "agent_id": null,
+          "title": "Session started",
+          "detail": "startup",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "prompt",
+          "seq": 7,
+          "at": 1790000860.0,
+          "agent_id": null,
+          "title": "Prompt",
+          "detail": "Run it",
+          "duration_seconds": null,
+          "status": ""
+        },
+        {
+          "kind": "tool",
+          "seq": 8,
+          "at": 1790000870.0,
+          "agent_id": null,
+          "title": "Bash",
+          "detail": "make",
+          "duration_seconds": null,
+          "status": "waiting"
+        }
+      ],
+      "total": 3,
+      "earlier_prompts": 0
+    }
+  }
+]

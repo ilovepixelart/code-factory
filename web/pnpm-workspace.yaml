@@ -1,0 +1,18 @@
+# A package version newer than 14 days is refused, the repository's rule for new dependencies
+#: new packages are how supply-chain attacks arrive.
+minimumReleaseAge: 20160
+# Vite can pick up Stylus as an optional peer. The board uses CSS and Tailwind.
+overrides:
+  stylus: '-'
+  js-beautify>glob: 14.0.2
+  'minimatch@>=7 <11.0.1': 11.0.1
+# No dependency runs an install script. vue-demi's (through @tanstack/vue-query) only switches its
+# files between Vue 2 and 3, and the files it ships already target Vue 3.
+allowBuilds:
+  vue-demi: false
+# The board runs the checks in a Linux container (CF-1222), so node_modules also holds the
+# Linux bindings of this machine's processor.
+supportedArchitectures:
+  os: [current, linux]
+  cpu: [current]
+  libc: [current, glibc]

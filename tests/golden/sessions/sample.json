@@ -1,0 +1,353 @@
+{
+ "now": 1790001000.0,
+ "spool": {
+  "s-work.jsonl": [
+   {
+    "session_id": "s-work",
+    "hook_event_name": "SessionStart",
+    "cwd": "{root}",
+    "source": "startup",
+    "transcript_path": "{home}/transcripts/s-work.jsonl",
+    "_captured_at": 1790000700.0
+   },
+   {
+    "session_id": "s-work",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Fix the bug",
+    "cwd": "{root}",
+    "_captured_at": 1790000710.0
+   },
+   {
+    "session_id": "s-work",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_use_id": "t1",
+    "tool_input": {
+     "command": "uv run pytest",
+     "description": "tests"
+    },
+    "_captured_at": 1790000720.0
+   },
+   {
+    "session_id": "s-work",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Bash",
+    "tool_use_id": "t1",
+    "duration_ms": 1200,
+    "_captured_at": 1790000730.0
+   },
+   {
+    "session_id": "s-work",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Read",
+    "tool_use_id": "t2",
+    "tool_input": {
+     "file_path": "/x/app.py"
+    },
+    "_captured_at": 1790000970.0
+   }
+  ],
+  "s-block.jsonl": [
+   {
+    "session_id": "s-block",
+    "hook_event_name": "SessionStart",
+    "cwd": "{root}",
+    "source": "startup",
+    "transcript_path": "{home}/transcripts/s-block.jsonl",
+    "_captured_at": 1790000800.0
+   },
+   {
+    "session_id": "s-block",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Edit it",
+    "_captured_at": 1790000810.0
+   },
+   {
+    "session_id": "s-block",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Edit",
+    "tool_use_id": "t3",
+    "tool_input": {
+     "file_path": "/x/a.py"
+    },
+    "_captured_at": 1790000820.0
+   },
+   {
+    "session_id": "s-block",
+    "hook_event_name": "PermissionRequest",
+    "tool_name": "Edit",
+    "_captured_at": 1790000821.0
+   }
+  ],
+  "s-idle.jsonl": [
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "SessionStart",
+    "cwd": "{root}",
+    "source": "startup",
+    "transcript_path": "{home}/transcripts/s-idle.jsonl",
+    "_captured_at": 1790000100.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Look",
+    "_captured_at": 1790000110.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Grep",
+    "tool_use_id": "t4",
+    "tool_input": {
+     "pattern": "TODO"
+    },
+    "_captured_at": 1790000120.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "PostToolUseFailure",
+    "tool_name": "Grep",
+    "tool_use_id": "t4",
+    "_captured_at": 1790000121.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "Notification",
+    "notification_type": "idle_prompt",
+    "message": "Waiting",
+    "_captured_at": 1790000122.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "Stop",
+    "last_assistant_message": "Done looking",
+    "_captured_at": 1790000130.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_use_id": "t5",
+    "tool_input": {
+     "command": "ls"
+    },
+    "_captured_at": 1790000131.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "PermissionRequest",
+    "tool_name": "Bash",
+    "_captured_at": 1790000132.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "No, do not",
+    "_captured_at": 1790000140.0
+   },
+   {
+    "session_id": "s-idle",
+    "hook_event_name": "Stop",
+    "_captured_at": 1790000150.0
+   }
+  ],
+  "s-end.jsonl": [
+   {
+    "session_id": "s-end",
+    "hook_event_name": "SessionStart",
+    "cwd": "{root}",
+    "source": "startup",
+    "transcript_path": "{home}/transcripts/s-end.jsonl",
+    "_captured_at": 1789996000.0
+   },
+   {
+    "session_id": "s-end",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Bye",
+    "_captured_at": 1789996010.0
+   },
+   {
+    "session_id": "s-end",
+    "hook_event_name": "SessionEnd",
+    "reason": "logout",
+    "_captured_at": 1789996020.0
+   }
+  ],
+  "s-stale.jsonl": [
+   {
+    "session_id": "s-stale",
+    "hook_event_name": "SessionStart",
+    "cwd": "/nowhere/place",
+    "source": "resume",
+    "_captured_at": 1789997000.0
+   },
+   {
+    "session_id": "s-stale",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Long job",
+    "_captured_at": 1789997010.0
+   }
+  ],
+  "s-sub.jsonl": [
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "SessionStart",
+    "cwd": "{root}",
+    "source": "startup",
+    "transcript_path": "{home}/transcripts/s-sub.jsonl",
+    "_captured_at": 1790000900.0
+   },
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Explore",
+    "_captured_at": 1790000905.0
+   },
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "SubagentStart",
+    "agent_id": "a1",
+    "agent_type": "Explore",
+    "_captured_at": 1790000910.0
+   },
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "PreToolUse",
+    "agent_id": "a1",
+    "tool_name": "Glob",
+    "tool_use_id": "t6",
+    "tool_input": {
+     "pattern": "**/*.py"
+    },
+    "_captured_at": 1790000911.0
+   },
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "PostToolUse",
+    "agent_id": "a1",
+    "tool_name": "Glob",
+    "tool_use_id": "t6",
+    "_captured_at": 1790000912.0
+   },
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "SubagentStop",
+    "agent_id": "a1",
+    "agent_type": "Explore",
+    "_captured_at": 1790000913.0
+   },
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "SubagentStart",
+    "agent_id": "a2",
+    "agent_type": "Plan",
+    "_captured_at": 1790000940.0
+   },
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "PreToolUse",
+    "agent_id": "a2",
+    "tool_name": "Write",
+    "tool_use_id": "t7",
+    "tool_input": {
+     "content": "x",
+     "file_path": {
+      "_trimmed_chars": 4000,
+      "head": "/very/long"
+     }
+    },
+    "_captured_at": 1790000941.0
+   },
+   {
+    "session_id": "s-sub",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Task",
+    "tool_use_id": "t8",
+    "tool_input": {
+     "prompt": "Plan it",
+     "description": ""
+    },
+    "_captured_at": 1790000980.0
+   }
+  ],
+  "_unidentified.jsonl": [
+   {
+    "hook_event_name": "Notification",
+    "message": "no session",
+    "_captured_at": 1790000990.0
+   }
+  ],
+  "s-rest.jsonl": [
+   {
+    "session_id": "s-rest",
+    "hook_event_name": "SessionStart",
+    "cwd": "{root}-wt",
+    "source": "startup",
+    "agent_id": null,
+    "_captured_at": 1790000600.0
+   },
+   {
+    "session_id": "s-rest",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Rest",
+    "_captured_at": 1790000610.0
+   },
+   {
+    "session_id": "s-rest",
+    "hook_event_name": "Stop",
+    "_captured_at": 1790000620.0
+   },
+   {
+    "session_id": "s-rest",
+    "hook_event_name": "Notification",
+    "notification_type": "idle_prompt",
+    "message": "Still here",
+    "_captured_at": 1790000630.0
+   }
+  ],
+  "s-block2.jsonl": [
+   {
+    "session_id": "s-block2",
+    "hook_event_name": "SessionStart",
+    "cwd": "{root}-detached",
+    "source": "startup",
+    "_captured_at": 1790000850.0
+   },
+   {
+    "session_id": "s-block2",
+    "hook_event_name": "UserPromptSubmit",
+    "prompt": "Run it",
+    "_captured_at": 1790000860.0
+   },
+   {
+    "session_id": "s-block2",
+    "hook_event_name": "PreToolUse",
+    "tool_name": "Bash",
+    "tool_use_id": "t10",
+    "tool_input": {
+     "command": "make"
+    },
+    "_captured_at": 1790000870.0
+   },
+   {
+    "session_id": "s-block2",
+    "hook_event_name": "PermissionRequest",
+    "tool_name": "Bash",
+    "_captured_at": 1790000871.0
+   }
+  ]
+ },
+ "raw": {
+  "s-work.jsonl": "{\"session_id\": \"s-work\", \"hook_event_name\": \"Stop\", \"_captured_at\": 1.0",
+  "zz-bad.jsonl": "not json at all\n[1, 2, 3]\n{\"session_id\": \"zz\", \"hook_event_name\": \"SessionStart\", \"cwd\": \"{root}/sub\", \"_captured_at\": 1790000990.5}\n"
+ },
+ "transcripts": {
+  "s-work.jsonl": "{\"type\": \"assistant\", \"message\": {\"id\": \"m1\", \"model\": \"claude\", \"usage\": {\"input_tokens\": 10, \"output_tokens\": 200, \"cache_read_input_tokens\": 1000, \"cache_creation_input_tokens\": 50}}}\n{\"type\": \"assistant\", \"message\": {\"id\": \"m1\", \"model\": \"claude\", \"usage\": {\"input_tokens\": 10, \"output_tokens\": 200, \"cache_read_input_tokens\": 1000, \"cache_creation_input_tokens\": 50}}}\n{\"type\": \"assistant\", \"message\": {\"id\": \"m2\", \"model\": \"claude\", \"usage\": {\"input_tokens\": 5, \"output_tokens\": 1300, \"cache_read_input_tokens\": 0, \"cache_creation_input_tokens\": 0}}}\n{\"type\": \"assistant\", \"message\": {\"id\": \"m3\", \"model\": \"<synthetic>\", \"usage\": {\"input_tokens\": 999, \"output_tokens\": 999, \"cache_read_input_tokens\": 0, \"cache_creation_input_tokens\": 0}}}\n{\"type\": \"assistant\", \"message\": {\"model\": \"claude\", \"usage\": {\"input_tokens\": 7}}}\n{\"type\": \"cost-state\", \"totalCostUSD\": 1.2, \"startTime\": 1790000000000, \"totalDuration\": 60000, \"hasUnknownModelCost\": false}\nnot json at all\n{\"type\": \"cost-state\", \"totalCostUSD\": 1.5, \"startTime\": 1790000100000, \"totalDuration\": 1500, \"hasUnknownModelCost\": true}\n[1, 2]\n{\"type\": \"assistant\", \"message\": {\"id\": \"m4\", \"model\": \"claude\", \"usage\": {\"input_tokens\": \"12\", \"output_tokens\": true, \"cache_read_input_tokens\": 3.5}}}\n",
+  "s-block.jsonl": "{\"type\": \"cost-state\", \"totalCostUSD\": 2, \"startTime\": 1790000500000}\n{\"type\": \"assistant\", \"message\": {\"id\": \"b1\", \"model\": \"claude\", \"usage\": {\"input_tokens\": 1, \"output_tokens\": 2, \"cache_read_input_tokens\": 0, \"cache_creation_input_tokens\": 0}}}",
+  "s-sub.jsonl": "{\"type\": \"assistant\", \"message\": {\"id\": \"p1\", \"model\": \"claude\", \"usage\": {\"input_tokens\": 100, \"output_tokens\": 1000, \"cache_read_input_tokens\": 0, \"cache_creation_input_tokens\": 0}}}\n",
+  "s-sub/subagents/a1.jsonl": "{\"type\": \"assistant\", \"message\": {\"id\": \"q1\", \"model\": \"claude\", \"usage\": {\"input_tokens\": 1, \"output_tokens\": 49500, \"cache_read_input_tokens\": 950000, \"cache_creation_input_tokens\": 0}}}\n",
+  "s-sub/subagents/a2.jsonl": "{\"type\": \"cost-state\", \"totalCostUSD\": 9.9}\n{\"type\": \"assistant\", \"message\": {\"id\": \"q2\", \"model\": \"claude\", \"usage\": {\"input_tokens\": 0, \"output_tokens\": 500, \"cache_read_input_tokens\": 0, \"cache_creation_input_tokens\": 0}}}\n",
+  "s-sub/subagents/notes.txt": "{\"type\": \"assistant\", \"message\": {\"id\": \"n1\", \"model\": \"claude\", \"usage\": {\"output_tokens\": 777}}}\n"
+ }
+}

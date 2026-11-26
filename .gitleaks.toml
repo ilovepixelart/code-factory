@@ -1,0 +1,36 @@
+[extend]
+useDefault = true
+
+# Exact synthetic values used by redaction, provider, and Git tests. Both the value
+# and one of the listed fixture paths must match.
+
+[[rules]]
+id = "aws-access-token"
+
+[[rules.allowlists]]
+condition = "AND"
+regexes = ["^[A]KIAABCDEFGHIJKLMNOP$"]
+paths = ["^tests/golden/sessions/capture_cases\\.json$", "^tests/platform/text/test_masking\\.py$", "^tests/sessions/test_capture_record\\.py$", "^tests/sessions/test_capture_script\\.py$"]
+
+[[rules.allowlists]]
+condition = "AND"
+regexes = ["^[A]SIAABCDEFGHIJKLMNOP$"]
+paths = ["^tests/platform/text/test_screen\\.py$"]
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+condition = "AND"
+regexes = ["^[0]123456789abcdef0123456789abcdef$"]
+paths = ["^tests/git/test_git_tree_rules\\.py$"]
+
+[[rules.allowlists]]
+condition = "AND"
+regexes = ["^[s]k\\-or\\-v1\\-1234567890$"]
+paths = ["^tests/broker/test_broker_run_key_rules\\.py$"]
+
+[[rules.allowlists]]
+condition = "AND"
+regexes = ["^[s]k\\-or\\-v1\\-runkey\\-1234$"]
+paths = ["^tests/broker/test_broker_provider_adapter\\.py$"]

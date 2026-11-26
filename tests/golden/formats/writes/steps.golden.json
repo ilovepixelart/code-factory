@@ -1,0 +1,552 @@
+[
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-5/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"created\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"type\": \"bug\"}\n",
+      "{root}/CF-5/ticket.md": "---\nid: CF-5\ntitle: New thing\ntype: bug\nlabels: a, b\npriority: high\ndue: 2026-11-01\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-6/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"created\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"type\": \"feature\"}\n",
+      "{root}/CF-6/ticket.md": "---\nid: CF-6\ntitle: Plain\ntype: feature\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "unknown repository",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "a new ticket starts in Spec",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "unknown type epic",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "unknown priority soon",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "bad due date 2026-13-01",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nrank: 2\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nrank: 2\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "budget must be a number of dollars",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "budget must be a number of dollars",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nrank: 2\nbudget: 0\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nrank: 2\nbudget: 1000\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "budget must be a number of dollars",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:eb10378f67c72f58bf145e31f901bc26972fd8501da553bb0f2df47166a65586\", \"name\": \"budget\", \"value\": \"3.5\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nrank: 2\nbudget: 3.5\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "CF-2 cannot link to itself",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "no ticket CF-9",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "parent CF-3 would make a loop",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:eb10378f67c72f58bf145e31f901bc26972fd8501da553bb0f2df47166a65586\", \"name\": \"budget\", \"value\": \"3.5\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:80b70268e2728bd29fcf25de1ae2fff3d35176212cbb7baf8cb28019f8464129\", \"name\": \"blocked_by\", \"value\": \"CF-1, CF-3\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nrank: 2\nblocked_by: CF-1, CF-3\nbudget: 3.5\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "unknown priority soon",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "bad archived maybe",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "CF-2 moves one column at a time: Build is next",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:eb10378f67c72f58bf145e31f901bc26972fd8501da553bb0f2df47166a65586\", \"name\": \"budget\", \"value\": \"3.5\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:80b70268e2728bd29fcf25de1ae2fff3d35176212cbb7baf8cb28019f8464129\", \"name\": \"blocked_by\", \"value\": \"CF-1, CF-3\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:4c4d1e6217cc7b889c8c0de59197c7424d43714d904ddd379b61b69525050219\", \"name\": \"labels\", \"value\": \"x, y\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:af14f3fefc9f315cc608e991a3b946fe124cfd3c68cd50877664f3cb4fc2a00d\", \"from\": \"\", \"to\": \"spec\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nstage: spec\nlabels: x, y\nrank: 2\nstage_since: 2026-09-21T14:30:00Z\nblocked_by: CF-1, CF-3\nbudget: 3.5\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Archived CF-2",
+    "undo": true,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:eb10378f67c72f58bf145e31f901bc26972fd8501da553bb0f2df47166a65586\", \"name\": \"budget\", \"value\": \"3.5\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:80b70268e2728bd29fcf25de1ae2fff3d35176212cbb7baf8cb28019f8464129\", \"name\": \"blocked_by\", \"value\": \"CF-1, CF-3\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:4c4d1e6217cc7b889c8c0de59197c7424d43714d904ddd379b61b69525050219\", \"name\": \"labels\", \"value\": \"x, y\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:af14f3fefc9f315cc608e991a3b946fe124cfd3c68cd50877664f3cb4fc2a00d\", \"from\": \"\", \"to\": \"spec\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"archived\", \"prev\": \"v1:fd3461a8fc6ac3d5366364f74fc5ac13df5101cb918103ae3bc41b46a39d7962\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nstage: spec\nlabels: x, y\narchived: true\nrank: 2\nstage_since: 2026-09-21T14:30:00Z\nblocked_by: CF-1, CF-3\nbudget: 3.5\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:eb10378f67c72f58bf145e31f901bc26972fd8501da553bb0f2df47166a65586\", \"name\": \"budget\", \"value\": \"3.5\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:80b70268e2728bd29fcf25de1ae2fff3d35176212cbb7baf8cb28019f8464129\", \"name\": \"blocked_by\", \"value\": \"CF-1, CF-3\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:4c4d1e6217cc7b889c8c0de59197c7424d43714d904ddd379b61b69525050219\", \"name\": \"labels\", \"value\": \"x, y\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:af14f3fefc9f315cc608e991a3b946fe124cfd3c68cd50877664f3cb4fc2a00d\", \"from\": \"\", \"to\": \"spec\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"archived\", \"prev\": \"v1:fd3461a8fc6ac3d5366364f74fc5ac13df5101cb918103ae3bc41b46a39d7962\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"restored\", \"prev\": \"v1:ff644e479d8b4539cd06aed626781dd9705f9727cd2458a20686cbcf3c1c3948\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nstage: spec\nlabels: x, y\nrank: 2\nstage_since: 2026-09-21T14:30:00Z\nblocked_by: CF-1, CF-3\nbudget: 3.5\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 410,
+    "error": "nothing to undo any more",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 404,
+    "error": "no such ticket",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 404,
+    "error": "no such ticket",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Moved CF-3 to Spec",
+    "undo": true,
+    "changed": {
+      "{root}/CF-3/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"from\": \"build\", \"to\": \"spec\"}\n",
+      "{root}/CF-3/ticket.md": "---\nid: CF-3\ntitle: Declared\ntype: feature\nstage: spec\nrank: 1\nstage_since: 2026-09-21T14:30:00Z\nparent: CF-1\n---\n",
+      "{second}/CF-1/ticket.md": "---\nid: CF-1\ntitle: Elsewhere\ntype: feature\nlabels: ops\npriority: medium\nrank: 1\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-3/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"from\": \"build\", \"to\": \"spec\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:f19931d1a855162b1799f2addbee95a7bd169b5b61db60c4179e425e3eb9d6aa\", \"from\": \"spec\", \"to\": \"build\"}\n",
+      "{root}/CF-3/ticket.md": "---\nid: CF-3\ntitle: Declared\ntype: feature\nstage: build\nrank: 1\nstage_since: 2026-09-21T14:30:00Z\nparent: CF-1\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nstage: spec\nlabels: x, y\nrank: 1\nstage_since: 2026-09-21T14:30:00Z\nblocked_by: CF-1, CF-3\nbudget: 3.5\n---\nA longer story.\n",
+      "{root}/CF-3/ticket.md": "---\nid: CF-3\ntitle: Declared\ntype: feature\nstage: build\nrank: 2\nstage_since: 2026-09-21T14:30:00Z\nparent: CF-1\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-5/ticket.md": "---\nid: CF-5\ntitle: New thing\ntype: bug\nlabels: a, b\npriority: high\ndue: 2026-11-01\nrank: 1\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "CF-5 needs a branch before Build: start an agent on it, or run code-factory start CF-5",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "CF-5 moves one column at a time: Build is next",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 404,
+    "error": "no such ticket",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-7/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"created\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"type\": \"bug\", \"from\": \"CF-5\"}\n",
+      "{root}/CF-7/ticket.md": "---\nid: CF-7\ntitle: New thing (copy)\ntype: bug\nlabels: a, b\npriority: high\ndue: 2026-11-01\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Deleted CF-7",
+    "undo": true,
+    "changed": {
+      "trash/sample/CF-7/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"created\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"type\": \"bug\", \"from\": \"CF-5\"}\n",
+      "trash/sample/CF-7/ticket.md": "---\nid: CF-7\ntitle: New thing (copy)\ntype: bug\nlabels: a, b\npriority: high\ndue: 2026-11-01\n---\n"
+    },
+    "removed": [
+      "{root}/CF-7/activity.jsonl",
+      "{root}/CF-7/ticket.md"
+    ]
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-7/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"created\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"type\": \"bug\", \"from\": \"CF-5\"}\n",
+      "{root}/CF-7/ticket.md": "---\nid: CF-7\ntitle: New thing (copy)\ntype: bug\nlabels: a, b\npriority: high\ndue: 2026-11-01\n---\n"
+    },
+    "removed": [
+      "trash/sample/CF-7/activity.jsonl",
+      "trash/sample/CF-7/ticket.md"
+    ]
+  },
+  {
+    "status": 200,
+    "notice": "Deleted CF-7",
+    "undo": true,
+    "changed": {
+      "trash/sample/CF-7/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"created\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"type\": \"bug\", \"from\": \"CF-5\"}\n",
+      "trash/sample/CF-7/ticket.md": "---\nid: CF-7\ntitle: New thing (copy)\ntype: bug\nlabels: a, b\npriority: high\ndue: 2026-11-01\n---\n"
+    },
+    "removed": [
+      "{root}/CF-7/activity.jsonl",
+      "{root}/CF-7/ticket.md"
+    ]
+  },
+  {
+    "status": 409,
+    "error": "an agent is running on this ticket; stop it first",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Set low priority on 2 tickets",
+    "undo": true,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:eb10378f67c72f58bf145e31f901bc26972fd8501da553bb0f2df47166a65586\", \"name\": \"budget\", \"value\": \"3.5\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:80b70268e2728bd29fcf25de1ae2fff3d35176212cbb7baf8cb28019f8464129\", \"name\": \"blocked_by\", \"value\": \"CF-1, CF-3\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:4c4d1e6217cc7b889c8c0de59197c7424d43714d904ddd379b61b69525050219\", \"name\": \"labels\", \"value\": \"x, y\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:af14f3fefc9f315cc608e991a3b946fe124cfd3c68cd50877664f3cb4fc2a00d\", \"from\": \"\", \"to\": \"spec\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"archived\", \"prev\": \"v1:fd3461a8fc6ac3d5366364f74fc5ac13df5101cb918103ae3bc41b46a39d7962\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"restored\", \"prev\": \"v1:ff644e479d8b4539cd06aed626781dd9705f9727cd2458a20686cbcf3c1c3948\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:1562538ee17d4d6afc51d14a0295ef0d33240d11739dafe19f41a9aa578785ac\", \"name\": \"priority\", \"value\": \"low\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nstage: spec\nlabels: x, y\npriority: low\nrank: 1\nstage_since: 2026-09-21T14:30:00Z\nblocked_by: CF-1, CF-3\nbudget: 3.5\n---\nA longer story.\n",
+      "{second}/CF-1/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"priority\", \"value\": \"low\"}\n",
+      "{second}/CF-1/ticket.md": "---\nid: CF-1\ntitle: Elsewhere\ntype: feature\nlabels: ops\npriority: low\nrank: 1\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:eb10378f67c72f58bf145e31f901bc26972fd8501da553bb0f2df47166a65586\", \"name\": \"budget\", \"value\": \"3.5\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:80b70268e2728bd29fcf25de1ae2fff3d35176212cbb7baf8cb28019f8464129\", \"name\": \"blocked_by\", \"value\": \"CF-1, CF-3\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:4c4d1e6217cc7b889c8c0de59197c7424d43714d904ddd379b61b69525050219\", \"name\": \"labels\", \"value\": \"x, y\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:af14f3fefc9f315cc608e991a3b946fe124cfd3c68cd50877664f3cb4fc2a00d\", \"from\": \"\", \"to\": \"spec\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"archived\", \"prev\": \"v1:fd3461a8fc6ac3d5366364f74fc5ac13df5101cb918103ae3bc41b46a39d7962\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"restored\", \"prev\": \"v1:ff644e479d8b4539cd06aed626781dd9705f9727cd2458a20686cbcf3c1c3948\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:1562538ee17d4d6afc51d14a0295ef0d33240d11739dafe19f41a9aa578785ac\", \"name\": \"priority\", \"value\": \"low\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:7a7cc5726f42a0dd72c8a6dc61c3e0e694a6a3955200f93f78ce26691ccc7830\", \"name\": \"priority\", \"value\": \"\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nstage: spec\nlabels: x, y\nrank: 1\nstage_since: 2026-09-21T14:30:00Z\nblocked_by: CF-1, CF-3\nbudget: 3.5\n---\nA longer story.\n",
+      "{second}/CF-1/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"priority\", \"value\": \"low\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:87955ba32792ee8bd94977d4609eb7b4a0c65010d4b884b8bc835d23aa25bdbf\", \"name\": \"priority\", \"value\": \"medium\"}\n",
+      "{second}/CF-1/ticket.md": "---\nid: CF-1\ntitle: Elsewhere\ntype: feature\nlabels: ops\npriority: medium\nrank: 1\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Labelled 2 tickets ops",
+    "undo": true,
+    "changed": {
+      "{root}/CF-2/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"title\", \"value\": \"Renamed\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:f18908a4fd5f7c11cd3a38d6739d9a9fbb6ea746d20a46eadeed7b7fcd32824a\", \"name\": \"description\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:5e86cde7e7b35df5e46eb0e8a35a2445a713a6821cf20e3b4a50fbd0fe411d47\", \"name\": \"budget\", \"value\": \"0\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e01cb07a094d3dd710804a900d88140a3515c88a8c7a786906ae3a71f23e7563\", \"name\": \"budget\", \"value\": \"1000\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:eb10378f67c72f58bf145e31f901bc26972fd8501da553bb0f2df47166a65586\", \"name\": \"budget\", \"value\": \"3.5\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:80b70268e2728bd29fcf25de1ae2fff3d35176212cbb7baf8cb28019f8464129\", \"name\": \"blocked_by\", \"value\": \"CF-1, CF-3\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:4c4d1e6217cc7b889c8c0de59197c7424d43714d904ddd379b61b69525050219\", \"name\": \"labels\", \"value\": \"x, y\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:af14f3fefc9f315cc608e991a3b946fe124cfd3c68cd50877664f3cb4fc2a00d\", \"from\": \"\", \"to\": \"spec\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"archived\", \"prev\": \"v1:fd3461a8fc6ac3d5366364f74fc5ac13df5101cb918103ae3bc41b46a39d7962\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"restored\", \"prev\": \"v1:ff644e479d8b4539cd06aed626781dd9705f9727cd2458a20686cbcf3c1c3948\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:1562538ee17d4d6afc51d14a0295ef0d33240d11739dafe19f41a9aa578785ac\", \"name\": \"priority\", \"value\": \"low\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:7a7cc5726f42a0dd72c8a6dc61c3e0e694a6a3955200f93f78ce26691ccc7830\", \"name\": \"priority\", \"value\": \"\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:a61aa7cd0c38559a66691e9799e42e2ce03727240e6519f984e7b9a502f92859\", \"name\": \"labels\", \"value\": \"x, y, ops\"}\n",
+      "{root}/CF-2/ticket.md": "---\nid: CF-2\ntitle: Renamed\ntype: feature\nstage: spec\nlabels: x, y, ops\nrank: 1\nstage_since: 2026-09-21T14:30:00Z\nblocked_by: CF-1, CF-3\nbudget: 3.5\n---\nA longer story.\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Archived 1 ticket",
+    "undo": true,
+    "changed": {
+      "{second}/CF-1/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"name\": \"priority\", \"value\": \"low\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"field\", \"prev\": \"v1:87955ba32792ee8bd94977d4609eb7b4a0c65010d4b884b8bc835d23aa25bdbf\", \"name\": \"priority\", \"value\": \"medium\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"archived\", \"prev\": \"v1:395515da18fac7dbefa317079ed4b92a1b4f27d4ef6c536f29590958afcf7ca0\"}\n",
+      "{second}/CF-1/ticket.md": "---\nid: CF-1\ntitle: Elsewhere\ntype: feature\nlabels: ops\npriority: medium\narchived: true\nrank: 1\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "CF-2 needs a branch before Build: start an agent on it, or run code-factory start CF-2",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Moved 2 tickets to Spec",
+    "undo": true,
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "one action and at least one ticket",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "one action and at least one ticket",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "unknown stage later",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "unknown priority soon",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "unknown priority soon",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "a label is one word or phrase",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "archived is true or empty",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 404,
+    "error": "no such ticket",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "board.json": "{\n  \"theme\": \"dark\",\n  \"wip\": {\n    \"spec\": 2,\n    \"build\": 3\n  }\n}\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "a limit must be a positive whole number",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "a limit must be a positive whole number",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "unknown stage later",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "board.json": "{\n  \"theme\": \"dark\",\n  \"wip\": {\n    \"build\": 3\n  }\n}\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-1/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"comment\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\": \"owner\", \"text\": \"Looks good\"}\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "",
+    "undo": false,
+    "changed": {
+      "{root}/CF-1/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"comment\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\": \"owner\", \"text\": \"Looks good\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"comment\", \"prev\": \"v1:9a9c77ddb8f4eebe1b8034e6b2e668505e6c516e654ad4e7b24de3bd2262fafe\", \"author\": \"owner\", \"text\": \"src/a.py:12: Rename this\"}\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "an empty comment says nothing",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Answered CF-1: Which size?",
+    "undo": false,
+    "changed": {
+      "{root}/CF-1/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"comment\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\": \"owner\", \"text\": \"Looks good\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"comment\", \"prev\": \"v1:9a9c77ddb8f4eebe1b8034e6b2e668505e6c516e654ad4e7b24de3bd2262fafe\", \"author\": \"owner\", \"text\": \"src/a.py:12: Rename this\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"answer\", \"prev\": \"v1:c0b9b0c7ade070726372ea739662141c89560a9e9314f7846292a95451872769\", \"question\": \"Which size?\", \"document\": \"spec.md\", \"index\": 1, \"text\": \"Large   enough\", \"channel\": \"http\", \"apply\": true, \"digest\": \"b98e1bc1401f6d4d\"}\n",
+      "{root}/CF-1/spec.md": "# BRD\n\nProblem.\n\n## Open questions\n\n- Which colour?\n  Answer: blue\n- Which size?\n  Answer: Large enough\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Answered CF-1: Which colour?",
+    "undo": false,
+    "changed": {
+      "{root}/CF-1/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"comment\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\": \"owner\", \"text\": \"Looks good\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"comment\", \"prev\": \"v1:9a9c77ddb8f4eebe1b8034e6b2e668505e6c516e654ad4e7b24de3bd2262fafe\", \"author\": \"owner\", \"text\": \"src/a.py:12: Rename this\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"answer\", \"prev\": \"v1:c0b9b0c7ade070726372ea739662141c89560a9e9314f7846292a95451872769\", \"question\": \"Which size?\", \"document\": \"spec.md\", \"index\": 1, \"text\": \"Large   enough\", \"channel\": \"http\", \"apply\": true, \"digest\": \"b98e1bc1401f6d4d\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"answer\", \"prev\": \"v1:0c420db6a70e5be0bb8d6e0f0d4a424892d6a9e524f47a83d0d84e07b1ec3fe5\", \"question\": \"Which colour?\", \"document\": \"spec.md\", \"index\": 0, \"text\": \"green\", \"channel\": \"http\", \"apply\": true, \"digest\": \"b98e1bc1401f6d4d\"}\n",
+      "{root}/CF-1/spec.md": "# BRD\n\nProblem.\n\n## Open questions\n\n- Which colour?\n  Answer: green\n- Which size?\n  Answer: Large enough\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 404,
+    "error": "no question 9 in spec.md",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 404,
+    "error": "no document ../spec.md",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 404,
+    "error": "no document ../CF-1/spec.md",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 400,
+    "error": "an answer and a question are needed",
+    "changed": {},
+    "removed": []
+  },
+  {
+    "status": 200,
+    "notice": "Archived CF-3",
+    "undo": true,
+    "changed": {
+      "{root}/CF-3/activity.jsonl": "{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"from\": \"build\", \"to\": \"spec\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"stage\", \"prev\": \"v1:f19931d1a855162b1799f2addbee95a7bd169b5b61db60c4179e425e3eb9d6aa\", \"from\": \"spec\", \"to\": \"build\"}\n{\"at\": \"2026-09-21T14:30:00Z\", \"kind\": \"archived\", \"prev\": \"v1:33d5bebeee3d8c588b9eef666b85053780398d4e83ccf1ad4b3be3d53c8ad108\"}\n",
+      "{root}/CF-3/ticket.md": "---\nid: CF-3\ntitle: Declared\ntype: feature\nstage: build\narchived: true\nrank: 2\nstage_since: 2026-09-21T14:30:00Z\nparent: CF-1\n---\n"
+    },
+    "removed": []
+  },
+  {
+    "status": 410,
+    "error": "nothing to undo any more",
+    "changed": {},
+    "removed": []
+  }
+]

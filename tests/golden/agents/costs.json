@@ -1,0 +1,26 @@
+{
+  "claude": {
+    "cost": 0.12,
+    "model": "b"
+  },
+  "claude-twice": {
+    "cost": 0.5,
+    "model": "only"
+  },
+  "claude-negative": {
+    "cost": null,
+    "model": null
+  },
+  "nothing": {
+    "cost": null,
+    "model": null
+  },
+  "empty": {
+    "cost": null,
+    "model": null
+  },
+  "missing": {
+    "cost": null,
+    "model": null
+  }
+}

@@ -1,0 +1,426 @@
+[project]
+name = "code-factory"
+version = "0.1.0"
+description = "A board that takes tickets from spec to merged with coding agents."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+requires-python = ">=3.14"
+dependencies = [
+    "ada-url>=4.1.1",
+    "alembic>=1.20.1",
+    "anyio>=4.16.0",
+    "asyncpg>=0.32.0",
+    "fastapi>=0.165.0",
+    "fastmcp>=4.2.5",
+    "httpx>=0.28.1",
+    "markdown-it-py>=4.3.0",
+    "mdit-py-plugins>=0.7.0",
+    "pydantic>=2.14.4",
+    "pydantic-settings>=2.16.3",
+    "pyyaml>=6",
+    "sqlalchemy[asyncio]>=2.1.9",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+code-factory = "code_factory.app:main"
+
+[build-system]
+# The one upper bound in the project, as uv's documentation recommends for uv_build: a build
+# requirement is resolved in isolation and never reaches a consumer's resolver, so the reason
+# for lower bounds only does not apply to it.
+requires = ["uv_build>=0.13.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv]
+required-version = ">=0.13.9"
+# The decisions name uv's managed CPython (python-build-standalone): every machine and container
+# gets the same build, never a system or Homebrew interpreter.
+python-preference = "only-managed"
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.16.2",
+    "import-linter>=2.17",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "pytest-cov>=7.1.0",
+    "pytest-timeout>=2.4.0",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.17.6",
+    "ty>=0.0.108",
+    "types-pyyaml>=6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["src", "tests"]
+extend-exclude = ["src/code_factory/platform/web/static"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D203",   # conflicts with D211
+    "D213",   # conflicts with D212
+    "COM812", # conflicts with the formatter
+    "ISC001", # conflicts with the formatter
+    "CPY",    # no copyright header
+    "D107",   # __init__ is documented by the class docstring
+    "TC001",  # moving imports under TYPE_CHECKING breaks pydantic and FastAPI at runtime
+    "TC002",
+    "TC003",
+    "FBT",    # boolean parameters appear in FastAPI and Click style signatures
+    "TRY003", # error messages are sentences written at the raise site
+    "EM101",  # same: a literal message at the raise site is the sentence
+    "EM102",
+]
+
+[tool.ruff.lint.mccabe]
+# Ruff has no cognitive complexity rule; C901 (cyclomatic) at 15 is the stand-in.
+max-complexity = 15
+
+[tool.ruff.lint.per-file-ignores]
+"src/code_factory/**/tools.py" = ["PLR0913", "PLR0917"]  # a tool's arguments are its schema
+"src/code_factory/**/tools/*.py" = ["PLR0913", "PLR0917"]
+"tests/**" = [
+    "S101",    # assert is the test idiom
+    "D",       # test names document themselves
+    "PLR2004", # expected values are literals by design
+    "SLF001",  # tests reach private seams on purpose
+    "INP001",  # test folders are not packages to import
+]
+"src/code_factory/checks/adapters/standins.py" = ["D102"]  # stand-ins implement a port; its docstring says what they do
+"tests/checks/**" = [
+    "ASYNC240", # tests read and write tmp_path files, never under load
+    "PLR0913",  # a test's arguments are its injected fixtures
+    "PLR0917",
+]
+"{alembic,src/code_factory/platform/db/alembic}/**" = [
+    "INP001", # Alembic loads its own folders by path
+    "D",      # generated files carry the revision message instead
+]
+"scripts/**" = ["INP001", "T201"]
+"site/**" = ["INP001"]  # the site is its own uv project, run by path
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Depends", "fastapi.Query", "fastapi.Path", "fastapi.Body", "fastapi.Header",
+]
+
+[tool.ruff.lint.flake8-type-checking]
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel", "pydantic_settings.BaseSettings", "sqlalchemy.orm.DeclarativeBase",
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.isort]
+known-first-party = ["code_factory"]
+
+[tool.ty.environment]
+python-version = "3.14"
+
+[tool.ty.src]
+include = ["src", "tests"]
+
+[tool.ty.rules]
+all = "error"
+
+[[tool.ty.overrides]]
+# SQLAlchemy's `mapped_column()` returns `MappedColumn[Any]`, which ty cannot see as `Mapped[T]`
+# (an ORM typing gap, not a defect). Scoped to the files that declare columns.
+include = ["src/code_factory/platform/db/tables.py", "src/code_factory/*/tables.py"]
+
+[tool.ty.overrides.rules]
+unsound-assignment = "ignore"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+timeout = 30
+# Coverage runs in every pytest run so the floor below is enforced by the gate.
+addopts = "--strict-markers --strict-config --cov --cov-report=term-missing:skip-covered"
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+# Measured 95% on 2026-11-23; the floor leaves room for the serve and mcp commands, which run in
+# subprocesses and are not measured.
+fail_under = 90
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]
+
+[tool.importlinter]
+root_packages = ["code_factory"]
+include_external_packages = true
+exclude_type_checking_imports = true
+
+# Every contract is direct imports only and is named for the rule it holds. A new violation is
+# fixed, never baselined. docs/architecture.md explains each; tests/test_architecture.py runs them
+# and checks that no package under `code_factory` escapes them.
+#
+# A new module is added to `containers` of "module-layers" and nowhere else: the wildcard
+# contracts below match every `code_factory.<name>` package.
+
+# Inside every module, each layer imports only the layers below it. A layer a module does
+# not have is skipped; a module is named in `containers` and nowhere else.
+[[tool.importlinter.contracts]]
+name = "module-layers"
+type = "layers"
+containers = [
+    "code_factory.board",
+    "code_factory.broker",
+    "code_factory.delivery",
+    "code_factory.evals",
+    "code_factory.follower",
+    "code_factory.inbox",
+    "code_factory.push",
+    "code_factory.screens",
+    "code_factory.commands",
+    "code_factory.hooks",
+    "code_factory.about",
+    "code_factory.agents",
+    "code_factory.auth",
+    "code_factory.checks",
+    "code_factory.factory",
+    "code_factory.git",
+    "code_factory.health",
+    "code_factory.memory",
+    "code_factory.memory_extras",
+    "code_factory.metrics",
+    "code_factory.releases",
+    "code_factory.repositories",
+    "code_factory.runs",
+    "code_factory.sample",
+    "code_factory.sessions",
+    "code_factory.settings",
+    "code_factory.stages",
+    "code_factory.talk",
+    "code_factory.team",
+    "code_factory.ticket_writes",
+    "code_factory.tickets",
+    "code_factory.timeline",
+    "code_factory.undo",
+]
+layers = [
+    "(module)",
+    "(routes) | (tools) | (cli)",
+    "(service)",
+    "(adapters) | (repository) | (ports)",
+    "(tables)",
+    "(rules)",
+    "(models)",
+]
+
+# The kernel's own layering: the command line on top, then the web edge, the MCP edge, the shared
+# startup (`runtime`), the module description, shared registries, the database, settings, and the leaves.
+[[tool.importlinter.contracts]]
+name = "platform-layers"
+type = "layers"
+layers = [
+    "code_factory.platform.cli",
+    "code_factory.platform.web",
+    "code_factory.platform.mcp",
+    "code_factory.platform.runtime | code_factory.platform.commands",
+    "code_factory.platform.module",
+    "code_factory.platform.services | code_factory.platform.background",
+    "code_factory.platform.db",
+    "code_factory.platform.config",
+    "code_factory.platform.contained",
+    "code_factory.platform.process | code_factory.platform.programs",
+    "code_factory.platform.text | code_factory.platform.network",
+    "code_factory.platform.logging | code_factory.platform.errors | code_factory.platform.identity | code_factory.platform.served",
+]
+
+# The shared text helpers and the listen-address rule are pure compute: no IO, framework, driver,
+# network or event loop. `anyio` is named so a blocking call is never hidden behind a thread hop
+# here; callers decide where heavy text work runs.
+[[tool.importlinter.contracts]]
+name = "platform-text-is-pure"
+type = "forbidden"
+source_modules = ["code_factory.platform.text", "code_factory.platform.network"]
+forbidden_modules = [
+    "sqlalchemy",
+    "asyncpg",
+    "fastapi",
+    "starlette",
+    "fastmcp",
+    "uvicorn",
+    "httpx",
+    "anyio",
+    "asyncio",
+    "subprocess",
+    "socket",
+    "sqlite3",
+]
+allow_indirect_imports = true
+
+# A module imports another module only through its `service` and `models`. The wildcard matches
+# every package under `code_factory`; the imports allowed are those into a `service` or `models`,
+# into `platform`, and `app` into each `module.py`.
+[[tool.importlinter.contracts]]
+name = "modules-meet-only-through-service-and-models"
+type = "independence"
+modules = ["code_factory.*"]
+ignore_imports = [
+    "code_factory.** -> code_factory.*.service",
+    "code_factory.** -> code_factory.*.models",
+    "code_factory.** -> code_factory.platform.**",
+    "code_factory.app -> code_factory.*.module",
+]
+
+# Modules form no import cycle (A.service uses B.service, so B.service must not use A).
+[[tool.importlinter.contracts]]
+name = "no-cycles-between-modules"
+type = "acyclic_siblings"
+ancestors = ["code_factory"]
+depth = 1
+
+# The platform knows no module and not `app`; `code_factory.app` hands it the modules.
+[[tool.importlinter.contracts]]
+name = "platform-imports-no-module"
+type = "forbidden"
+source_modules = ["code_factory.platform"]
+forbidden_modules = ["code_factory.*"]
+ignore_imports = ["code_factory.platform.** -> code_factory.platform.**"]
+allow_indirect_imports = true
+
+# DTOs and domain rules do no IO and use no framework, database driver, network or event loop.
+[[tool.importlinter.contracts]]
+name = "models-and-rules-are-pure"
+type = "forbidden"
+source_modules = [
+    "code_factory.*.models",
+    "code_factory.*.rules",
+    "code_factory.*.ports",
+]
+forbidden_modules = [
+    "sqlalchemy",
+    "asyncpg",
+    "fastapi",
+    "starlette",
+    "fastmcp",
+    "uvicorn",
+    "httpx",
+    "anyio",
+    "asyncio",
+    "subprocess",
+    "socket",
+    "sqlite3",
+]
+allow_indirect_imports = true
+
+# FastAPI and Starlette appear only in `*.routes` and `platform.web`.
+[[tool.importlinter.contracts]]
+name = "fastapi-only-at-the-web-edge"
+type = "forbidden"
+source_modules = [
+    "code_factory.*.service",
+    "code_factory.*.models",
+    "code_factory.*.rules",
+    "code_factory.*.tables",
+    "code_factory.*.repository",
+    "code_factory.*.adapters",
+    "code_factory.*.tools",
+    "code_factory.*.cli",
+    "code_factory.*.module",
+    "code_factory.app",
+    "code_factory.platform.config",
+    "code_factory.platform.logging",
+    "code_factory.platform.errors",
+    "code_factory.platform.background",
+    "code_factory.platform.services",
+    "code_factory.platform.runtime",
+    "code_factory.platform.commands",
+    "code_factory.platform.contained",
+    "code_factory.platform.process",
+    "code_factory.platform.programs",
+    "code_factory.platform.db",
+    "code_factory.platform.mcp",
+]
+forbidden_modules = ["fastapi", "starlette"]
+allow_indirect_imports = true
+
+# FastMCP appears only in `*.tools` and `platform.mcp`.
+[[tool.importlinter.contracts]]
+name = "fastmcp-only-at-the-mcp-edge"
+type = "forbidden"
+source_modules = [
+    "code_factory.*.service",
+    "code_factory.*.models",
+    "code_factory.*.rules",
+    "code_factory.*.tables",
+    "code_factory.*.repository",
+    "code_factory.*.adapters",
+    "code_factory.*.routes",
+    "code_factory.*.cli",
+    "code_factory.*.module",
+    "code_factory.app",
+    "code_factory.platform.config",
+    "code_factory.platform.logging",
+    "code_factory.platform.errors",
+    "code_factory.platform.background",
+    "code_factory.platform.services",
+    "code_factory.platform.runtime",
+    "code_factory.platform.commands",
+    "code_factory.platform.contained",
+    "code_factory.platform.process",
+    "code_factory.platform.programs",
+    "code_factory.platform.db",
+    "code_factory.platform.web",
+]
+forbidden_modules = ["fastmcp"]
+allow_indirect_imports = true
+
+# SQLAlchemy and asyncpg appear only in `*.tables`, `*.repository` and `platform.db`, except that
+# `platform.config` parses the database URL with `sqlalchemy.engine.make_url`, the parser the
+# driver itself uses (a hand-written one disagrees on passwords holding `/`, `?` or `#`).
+[[tool.importlinter.contracts]]
+name = "sqlalchemy-only-at-the-db-edge"
+type = "forbidden"
+source_modules = [
+    "code_factory.*.service",
+    "code_factory.*.models",
+    "code_factory.*.rules",
+    "code_factory.*.adapters",
+    "code_factory.*.routes",
+    "code_factory.*.tools",
+    "code_factory.*.cli",
+    "code_factory.*.module",
+    "code_factory.app",
+    "code_factory.platform.logging",
+    "code_factory.platform.errors",
+    "code_factory.platform.background",
+    "code_factory.platform.services",
+    "code_factory.platform.runtime",
+    "code_factory.platform.commands",
+    "code_factory.platform.contained",
+    "code_factory.platform.process",
+    "code_factory.platform.programs",
+    "code_factory.platform.web",
+    "code_factory.platform.mcp",
+]
+forbidden_modules = ["sqlalchemy", "asyncpg"]
+allow_indirect_imports = true
+
+# Routes and tools call a service and nothing else: the database is reached through the service's
+# unit of work (docs/architecture.md, "How a service reaches the database"), never from the edge.
+[[tool.importlinter.contracts]]
+name = "edges-never-touch-the-database"
+type = "forbidden"
+source_modules = ["code_factory.*.routes", "code_factory.*.tools"]
+forbidden_modules = ["code_factory.platform.db"]
+allow_indirect_imports = true

@@ -1,0 +1,120 @@
+[
+  {
+    "name": "ascii",
+    "value": {
+      "at": "2026-10-04T10:00:00Z",
+      "kind": "comment",
+      "text": "hello"
+    }
+  },
+  {
+    "name": "key-order",
+    "value": {
+      "b": 1,
+      "a": 2,
+      "c": {
+        "z": 1,
+        "y": 2
+      }
+    }
+  },
+  {
+    "name": "accents",
+    "value": {
+      "text": "café naïve Ölçek"
+    }
+  },
+  {
+    "name": "astral",
+    "value": {
+      "text": "ship 🚀 now",
+      "cjk": "漢字"
+    }
+  },
+  {
+    "name": "controls",
+    "value": {
+      "text": "a\u0000b\u001fcd\ttab\nnl\rcr\bbs\fff\"q\\b/s ls"
+    }
+  },
+  {
+    "name": "floats",
+    "value": [
+      1.0,
+      0.1,
+      1e+16,
+      1000000000000000.0,
+      1e-07,
+      0.0001,
+      1e-05,
+      123456789.123456,
+      -0.0,
+      5e-324,
+      1.7976931348623157e+308,
+      2.5e-10,
+      1712345678.123456
+    ]
+  },
+  {
+    "name": "integers",
+    "value": [
+      0,
+      -5,
+      9007199254740993,
+      18446744073709551615,
+      -9223372036854775808
+    ]
+  },
+  {
+    "name": "scalars",
+    "value": [
+      true,
+      false,
+      null,
+      "",
+      0.5
+    ]
+  },
+  {
+    "name": "empty",
+    "value": {
+      "list": [],
+      "object": {},
+      "nested": [
+        [],
+        {},
+        [
+          []
+        ]
+      ]
+    }
+  },
+  {
+    "name": "nested",
+    "value": {
+      "winner": 2,
+      "attempts": [
+        {
+          "attempt": 1,
+          "passed": true,
+          "lines": 10,
+          "cost": 0.5
+        },
+        {
+          "attempt": 2,
+          "passed": false,
+          "lines": 3,
+          "cost": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "top-string",
+    "value": "plain"
+  },
+  {
+    "name": "top-empty-list",
+    "value": []
+  }
+]

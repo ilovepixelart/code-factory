@@ -1,0 +1,1642 @@
+[
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Say which role this token holds, its ticket and stage, the tools it may call, the documents it may write and its limits. Use first when unsure what you may do; for a ticket's state use get_ticket.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "name": "whoami",
+    "outputSchema": {
+      "description": "What a token is and what it may do.",
+      "properties": {
+        "expires_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "limits": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": "object"
+        },
+        "repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "role": {
+          "description": "What a caller may do: one ticket in one stage, the board, or everything.",
+          "enum": [
+            "run",
+            "coordinator",
+            "owner"
+          ],
+          "type": "string"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "subject": {
+          "type": "string"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tools": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "writable_documents": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "subject",
+        "run_id",
+        "ticket_id",
+        "stage",
+        "repository",
+        "expires_at",
+        "tools",
+        "writable_documents",
+        "limits"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Read a ticket's fields, state, its documents' names and versions and its latest activity, without document text. Use when starting work or judging one ticket; for a document's text use read_document, for older history list_activity.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ticket, such as CF-12. A run may leave it out: it has one ticket."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_ticket",
+    "outputSchema": {
+      "description": "A ticket as an agent starts on it. Document text comes from `read_document`.",
+      "properties": {
+        "description_truncated": {
+          "default": false,
+          "type": "boolean"
+        },
+        "documents": {
+          "items": {
+            "description": "A document as a ticket's index lists it: no text.",
+            "properties": {
+              "chars": {
+                "type": "integer"
+              },
+              "name": {
+                "description": "The documents a ticket can have, in the order they are written.",
+                "enum": [
+                  "requirements",
+                  "mock",
+                  "spec",
+                  "uat",
+                  "review",
+                  "notes"
+                ],
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "updated_by": {
+                "type": "string"
+              },
+              "version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "name",
+              "version",
+              "chars",
+              "updated_by",
+              "updated_at"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "recent_activity": {
+          "items": {
+            "description": "One appended record of a ticket's history; `id` rises with every append.",
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "by": {
+                "type": "string"
+              },
+              "data": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "ticket_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "ticket_id",
+              "at",
+              "kind",
+              "by",
+              "data"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "ticket": {
+          "description": "A ticket as the board shows it, with the column its facts put it in.",
+          "properties": {
+            "archived": {
+              "type": "boolean"
+            },
+            "assignee": {
+              "type": "string"
+            },
+            "blocked": {
+              "type": "string"
+            },
+            "blocked_by": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "branch": {
+              "type": "string"
+            },
+            "budget": {
+              "type": "string"
+            },
+            "caused_by": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "column": {
+              "description": "A board column, in the order a ticket walks them.",
+              "enum": [
+                "spec",
+                "build",
+                "review",
+                "merged"
+              ],
+              "type": "string"
+            },
+            "created_at": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "due": {
+              "type": "string"
+            },
+            "e2e": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "labels": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "merged": {
+              "type": "boolean"
+            },
+            "number": {
+              "type": "integer"
+            },
+            "pages": {
+              "type": "string"
+            },
+            "parallel": {
+              "type": "string"
+            },
+            "parent": {
+              "type": "string"
+            },
+            "priority": {
+              "enum": [
+                "",
+                "urgent",
+                "high",
+                "medium",
+                "low"
+              ],
+              "type": "string"
+            },
+            "pull_request": {
+              "anyOf": [
+                {
+                  "description": "A ticket's pull request.",
+                  "properties": {
+                    "number": {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "state": {
+                      "description": "The state of a ticket's pull request as the forge reports it.",
+                      "enum": [
+                        "open",
+                        "closed",
+                        "merged"
+                      ],
+                      "type": "string"
+                    },
+                    "url": {
+                      "default": "",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "number",
+                    "state"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rank": {
+              "type": "integer"
+            },
+            "repository": {
+              "type": "string"
+            },
+            "source": {
+              "type": "string"
+            },
+            "steps": {
+              "type": "string"
+            },
+            "tests": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "type": {
+              "enum": [
+                "feature",
+                "bug",
+                "refactor",
+                "upgrade",
+                "hotfix",
+                "docs"
+              ],
+              "type": "string"
+            },
+            "updated_at": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "number",
+            "repository",
+            "title",
+            "type",
+            "description",
+            "labels",
+            "priority",
+            "assignee",
+            "due",
+            "blocked",
+            "rank",
+            "e2e",
+            "tests",
+            "budget",
+            "parallel",
+            "source",
+            "steps",
+            "pages",
+            "parent",
+            "blocked_by",
+            "caused_by",
+            "archived",
+            "branch",
+            "pull_request",
+            "merged",
+            "column",
+            "created_at",
+            "updated_at"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "ticket",
+        "documents",
+        "recent_activity"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Create a ticket under the next number. A run files a follow-up for something found on the way (a few per run); the owner files any ticket. Use when new work should go on the board; for an existing ticket use update_ticket.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "blocked_by": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Ticket ids."
+        },
+        "description": {
+          "default": "",
+          "type": "string"
+        },
+        "labels": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Owner and coordinator only."
+        },
+        "priority": {
+          "default": "",
+          "enum": [
+            "",
+            "urgent",
+            "high",
+            "medium",
+            "low"
+          ],
+          "type": "string"
+        },
+        "repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default: the caller's own."
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "default": "feature",
+          "enum": [
+            "feature",
+            "bug",
+            "refactor",
+            "upgrade",
+            "hotfix",
+            "docs"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "type": "object"
+    },
+    "name": "create_ticket",
+    "outputSchema": {
+      "description": "A ticket that was created.",
+      "properties": {
+        "column": {
+          "description": "A board column, in the order a ticket walks them.",
+          "enum": [
+            "spec",
+            "build",
+            "review",
+            "merged"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "column"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "List a ticket's activity newest first (moves, documents, runs, checks, answers, notes, findings), filtered by kind. Use to see what happened and why work was sent back; get_ticket has only the latest few.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "next_cursor of the last page."
+        },
+        "kinds": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "For example stage, note."
+        },
+        "limit": {
+          "default": 20,
+          "description": "Page size, 1 to 100.",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ticket, such as CF-12. A run may leave it out: it has one ticket."
+        }
+      },
+      "type": "object"
+    },
+    "name": "list_activity",
+    "outputSchema": {
+      "description": "A page of a ticket's history; `next_cursor` continues it, `None` at its end.",
+      "properties": {
+        "items": {
+          "items": {
+            "description": "One appended record of a ticket's history; `id` rises with every append.",
+            "properties": {
+              "at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "by": {
+                "type": "string"
+              },
+              "data": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "kind": {
+                "type": "string"
+              },
+              "ticket_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "ticket_id",
+              "at",
+              "kind",
+              "by",
+              "data"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Record a note on a ticket's activity under your name; the owner reads it. Use to leave a finding that is not a change to any field. A diagnosis (why work is stuck) is for the owner and coordinator.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "default": "note",
+          "description": "diagnosis is for the owner and coordinator.",
+          "enum": [
+            "note",
+            "diagnosis"
+          ],
+          "type": "string"
+        },
+        "text": {
+          "description": "At most 4000 characters.",
+          "type": "string"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ticket, such as CF-12. A run may leave it out: it has one ticket."
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "type": "object"
+    },
+    "name": "post_note",
+    "outputSchema": {
+      "description": "A note that was recorded: the activity record's id.",
+      "properties": {
+        "id": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Read one ticket document (requirements, spec, uat, mock, review, notes) as text, a page at a time; next_offset continues it. Use when you need what a document says; get_ticket lists which exist and their versions.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_chars": {
+          "default": 20000,
+          "description": "1 to 40000.",
+          "maximum": 40000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The documents a ticket can have, in the order they are written.",
+          "enum": [
+            "requirements",
+            "mock",
+            "spec",
+            "uat",
+            "review",
+            "notes"
+          ],
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Character to start at.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ticket, such as CF-12. A run may leave it out: it has one ticket."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "name": "read_document",
+    "outputSchema": {
+      "description": "Part of a document's text; `next_offset` continues it, `None` at its end.",
+      "properties": {
+        "name": {
+          "description": "The documents a ticket can have, in the order they are written.",
+          "enum": [
+            "requirements",
+            "mock",
+            "spec",
+            "uat",
+            "review",
+            "notes"
+          ],
+          "type": "string"
+        },
+        "next_offset": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "total_chars": {
+          "type": "integer"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "updated_by": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "text",
+        "offset",
+        "next_offset",
+        "total_chars",
+        "updated_by",
+        "updated_at"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Replace a document with the whole text (name the version you read, none to create it) or append to it. The text is checked for its kind and refused with the line numbers when wrong. Use to write your stage's output; a run may write only its stage's documents.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "base_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The version you read; none to create. Not for append."
+        },
+        "content": {
+          "type": "string"
+        },
+        "mode": {
+          "default": "replace",
+          "description": "replace (whole text) or append.",
+          "enum": [
+            "replace",
+            "append"
+          ],
+          "type": "string"
+        },
+        "name": {
+          "description": "The documents a ticket can have, in the order they are written.",
+          "enum": [
+            "requirements",
+            "mock",
+            "spec",
+            "uat",
+            "review",
+            "notes"
+          ],
+          "type": "string"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ticket, such as CF-12. A run may leave it out: it has one ticket."
+        }
+      },
+      "required": [
+        "name",
+        "content"
+      ],
+      "type": "object"
+    },
+    "name": "write_document",
+    "outputSchema": {
+      "description": "A write that was taken: the document's new version.",
+      "properties": {
+        "name": {
+          "description": "The documents a ticket can have, in the order they are written.",
+          "enum": [
+            "requirements",
+            "mock",
+            "spec",
+            "uat",
+            "review",
+            "notes"
+          ],
+          "type": "string"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Dismiss a review finding you do not agree with, with the reason; the reviewer and the owner read it on the ticket. Use when a finding is wrong or out of scope; to fix one, change the code instead. A finding is dismissed once.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "finding_id": {
+          "description": "A finding id such as F2.",
+          "type": "string"
+        },
+        "reason": {
+          "description": "Why it does not apply, 1 to 1000 characters.",
+          "type": "string"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ticket, such as CF-12. A run may leave it out: it has one ticket."
+        }
+      },
+      "required": [
+        "finding_id",
+        "reason"
+      ],
+      "type": "object"
+    },
+    "name": "dismiss_finding",
+    "outputSchema": {
+      "description": "A finding a Build run dismissed, with the reason it gave.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "reason"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Ask the owner one focused question that blocks you, with choices and a recommended one; then end your turn: the answer is recorded on the ticket for the next run to read. Asking an equal open question again returns the first. Use only when a decision or permission genuinely blocks progress.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "choices": {
+          "anyOf": [
+            {
+              "items": {
+                "description": "A choice a question offers: a short label, what it means, and an optional preview.",
+                "properties": {
+                  "description": {
+                    "default": "",
+                    "description": "What picking it means or its trade-off, in a sentence or two.",
+                    "type": "string"
+                  },
+                  "preview": {
+                    "default": "",
+                    "description": "Optional: a mockup or code to compare, shown as monospace text. Only when the choices differ in something to see.",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "description": "Deprecated: put why in description.",
+                    "type": "string"
+                  },
+                  "recommended": {
+                    "default": false,
+                    "description": "The one you would pick; it is shown first. Say why in its description.",
+                    "type": "boolean"
+                  },
+                  "text": {
+                    "description": "A short label, a few words.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "text"
+                ],
+                "type": "object"
+              },
+              "maxItems": 4,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "None for a question answered in words, else 2 to 4 distinct choices; the owner can always type another answer, so add no 'Other'."
+        },
+        "document": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The document it is about."
+        },
+        "question": {
+          "description": "One focused question, at most 1000 characters.",
+          "maxLength": 1000,
+          "minLength": 1,
+          "type": "string"
+        },
+        "several": {
+          "default": false,
+          "description": "Whether more than one choice may be picked.",
+          "type": "boolean"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The ticket, such as CF-12. A run may leave it out: it has one ticket."
+        },
+        "topic": {
+          "default": "",
+          "description": "A label of at most 12 characters naming what it is about, for example Auth method or Library.",
+          "maxLength": 12,
+          "type": "string"
+        }
+      },
+      "required": [
+        "question"
+      ],
+      "type": "object"
+    },
+    "name": "ask_question",
+    "outputSchema": {
+      "description": "The answer to `ask`: `created` is false when the same open question was there already.",
+      "properties": {
+        "created": {
+          "type": "boolean"
+        },
+        "question_id": {
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "answered",
+            "withdrawn"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "question_id",
+        "created",
+        "status"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "List questions with their choices and answers, by status (open by default), for one ticket or, for the owner, all. Use to see what waits on the owner or what was decided; answer_question takes a question's id.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "next_cursor of the last page."
+        },
+        "document": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "limit": {
+          "default": 25,
+          "description": "Page size, 1 to 100.",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "status": {
+          "default": "open",
+          "enum": [
+            "open",
+            "answered",
+            "all"
+          ],
+          "type": "string"
+        },
+        "ticket_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A run: its own. The owner: leave out for every ticket."
+        }
+      },
+      "type": "object"
+    },
+    "name": "list_questions",
+    "outputSchema": {
+      "description": "A page of questions by id; `next_cursor` continues it, `None` at its end.",
+      "properties": {
+        "items": {
+          "items": {
+            "description": "A question an agent asked the owner.\n\n`index` is its position among the ticket's questions of the same document, which is how the\napp addresses it.",
+            "properties": {
+              "answer": {
+                "anyOf": [
+                  {
+                    "description": "One answer to a question; the current one is the newest.",
+                    "properties": {
+                      "by": {
+                        "type": "string"
+                      },
+                      "channel": {
+                        "enum": [
+                          "http",
+                          "reply",
+                          "mcp",
+                          "acp",
+                          "cli"
+                        ],
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "format": "date-time",
+                        "type": "string"
+                      },
+                      "id": {
+                        "type": "integer"
+                      },
+                      "picked": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "text": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "text",
+                      "picked",
+                      "by",
+                      "channel",
+                      "created_at"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "asked_by": {
+                "type": "string"
+              },
+              "choices": {
+                "items": {
+                  "description": "One choice a question offers; `ticked` is set on the picked ones of an answered question.",
+                  "properties": {
+                    "description": {
+                      "default": "",
+                      "type": "string"
+                    },
+                    "preview": {
+                      "default": "",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "default": "",
+                      "type": "string"
+                    },
+                    "recommended": {
+                      "default": false,
+                      "type": "boolean"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "ticked": {
+                      "default": false,
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "text"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "created_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "document": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "index": {
+                "type": "integer"
+              },
+              "run_id": {
+                "type": "string"
+              },
+              "several": {
+                "type": "boolean"
+              },
+              "status": {
+                "enum": [
+                  "open",
+                  "answered",
+                  "withdrawn"
+                ],
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "ticket_id": {
+                "type": "string"
+              },
+              "topic": {
+                "default": "",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "ticket_id",
+              "document",
+              "index",
+              "text",
+              "several",
+              "choices",
+              "asked_by",
+              "run_id",
+              "created_at",
+              "status"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "next_cursor"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Search the owner's standing rules, decisions and lessons; every word of the query must match and an empty query lists them all. Use before asking or acting on a guess, to learn what is already decided; to record a lesson use propose_memory.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "next_cursor of the last page."
+        },
+        "kinds": {
+          "anyOf": [
+            {
+              "items": {
+                "enum": [
+                  "rule",
+                  "decision",
+                  "lesson"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "limit": {
+          "default": 10,
+          "description": "Page size, 1 to 100.",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "query": {
+          "default": "",
+          "description": "Words that must all match; empty lists all.",
+          "type": "string"
+        },
+        "repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default: the caller's own."
+        },
+        "status": {
+          "default": "active",
+          "description": "Runs read active entries only.",
+          "enum": [
+            "active",
+            "proposed",
+            "retired"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "name": "search_memory",
+    "outputSchema": {
+      "properties": {
+        "items": {
+          "items": {
+            "description": "An entry in a search: what to do, why, and what guards it.",
+            "properties": {
+              "cites": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "guard": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "rule",
+                  "decision",
+                  "lesson"
+                ],
+                "type": "string"
+              },
+              "repository": {
+                "type": "string"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "stale": {
+                "type": "boolean"
+              },
+              "statement": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "proposed",
+                  "retired"
+                ],
+                "type": "string"
+              },
+              "truncated": {
+                "default": false,
+                "type": "boolean"
+              },
+              "why": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "repository",
+              "id",
+              "kind",
+              "statement",
+              "why",
+              "guard",
+              "scope",
+              "cites",
+              "status",
+              "stale"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "next_cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Propose a lesson: what to do now, why (what went wrong), the guard that now prevents it and the paths or tests it is about. It is held until the owner approves it. Use when a mistake that could recur has been fixed; search_memory finds what exists.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "cites": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Paths or test names."
+        },
+        "guard": {
+          "default": "",
+          "description": "The test that now prevents it, if any.",
+          "type": "string"
+        },
+        "kind": {
+          "default": "lesson",
+          "enum": [
+            "rule",
+            "decision",
+            "lesson"
+          ],
+          "type": "string"
+        },
+        "repository": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Default: the caller's own."
+        },
+        "scope": {
+          "default": "",
+          "description": "Who loads it; empty loads for everyone.",
+          "type": "string"
+        },
+        "statement": {
+          "description": "What to do now.",
+          "type": "string"
+        },
+        "supersedes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Entry ids it replaces."
+        },
+        "why": {
+          "default": "",
+          "description": "What went wrong.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "statement"
+      ],
+      "type": "object"
+    },
+    "name": "propose_memory",
+    "outputSchema": {
+      "description": "A proposal that was recorded: it is held until the owner approves it.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "proposed",
+            "retired"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "repository",
+        "status"
+      ],
+      "type": "object"
+    }
+  }
+]

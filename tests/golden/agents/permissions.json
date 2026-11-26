@@ -1,0 +1,216 @@
+{
+  "calls": [
+    {
+      "tool": "Bash",
+      "input": {
+        "command": "npm test -- --watch"
+      },
+      "summary": "npm test -- --watch",
+      "kind": "Bash(npm test *)"
+    },
+    {
+      "tool": "Bash",
+      "input": {
+        "command": "git -C x status"
+      },
+      "summary": "git -C x status",
+      "kind": "Bash(git *)"
+    },
+    {
+      "tool": "Bash",
+      "input": {
+        "command": "ls"
+      },
+      "summary": "ls",
+      "kind": "Bash(ls *)"
+    },
+    {
+      "tool": "Bash",
+      "input": {
+        "command": "cat a | grep b"
+      },
+      "summary": "cat a | grep b",
+      "kind": null
+    },
+    {
+      "tool": "Bash",
+      "input": {
+        "command": "echo $(whoami)"
+      },
+      "summary": "echo $(whoami)",
+      "kind": null
+    },
+    {
+      "tool": "Bash",
+      "input": {
+        "command": "   "
+      },
+      "summary": "   ",
+      "kind": null
+    },
+    {
+      "tool": "Bash",
+      "input": {
+        "command": 5
+      },
+      "summary": "{\"command\": 5}",
+      "kind": null
+    },
+    {
+      "tool": "Edit",
+      "input": {
+        "file_path": "/x/yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+        "old": "é"
+      },
+      "summary": "{\"file_path\": \"/x/yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+      "kind": "Edit"
+    },
+    {
+      "tool": "",
+      "input": {},
+      "summary": "{}",
+      "kind": null
+    },
+    {
+      "tool": "WebFetch",
+      "input": [
+        "a"
+      ],
+      "summary": "[\"a\"]",
+      "kind": "WebFetch"
+    }
+  ],
+  "histories": [
+    {
+      "answers": [
+        {
+          "kind": "Bash(npm test *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(npm test *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(npm test *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(npm test *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(npm test *)",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        },
+        {
+          "kind": "Read",
+          "allowed": true
+        },
+        {
+          "kind": "Read",
+          "allowed": true
+        },
+        {
+          "kind": "Read",
+          "allowed": true
+        },
+        {
+          "kind": "Read",
+          "allowed": true
+        },
+        {
+          "kind": "Read",
+          "allowed": true
+        },
+        {
+          "kind": "Read",
+          "allowed": false
+        }
+      ],
+      "rules": [],
+      "extra": "",
+      "suggestions": [
+        [
+          "Bash(npm test *)",
+          5
+        ]
+      ]
+    },
+    {
+      "answers": [
+        {
+          "kind": "Bash(ls *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(ls *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(ls *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(ls *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(ls *)",
+          "allowed": true
+        },
+        {
+          "kind": "Bash(ls *)",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        },
+        {
+          "kind": "Edit",
+          "allowed": true
+        }
+      ],
+      "rules": [
+        "Edit"
+      ],
+      "extra": "not json\n{\"allowed\": true}\n",
+      "suggestions": [
+        [
+          "Bash(ls *)",
+          6
+        ]
+      ]
+    }
+  ],
+  "spent_note": "budget reached ($4.50 of $4.00)"
+}

@@ -1,0 +1,22 @@
+{
+  "reads": {
+    "/api/board": 800,
+    "/api/tickets": 700,
+    "/api/archive": 800,
+    "/api/inbox": 800,
+    "/api/inbox/count": 800,
+    "/api/flow": 100,
+    "/api/memory": 300,
+    "/api/tickets/sample/PF-1": 800
+  },
+  "pages": {
+    "/tickets": 1800,
+    "/inbox": 1800,
+    "/agents": 300,
+    "/flow": 400,
+    "/archive": 1800,
+    "/memory": 600,
+    "/": 300
+  },
+  "run_start": 4000
+}

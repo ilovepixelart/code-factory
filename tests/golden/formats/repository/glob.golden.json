@@ -1,0 +1,107 @@
+{
+  "tests/**": [
+    "tests",
+    "tests/.dot.py",
+    "tests/a.py",
+    "tests/b.py",
+    "tests/sub",
+    "tests/sub/c.py",
+    "tests/sub/deep",
+    "tests/sub/deep/d.rs"
+  ],
+  "tests/**/*.py": [
+    "tests/.dot.py",
+    "tests/a.py",
+    "tests/b.py",
+    "tests/sub/c.py"
+  ],
+  "**/*.py": [
+    ".hidden/e.py",
+    "tests/.dot.py",
+    "tests/a.py",
+    "tests/b.py",
+    "tests/sub/c.py",
+    "top.py"
+  ],
+  "*/*.py": [
+    ".hidden/e.py",
+    "tests/.dot.py",
+    "tests/a.py",
+    "tests/b.py"
+  ],
+  "tests/*": [
+    "tests/.dot.py",
+    "tests/a.py",
+    "tests/b.py",
+    "tests/sub"
+  ],
+  "tests/?.py": [
+    "tests/a.py",
+    "tests/b.py"
+  ],
+  "tests/[ab].py": [
+    "tests/a.py",
+    "tests/b.py"
+  ],
+  "tests/[!a].py": [
+    "tests/b.py"
+  ],
+  "tests/": [
+    "tests"
+  ],
+  "tests//a.py": [
+    "tests/a.py"
+  ],
+  "./tests/a.py": [
+    "tests/a.py"
+  ],
+  "**": [
+    ".",
+    ".hidden",
+    ".hidden/e.py",
+    "empty",
+    "src",
+    "src/[x].txt",
+    "src/]x.txt",
+    "src/lib.rs",
+    "tests",
+    "tests/.dot.py",
+    "tests/a.py",
+    "tests/b.py",
+    "tests/sub",
+    "tests/sub/c.py",
+    "tests/sub/deep",
+    "tests/sub/deep/d.rs",
+    "top.py"
+  ],
+  "*": [
+    ".hidden",
+    "empty",
+    "src",
+    "tests",
+    "top.py"
+  ],
+  "src/[[]x].txt": [
+    "src/[x].txt"
+  ],
+  "src/*.rs": [
+    "src/lib.rs"
+  ],
+  "tests/sub/**/*.rs": [
+    "tests/sub/deep/d.rs"
+  ],
+  "missing/*.py": [],
+  "empty/**": [
+    "empty"
+  ],
+  "tests/a.py/": [],
+  "top.py": [
+    "top.py"
+  ],
+  "**/deep/*": [
+    "tests/sub/deep/d.rs"
+  ],
+  "src/[]]x.txt": [
+    "src/]x.txt"
+  ]
+}

@@ -1,0 +1,94 @@
+[
+  {
+    "spool": "s-1.jsonl",
+    "line": "{\"session_id\":\"s-1\",\"hook_event_name\":\"SessionStart\",\"cwd\":\"/repo\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "agent_7-B.jsonl",
+    "line": "{\"session_id\":\"agent_7-B\",\"event\":\"underscore\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "_unidentified.jsonl",
+    "line": "{\"session_id\":\"bad/id\",\"event\":1,\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.jsonl",
+    "line": "{\"session_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "_unidentified.jsonl",
+    "line": "{\"session_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "_unidentified.jsonl",
+    "line": "{\"session_id\":\"\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "_unidentified.jsonl",
+    "line": "{\"session_id\":5,\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "_unidentified.jsonl",
+    "line": "{\"event\":\"no id\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"tool_input\":{\"command\":\"curl -H \\\"Authorization: [redacted] ghi\\\" x\"},\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"env\":\"API_KEY=[redacted] token: \\\"[redacted]\\\" password=[redacted];\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"text\":\"keys [redacted] [redacted] [redacted] [redacted] and [redacted] end\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"text\":\"AKIAABCDEFGHIJKLMNO short and secret = '[redacted]'\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"long\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"long\":{\"_trimmed_chars\":2001,\"head\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"},\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"nested\":[{\"deep\":[{\"_trimmed_chars\":2001,\"head\":\"\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\\u00e9\"}]},1,null,true,2.5],\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"_captured_at\":1790001000.0,\"z\":\"after\"}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"unicode\":\"Caf\\u00e9 \\ud83d\\ude00 \\u6f22\\u5b57\",\"ctl\":\"a\\u0001b\",\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"a\":2,\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"big\":12345678901234567890,\"float\":1e+300,\"_captured_at\":1790001000.0}\n"
+  },
+  {
+    "refused": "TypeError"
+  },
+  {
+    "refused": "TypeError"
+  },
+  {
+    "refused": "JSONDecodeError"
+  },
+  {
+    "refused": "JSONDecodeError"
+  },
+  {
+    "spool": "s.jsonl",
+    "line": "{\"session_id\":\"s\",\"pwd\":\"Passwd:[redacted] password = [redacted] secret:[redacted]\",\"_captured_at\":1790001000.0}\n"
+  }
+]

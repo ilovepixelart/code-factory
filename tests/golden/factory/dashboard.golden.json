@@ -1,0 +1,92 @@
+{
+  "from": 1793491200,
+  "to": 1794096000,
+  "now": 1794268800,
+  "runs": {
+    "total": 13,
+    "by_stage": [
+      {"key": "build", "runs": 6},
+      {"key": "review", "runs": 4},
+      {"key": "eval", "runs": 1},
+      {"key": "judge", "runs": 1},
+      {"key": "spec", "runs": 1}
+    ],
+    "by_state": [
+      {"key": "finished", "runs": 9},
+      {"key": "failed", "runs": 2},
+      {"key": "running", "runs": 1},
+      {"key": "stopped", "runs": 1}
+    ],
+    "by_source": [
+      {"key": "board", "runs": 11},
+      {"key": "eval", "runs": 1},
+      {"key": "judge", "runs": 1}
+    ],
+    "by_model": [
+      {"key": "opus", "runs": 8},
+      {"key": "sonnet", "runs": 5}
+    ],
+    "by_agent": [
+      {"key": "builder", "runs": 8},
+      {"key": "reviewer", "runs": 4},
+      {"key": "judge", "runs": 1}
+    ]
+  },
+  "prs": {"opened": 7, "merged": 4, "merged_in_period": 3, "open": 2, "closed": 1},
+  "series": {
+    "bucket": "day",
+    "points": [
+      {"start": 1793491200, "opened": 0, "merged": 0},
+      {"start": 1793577600, "opened": 1, "merged": 1},
+      {"start": 1793664000, "opened": 1, "merged": 1},
+      {"start": 1793750400, "opened": 0, "merged": 0},
+      {"start": 1793836800, "opened": 1, "merged": 1},
+      {"start": 1793923200, "opened": 2, "merged": 0},
+      {"start": 1794009600, "opened": 2, "merged": 1}
+    ]
+  },
+  "autonomy": {"share": 0.6666666666666666, "autonomous": 2, "assisted": 1, "unknown": 1},
+  "cycle": {
+    "total": {"median": 79200.0, "count": 4},
+    "stages": [
+      {"stage": "kickoff_to_pr", "median": 9000.0, "count": 4},
+      {"stage": "pr_to_review", "median": 21600.0, "count": 3},
+      {"stage": "review_to_merge", "median": 64800.0, "count": 3}
+    ]
+  },
+  "cost": {
+    "median": 1.75,
+    "priced": 6,
+    "of": 7,
+    "estimated": false,
+    "measurement": 0.5,
+    "by_component": [
+      {"component": "spec", "median": 0.0, "total": 0.5},
+      {"component": "build", "median": 1.5, "total": 16.0},
+      {"component": "review", "median": 0.5, "total": 5.0},
+      {"component": "other", "median": 0.0, "total": 0.0}
+    ],
+    "by_size": [
+      {"size": "S", "median": 1.5, "priced": 2, "of": 2},
+      {"size": "M", "median": 3.5, "priced": 2, "of": 2},
+      {"size": "L", "median": 1.5, "priced": 1, "of": 2},
+      {"size": "XL", "median": 10.0, "priced": 1, "of": 1}
+    ]
+  },
+  "expensive": [
+    {"url": "https://github.com/sample/sample/pull/14", "repository": "sample", "number": 14, "ticket": "CF-4", "title": "Cache the index", "state": "open", "opened_at": 1793952000, "cost": 10.0, "cost_complete": true, "estimated": false, "changed_lines": 1000, "size": "XL", "runs": 2},
+    {"url": "https://github.com/sample/sample/pull/12", "repository": "sample", "number": 12, "ticket": "CF-2", "title": "Split the loader", "state": "merged", "opened_at": 1793700000, "cost": 5.0, "cost_complete": true, "estimated": false, "changed_lines": 100, "size": "M", "runs": 3},
+    {"url": "https://github.com/sample/sample/pull/13", "repository": "sample", "number": 13, "ticket": "CF-3", "title": "Retry the fetch", "state": "merged", "opened_at": 1793880000, "cost": 2.0, "cost_complete": true, "estimated": false, "changed_lines": 499, "size": "M", "runs": 1},
+    {"url": "https://github.com/sample/sample/pull/17", "repository": "sample", "number": 17, "ticket": "CF-6", "title": "Trim the page", "state": "merged", "opened_at": 1794049200, "cost": 1.5, "cost_complete": true, "estimated": false, "changed_lines": 99, "size": "S", "runs": 2},
+    {"url": "https://github.com/sample/sample/pull/16", "repository": "sample", "number": 16, "ticket": "CF-6", "title": "Page the list", "state": "open", "opened_at": 1794045600, "cost": 1.5, "cost_complete": true, "estimated": false, "changed_lines": 999, "size": "L", "runs": 2}
+  ],
+  "scorers": {
+    "available": true,
+    "cards": [
+      {"repository": "sample", "name": "ran-tests", "question": "Did the agent run the tests before finishing?", "yes": 3, "no": 1, "unclear": 1, "asked": 5, "pass_rate": 0.75, "average_score": null, "window": {"from": 1793664000, "to": 1794268800}}
+    ]
+  },
+  "improvements": {"available": false, "items": []},
+  "fix_rounds": [],
+  "role_notes": []
+}

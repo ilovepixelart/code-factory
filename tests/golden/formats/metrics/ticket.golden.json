@@ -1,0 +1,212 @@
+{
+  "runs": [],
+  "spent": 0,
+  "cost": {
+    "total": null,
+    "review": null,
+    "cache_read": null,
+    "turns": null
+  },
+  "budget": null,
+  "default_budget": null,
+  "halted": "",
+  "ticket": {
+    "id": "CF-20",
+    "title": "Small change 20",
+    "type": "feature",
+    "branch": "",
+    "e2e": "",
+    "tests": "",
+    "description": "",
+    "stage": "",
+    "labels": "",
+    "priority": "",
+    "assignee": "",
+    "due": "",
+    "blocked": "",
+    "archived": false,
+    "rank": 0,
+    "stage_since": "",
+    "blocked_by": "",
+    "caused_by": "",
+    "parent": "",
+    "budget": "",
+    "parallel": "",
+    "source": "",
+    "steps": "",
+    "pages": ""
+  },
+  "repository": "sample",
+  "work_done": false,
+  "checklist": [
+    {
+      "stage": "spec",
+      "required": true,
+      "present": false,
+      "detail": "a branch"
+    },
+    {
+      "stage": "build",
+      "required": true,
+      "present": false,
+      "detail": "a branch"
+    },
+    {
+      "stage": "review",
+      "required": true,
+      "present": false,
+      "detail": "no branch declared"
+    },
+    {
+      "stage": "merged",
+      "required": true,
+      "present": false,
+      "detail": "main"
+    },
+    {
+      "stage": "released",
+      "required": false,
+      "present": false,
+      "detail": ".code-factory/releases/<version>.md"
+    }
+  ],
+  "summary": {
+    "gate": null,
+    "verdict": "",
+    "capture": null,
+    "not_proven": []
+  },
+  "current_stage": "spec",
+  "questions": [],
+  "documents": [
+    {
+      "stage": "requirements",
+      "html": null
+    },
+    {
+      "stage": "spec",
+      "html": null
+    },
+    {
+      "stage": "uat",
+      "html": null
+    }
+  ],
+  "plan": null,
+  "link": {
+    "open_blockers": [],
+    "blocks": [],
+    "parent": "",
+    "children": 0,
+    "children_done": 0,
+    "child_ids": []
+  },
+  "titles": {
+    "CF-1": "Ship the login",
+    "CF-2": "Search tickets",
+    "CF-3": "Login fails on an empty password",
+    "CF-4": "Search crashes on quotes",
+    "CF-5": "Export a report",
+    "CF-6": "Dark mode for charts",
+    "CF-7": "Rewrite the importer",
+    "CF-8": "Bulk tags",
+    "CF-9": "New sidebar",
+    "CF-10": "Faster checks",
+    "CF-11": "Pick a palette",
+    "CF-12": "Audit log",
+    "CF-13": "Retry uploads",
+    "CF-20": "Small change 20",
+    "CF-21": "Small change 21",
+    "CF-22": "Small change 22",
+    "CF-23": "Small change 23",
+    "CF-24": "Small change 24",
+    "CF-25": "Small change 25",
+    "CF-26": "Small change 26",
+    "CF-27": "Small change 27",
+    "CF-28": "Small change 28",
+    "CF-29": "Small change 29",
+    "CF-30": "Small change 30",
+    "CF-31": "Small change 31",
+    "CF-32": "Small change 32",
+    "CF-33": "Small change 33",
+    "CF-34": "Small change 34",
+    "CF-35": "Small change 35",
+    "CF-36": "Small change 36",
+    "CF-37": "Small change 37",
+    "CF-38": "Small change 38",
+    "CF-39": "Small change 39",
+    "CF-40": "Small change 40",
+    "CF-41": "Small change 41",
+    "CF-50": "Idea 50",
+    "CF-51": "Idea 51",
+    "CF-52": "Idea 52",
+    "CF-53": "Idea 53",
+    "CF-54": "Idea 54"
+  },
+  "stages_by_id": {
+    "CF-1": "released",
+    "CF-34": "spec",
+    "CF-31": "spec",
+    "CF-36": "spec",
+    "CF-6": "spec",
+    "CF-40": "spec",
+    "CF-50": "spec",
+    "CF-52": "spec",
+    "CF-3": "spec",
+    "CF-27": "spec",
+    "CF-25": "spec",
+    "CF-13": "spec",
+    "CF-5": "spec",
+    "CF-35": "spec",
+    "CF-29": "spec",
+    "CF-21": "spec",
+    "CF-8": "spec",
+    "CF-26": "spec",
+    "CF-51": "spec",
+    "CF-2": "released",
+    "CF-41": "spec",
+    "CF-20": "spec",
+    "CF-12": "review",
+    "CF-10": "build",
+    "CF-4": "released",
+    "CF-9": "review",
+    "CF-24": "spec",
+    "CF-32": "spec",
+    "CF-22": "spec",
+    "CF-23": "spec",
+    "CF-30": "spec",
+    "CF-37": "spec",
+    "CF-28": "spec",
+    "CF-33": "spec",
+    "CF-38": "spec",
+    "CF-53": "spec",
+    "CF-54": "spec",
+    "CF-11": "spec",
+    "CF-39": "spec",
+    "CF-7": "spec"
+  },
+  "description_html": "",
+  "check": null,
+  "check_log": "",
+  "checks_configured": false,
+  "activity": [
+    {
+      "at": 1788186600.0,
+      "sentence": "Moved to Review",
+      "kind": "stage",
+      "text": ""
+    },
+    {
+      "at": 1788121800.0,
+      "sentence": "Moved to Build",
+      "kind": "stage",
+      "text": ""
+    },
+    {
+      "at": 1788057000.0,
+      "sentence": "Created as a ticket",
+      "kind": "created",
+      "text": ""
+    }
+  ]
+}

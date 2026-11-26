@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{#
+  Utilities live in the markup. Where a shape repeats, a macro or a loop writes it once. Every
+  snippet comes from web/snippets.toml, which tests/site/test_site_snippets.py holds to the board.
+#}
+
+{# The one line a visitor is here to copy. The button appears only where the clipboard API
+   does; without it the text is still select-all. #}
+{% macro install(command, mode) %}
+  <span class="inline-flex max-w-full items-center gap-2 font-mono text-sm text-muted-foreground border border-dashed border-border rounded-lg pl-3 pr-1.5 py-1">
+    <span class="select-all truncate" data-install>{{ command }}</span>
+    <button type="button" data-copy hidden aria-label="Copy {{ mode }} command" class="btn btn-sm btn-ghost text-muted-foreground">copy</button>
+  </span>
+{% endmacro %}
+
+{% macro heading(eyebrow, title, intro) %}
+  <p class="text-xs uppercase tracking-wider text-muted-foreground">{{ eyebrow }}</p>
+  <h2 class="font-display mt-2 text-2xl font-semibold tracking-tight text-balance">{{ title }}</h2>
+  {% if intro %}<p class="mt-2 text-muted-foreground max-w-[64ch]">{{ intro | safe }}</p>{% endif %}
+{% endmacro %}
+
+{% macro blurbs(items, measure='', columns='') %}
+  <dl class="grid gap-4 {{ columns }}">
+    {% for term, body in items %}
+      <div>
+        <dt class="text-sm font-semibold">{{ term }}</dt>
+        <dd class="mt-1.5 text-sm text-muted-foreground {{ measure }}">{{ body | safe }}</dd>
+      </div>
+    {% endfor %}
+  </dl>
+{% endmacro %}
+
+{% macro chrome(label) %}
+  <div class="flex items-center gap-1.5 px-3 py-2.5 border-b border-border bg-muted/60">
+    <span class="size-2.5 rounded-full bg-muted-foreground/40"></span>
+    <span class="size-2.5 rounded-full bg-muted-foreground/40"></span>
+    <span class="size-2.5 rounded-full bg-muted-foreground/40"></span>
+    <span class="ml-2 font-mono text-xs text-muted-foreground truncate">{{ label }}</span>
+  </div>
+{% endmacro %}
+
+{% macro codepane(key) %}
+  {# min-w-0: a grid item is min-content wide by default, so a wide <pre> would stretch its
+     track instead of scrolling inside it. #}
+  {% set pane = panes[key] %}
+  <div class="card min-w-0">
+    {{ chrome(pane.label) }}
+    <pre class="code min-w-0 p-4 font-mono text-sm leading-relaxed overflow-x-auto"><code>{{ pane | code | safe }}</code></pre>
+  </div>
+{% endmacro %}
+
+{% macro inline(text) %}<span class="font-mono text-xs text-foreground">{{ text }}</span>{% endmacro %}
+
+{% block body %}
+<section class="gridded {{ band }}">
+  <div class="{{ pad }} grid lg:grid-cols-2 {{ cols }} items-start">
+    <div class="min-w-0">
+      <p class="text-xs uppercase tracking-wider text-muted-foreground">Self-hosted ticket board for Claude Code and Codex</p>
+      <h1 class="font-display mt-3 text-5xl sm:text-6xl font-semibold tracking-[-0.04em] leading-[0.98] text-balance">
+        From ticket to merged code, with agents.
+      </h1>
+      <p class="mt-5 text-lg text-muted-foreground max-w-[56ch]">
+        A board that takes software work from a ticket to merged code. Coding agents work in
+        <span class="text-foreground font-medium">worktrees of their own</span> and reach the board
+        through <span class="text-foreground font-medium">MCP tools and hooks</span>. Factory can
+        open GitHub pull requests and waits for your approval before merging by default.
+      </p>
+
+      <div class="mt-8 flex flex-wrap items-center gap-2">
+        <a class="btn btn-default" href="#how">How it works</a>
+        <a class="btn btn-outline" href="#examples">See the calls</a>
+      </div>
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        {{ install('sh scripts/start.sh --local', 'Local mode') }}
+        <span class="badge font-mono">{{ version }}</span>
+      </div>
+    </div>
+
+    {{ codepane('quickstart') }}
+  </div>
+</section>
+
+<section class="{{ band }} bg-muted/50">
+  <div class="{{ pad }}">
+    {{ heading('Columns', 'Spec, Build, Review, Merged',
+       'A ticket\'s column is read from git: its branch, its commits, its pull request and the
+        merge. An observer refreshes those facts every 30 seconds; a column you declare by hand
+        wins over them.') }}
+    {# stage, dot and meaning follow stages/rules/evidence.py and STAGE_DOT in
+       web/src/lib/board.ts; a test pins this list to the board's stages. #}
+    <dl class="{{ lede }} grid sm:grid-cols-2 lg:grid-cols-5 gap-x-10 gap-y-8">
+      {% for stage, dot, meaning in [
+        ('spec', 'bg-chart-1', 'Filed, with no branch yet: the work is still being described.'),
+        ('build', 'bg-chart-2', 'A branch exists. An agent works it in a worktree of its own until it is pushed with a pull request.'),
+        ('review', 'bg-chart-3', 'Pushed, with a pull request recorded. The checks and a review run judge its head.'),
+        ('merged', 'bg-chart-4', 'Git says the branch reached the default branch.'),
+        ('released', 'bg-chart-5', 'Not a column: a published release names the ticket, and it moves to the archive.'),
+      ] %}
+        <div class="min-w-0">
+          <dt class="flex items-center gap-2 font-mono text-sm">
+            <span class="inline-block size-2 rounded-full ring-1 ring-foreground/20 {{ dot }}"></span>{{ stage }}
+          </dt>
+          {# pl-4 is the dot plus its gap, so the meaning starts under the name #}
+          <dd class="mt-1.5 pl-4 text-sm text-muted-foreground">{{ meaning }}</dd>
+        </div>
+      {% endfor %}
+    </dl>
+  </div>
+</section>
+
+<section id="how" class="{{ band }} scroll-mt-14">
+  <div class="{{ pad }} grid lg:grid-cols-2 {{ cols }} items-start">
+    <div class="min-w-0">
+      {{ heading('The Inbox', 'When an agent needs you, it waits',
+         'Everything that waits on you is one list: questions, permission requests, rules to adopt,
+          memory proposals, stopped agents, screens to approve, failing and mergeable pull requests,
+          failing default branches.') }}
+      <div class="{{ lede }}">
+        {{ blurbs([
+          ('A permission request holds the agent', 'A tool the sandbox or your standing rules do not settle becomes a request. The hook waits up to 540 seconds for your Allow or Deny, and the answer travels back to the agent.'),
+          ('A question is kept on the ticket', 'An agent asks one focused question with its choices and a recommended one, then ends its turn. The answer is recorded on the ticket for the next run to read.'),
+          ('Answered from your phone', 'With a push target set, each new item goes to ntfy or a webhook with a link that answers it without signing in. Opening the link changes nothing; only a press answers.'),
+        ], 'max-w-[56ch]') }}
+      </div>
+    </div>
+    <div class="min-w-0">{{ codepane('ask') }}</div>
+  </div>
+</section>
+
+<section id="examples" class="{{ band }} bg-muted/50 scroll-mt-14">
+  <div class="{{ pad }}">
+    {{ heading('Interfaces', 'The calls and the commands, as the board takes them',
+       'Agents reach the board through MCP tools; you through the web app, the same tools and the
+        ' ~ inline('code-factory') ~ ' command.') }}
+    <div class="{{ lede }} card">
+      {% include "partials/example.html" %}
+    </div>
+  </div>
+</section>
+
+<section class="{{ band }}">
+  <div class="{{ pad }}">
+    {{ heading('Features', 'One board, from the ticket to the merge',
+       'Each area is a module of one application, reached only through its service.') }}
+    <div class="{{ lede }} grid sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8">
+      {% for title, body in [
+        ('Board', 'Columns with limits, cards, filters and saved views, bulk changes, an archive, and a ticket page with documents, links, activity and undo.'),
+        ('Inbox', 'Everything that waits on you, oldest first, with a count and the newest sentence.'),
+        ('Push and reply links', 'One message per new Inbox item to ntfy or a webhook, with a link that answers a request or a question.'),
+        ('Agents and runs', 'Agents and model connections, claims, runs in worktrees, permissions, previews and split runs.'),
+        ('MCP', 'Tools for tickets, documents, activity, questions, reviews and memory, per caller and stage.'),
+        ('Hooks', 'Permission requests, news for a running agent, recall at session start, and the rewrite guard.'),
+        ('Checks, review, delivery', 'The checks command and its verdicts, review runs and findings, pull requests and the merge.'),
+        ('Sessions', 'Captured agent sessions with their timeline, usage and cost.'),
+        ('Memory', 'Rules, decisions and lessons agents load, and the lessons they propose for you to approve.'),
+        ('Flow and Factory', 'What merged, how long it took, whether it held and what it cost per cohort.'),
+        ('Screens', 'Captures of a ticket\'s pages, light and dark, for you to approve.'),
+        ('Releases', 'Notes drafted from the merged tickets, edited, then published.'),
+      ] %}
+        <div>
+          <h3 class="text-sm font-semibold">{{ title }}</h3>
+          <p class="mt-1.5 text-sm text-muted-foreground max-w-[42ch]">{{ body }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="{{ band }} bg-muted/50">
+  <div class="{{ pad }}">
+    {{ heading('The board', 'The work as a whole, in one page',
+       'A browser tab on your own machine, served by the same process the agents talk to, so there
+        is no second service to run.') }}
+    <div class="{{ lede }}">
+      {{ blurbs([
+        ('A card says where it stands', 'Its column, what blocks it, its branch, its priority and what it has cost so far.'),
+        ('Live without a reload', 'The board refreshes every 3 seconds while the tab is in view.'),
+        ('Changes can be undone', 'Use Undo from the notice that follows a card change.'),
+      ], 'max-w-[42ch]', 'sm:grid-cols-3') }}
+      <a class="btn btn-outline mt-8" href="#start">Run the board locally</a>
+    </div>
+  </div>
+</section>
+
+<section class="{{ band }}">
+  <div class="{{ pad }} grid lg:grid-cols-2 {{ cols }} items-start">
+    <div class="min-w-0">
+      {{ heading('Guardrails', 'What a run may do, and what stays yours',
+         'A tracked repository keeps its settings in ' ~ inline('.code-factory/config.toml') ~ '.
+          A key nothing reads is an error, not ignored.') }}
+      <div class="{{ lede }}">
+        {{ blurbs([
+          ('A token per run', 'A run reaches the board with a token bound to it: it sees the tools of its role, writes only its stage\'s documents, and makes at most 120 calls a minute.'),
+          ('Fast feedback during fixes', 'When configured, the fast gate checks affected tests first. A pass queues the required full gate for the same commit.'),
+          ('Some merges stay yours', 'A head that touches ' ~ inline('sensitive_paths') ~ ', or a change larger than ' ~ inline('large_change') ~ ', is held for you to merge.'),
+          ('Checked before it is read', inline('code-factory config check') ~ ' reports each defect as path:line: message.'),
+        ], 'max-w-[56ch]') }}
+      </div>
+    </div>
+    <div class="min-w-0">{{ codepane('config') }}</div>
+  </div>
+</section>
+
+<section id="start" class="{{ band }} bg-muted/50 scroll-mt-14">
+  <div class="{{ pad }}">
+    {{ heading('Start', 'Run it from a source checkout',
+       'Choose Local mode for coding tools installed on your machine or Server mode for Docker.
+        Follow the setup in ' ~ inline('docs/quickstart.md') ~ '.') }}
+    <dl class="{{ lede }} grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-10 gap-y-8">
+      {% for term, value in [
+          ('Version', version ~ ', under construction'), ('Python', '3.14, async throughout'),
+          ('Database', 'PostgreSQL'), ('Web app', 'Vue 3 and shadcn-vue'),
+          ('Tests', '8,200+ in pytest'), ('Serves', '127.0.0.1:4000, one owner')] %}
+        <div>
+          <dt class="text-xs uppercase tracking-wider text-muted-foreground">{{ term }}</dt>
+          <dd class="mt-1.5 text-sm font-medium">{{ value }}</dd>
+        </div>
+      {% endfor %}
+    </dl>
+    <dl class="{{ lede }} grid gap-4 sm:grid-cols-2">
+      {% for mode, detail, command in [
+          ('Local mode', 'The app runs on your machine with the Claude Code or Codex CLI you use there.', 'sh scripts/start.sh --local'),
+          ('Server mode', 'The app and PostgreSQL run together in Docker.', 'sh scripts/compose.sh')] %}
+        <div class="card p-4">
+          <dt class="text-sm font-semibold">{{ mode }}</dt>
+          <dd class="mt-2 text-sm text-muted-foreground">{{ detail }}</dd>
+          <dd class="mt-3">{{ install(command, mode) }}</dd>
+        </div>
+      {% endfor %}
+    </dl>
+  </div>
+</section>
+{% endblock %}

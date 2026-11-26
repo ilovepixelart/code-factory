@@ -1,0 +1,5 @@
+{"prs": [
+  {"url": "https://github.com/sample/sample/pull/14", "repository": "sample", "number": 14, "ticket": "CF-4", "title": "Cache the index", "state": "open", "opened_at": 1793952000, "cost": 10.0, "cost_complete": true, "estimated": false, "changed_lines": 1000, "size": "XL", "runs": 2},
+  {"url": "https://github.com/sample/sample/pull/12", "repository": "sample", "number": 12, "ticket": "CF-2", "title": "Split the loader", "state": "merged", "opened_at": 1793700000, "cost": 5.0, "cost_complete": true, "estimated": false, "changed_lines": 100, "size": "M", "runs": 3},
+  {"url": "https://github.com/sample/sample/pull/13", "repository": "sample", "number": 13, "ticket": "CF-3", "title": "Retry the fetch", "state": "merged", "opened_at": 1793880000, "cost": 2.0, "cost_complete": true, "estimated": false, "changed_lines": 499, "size": "M", "runs": 1}
+]}

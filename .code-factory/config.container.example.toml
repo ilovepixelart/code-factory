@@ -1,0 +1,7 @@
+# Verify the runner can execute Factory's sandbox integration tests before activating this config.
+[checks]
+container = "code-factory-checks:local"
+command = "sh scripts/gate.sh --force --secrets"
+fast = "sh scripts/gate.sh --fast --force --secrets"
+main = "sh scripts/gate.sh --force --secrets"
+timeout = 1200

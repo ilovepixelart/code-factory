@@ -1,0 +1,117 @@
+{
+  "unreviewed": [
+    {
+      "id": "2026-10-01-keep-it-small",
+      "kind": "rule",
+      "date": "2026-10-01",
+      "source": "conversation",
+      "statement": "Keep it small and test first",
+      "why": "",
+      "guard": "",
+      "repository": "sample",
+      "reviewed": "",
+      "guard_state": "",
+      "loaded": true,
+      "left_out": false,
+      "superseded_by": "",
+      "scope": "",
+      "supersedes": "",
+      "loads": "every session",
+      "chars": 31,
+      "proposed": false,
+      "stale": false,
+      "incomplete": true,
+      "review_due": "2026-12-30",
+      "filing": "committed",
+      "cites": "",
+      "stale_cites": []
+    },
+    {
+      "id": "2026-10-02-the-gate-ran-twice",
+      "kind": "lesson",
+      "date": "2026-10-02",
+      "source": "CF-2",
+      "statement": "The gate ran twice on one tree",
+      "why": "",
+      "guard": "",
+      "repository": "sample",
+      "reviewed": "",
+      "guard_state": "none",
+      "loaded": true,
+      "left_out": false,
+      "superseded_by": "",
+      "scope": "",
+      "supersedes": "",
+      "loads": "every session",
+      "chars": 33,
+      "proposed": false,
+      "stale": false,
+      "incomplete": true,
+      "review_due": "2026-12-31",
+      "filing": "committed",
+      "cites": "",
+      "stale_cites": []
+    },
+    {
+      "id": "2026-10-03-ship-small",
+      "kind": "decision",
+      "date": "2026-10-03",
+      "source": "chat",
+      "statement": "Ship small pull requests",
+      "why": "",
+      "guard": "",
+      "repository": "sample",
+      "reviewed": "",
+      "guard_state": "",
+      "loaded": true,
+      "left_out": false,
+      "superseded_by": "",
+      "scope": "",
+      "supersedes": "",
+      "loads": "every session",
+      "chars": 27,
+      "proposed": false,
+      "stale": false,
+      "incomplete": true,
+      "review_due": "2027-01-01",
+      "filing": "committed",
+      "cites": "",
+      "stale_cites": []
+    }
+  ],
+  "rules": [],
+  "decisions": [],
+  "lessons": [],
+  "retired": [],
+  "results": {
+    "gate": [
+      {
+        "repository": "sample",
+        "path": ".code-factory/memory/2026-10-02-the-gate-ran-twice.md",
+        "snippet": "...CF-2 The gate ran twice on one tree",
+        "open": "#2026-10-02-the-gate-ran-twice"
+      },
+      {
+        "repository": "sample",
+        "path": "docs/notes.md",
+        "snippet": "Notes The gate refuses a push whose checks did not pass on...",
+        "open": ""
+      }
+    ],
+    "keep small": [
+      {
+        "repository": "sample",
+        "path": ".code-factory/memory/2026-10-01-keep-it-small.md",
+        "snippet": "...conversation Keep it small and test first",
+        "open": "#2026-10-01-keep-it-small"
+      },
+      {
+        "repository": "sample",
+        "path": "docs/notes.md",
+        "snippet": "...Keep tickets small.",
+        "open": ""
+      }
+    ],
+    "nothing matches this": []
+  }
+}

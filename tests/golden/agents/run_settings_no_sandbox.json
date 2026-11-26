@@ -1,0 +1,172 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test *)",
+      "Edit",
+      "mcp__code-factory"
+    ],
+    "deny": [
+      "Read(~/.ssh)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.config/gh)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.docker/config.json)",
+      "Read(~/.docker/config.json/**)",
+      "Read(~/.netrc)",
+      "Read(~/.netrc/**)",
+      "Read(~/.npmrc)",
+      "Read(~/.npmrc/**)",
+      "Read(~/.pypirc)",
+      "Read(~/.pypirc/**)",
+      "Read(~/.git-credentials)",
+      "Read(~/.git-credentials/**)",
+      "Read(~/.omp)",
+      "Read(~/.omp/**)",
+      "Read(~/.local/share/opencode/auth.json)",
+      "Read(~/.local/share/opencode/auth.json/**)",
+      "Read(~/.kube)",
+      "Read(~/.kube/**)",
+      "Read(~/.azure)",
+      "Read(~/.azure/**)",
+      "Read(~/.pi/agent)",
+      "Read(~/.pi/agent/**)",
+      "Read(~/.codex)",
+      "Read(~/.codex/**)",
+      "Read(~/.claude)",
+      "Read(~/.claude/**)",
+      "Read(~/.claude.json)",
+      "Read(~/.claude.json/**)",
+      "Edit(./.claude/**)",
+      "Write(./.claude/**)",
+      "Read(/{home})",
+      "Read(/{home}/**)",
+      "Edit(/{home})",
+      "Edit(/{home}/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" recall"
+          }
+        ],
+        "matcher": "startup|resume|clear|compact"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"{exe}\" capture"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,338 @@
+{
+  "labels": [
+    "ui",
+    "agents",
+    "UI ",
+    "rewrite",
+    "quality",
+    "Café",
+    "🚀",
+    "a",
+    "",
+    "infrastructure",
+    "long label with spaces"
+  ],
+  "money": [
+    0,
+    0.5,
+    1.25,
+    4.25,
+    1234.5,
+    1000000,
+    0.125,
+    0.375,
+    2.675,
+    1.005,
+    0.001,
+    99.999,
+    1e-09,
+    12345678.9
+  ],
+  "days": [
+    [
+      "2026-10-10",
+      "2026-10-05"
+    ],
+    [
+      "2026-01-03",
+      "2026-10-05"
+    ],
+    [
+      "2025-12-31",
+      "2026-10-05"
+    ],
+    [
+      "20261004",
+      "2026-10-05"
+    ],
+    [
+      "2026-W40-1",
+      "2026-10-05"
+    ],
+    [
+      "2027-W01",
+      "2026-10-05"
+    ],
+    [
+      "not a date",
+      "2026-10-05"
+    ],
+    [
+      "",
+      "2026-10-05"
+    ],
+    [
+      "2026-02-30",
+      "2026-10-05"
+    ]
+  ],
+  "count": [
+    0,
+    999,
+    1000,
+    1049,
+    1050,
+    1250,
+    2250,
+    1500,
+    999949,
+    999950,
+    1000000,
+    1250000,
+    81100000,
+    123456789
+  ],
+  "dur": [
+    null,
+    0,
+    0.0004,
+    0.0005,
+    0.35,
+    0.9994,
+    0.9996,
+    1,
+    1.85,
+    1.25,
+    59.94,
+    59.96,
+    60,
+    95.4,
+    3725
+  ],
+  "trim": [
+    [
+      "short",
+      140
+    ],
+    [
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      140
+    ],
+    [
+      "abcdef",
+      4
+    ],
+    [
+      "abcd",
+      4
+    ],
+    [
+      "日本語テキスト",
+      3
+    ],
+    [
+      "",
+      5
+    ]
+  ],
+  "turn_entries": [
+    [],
+    [
+      {
+        "kind": "start",
+        "seq": 1,
+        "at": 100.0,
+        "agent_id": null,
+        "title": "Session started",
+        "detail": "",
+        "duration_seconds": null,
+        "status": ""
+      }
+    ],
+    [
+      {
+        "kind": "start",
+        "seq": 1,
+        "at": 100.0,
+        "agent_id": null,
+        "title": "Session started",
+        "detail": "",
+        "duration_seconds": null,
+        "status": ""
+      },
+      {
+        "kind": "prompt",
+        "seq": 2,
+        "at": 101.0,
+        "agent_id": null,
+        "title": "Prompt",
+        "detail": "Fix it",
+        "duration_seconds": null,
+        "status": ""
+      },
+      {
+        "kind": "tool",
+        "seq": 3,
+        "at": 102.0,
+        "agent_id": null,
+        "title": "Bash",
+        "detail": "ls",
+        "duration_seconds": 0.5,
+        "status": "done"
+      },
+      {
+        "kind": "stop",
+        "seq": 4,
+        "at": 110.0,
+        "agent_id": null,
+        "title": "Turn ended",
+        "detail": "ok",
+        "duration_seconds": null,
+        "status": ""
+      }
+    ],
+    [
+      {
+        "kind": "prompt",
+        "seq": 1,
+        "at": 10.0,
+        "agent_id": null,
+        "title": "Prompt",
+        "detail": "One",
+        "duration_seconds": null,
+        "status": ""
+      },
+      {
+        "kind": "tool",
+        "seq": 2,
+        "at": 11.0,
+        "agent_id": null,
+        "title": "Read",
+        "detail": "a",
+        "duration_seconds": null,
+        "status": "failed"
+      },
+      {
+        "kind": "stop",
+        "seq": 3,
+        "at": 12.0,
+        "agent_id": null,
+        "title": "",
+        "detail": "",
+        "duration_seconds": null,
+        "status": ""
+      },
+      {
+        "kind": "prompt",
+        "seq": 4,
+        "at": 20.0,
+        "agent_id": null,
+        "title": "Prompt",
+        "detail": "Two",
+        "duration_seconds": null,
+        "status": ""
+      },
+      {
+        "kind": "tool",
+        "seq": 5,
+        "at": 21.0,
+        "agent_id": null,
+        "title": "Edit",
+        "detail": "b",
+        "duration_seconds": null,
+        "status": "running"
+      },
+      {
+        "kind": "stop",
+        "seq": 6,
+        "at": 25.0,
+        "agent_id": null,
+        "title": "",
+        "detail": "",
+        "duration_seconds": null,
+        "status": ""
+      }
+    ],
+    [
+      {
+        "kind": "prompt",
+        "seq": 1,
+        "at": 10.0,
+        "agent_id": null,
+        "title": "Prompt",
+        "detail": "Only",
+        "duration_seconds": null,
+        "status": ""
+      },
+      {
+        "kind": "tool",
+        "seq": 2,
+        "at": 11.0,
+        "agent_id": "ag1",
+        "title": "Bash",
+        "detail": "x",
+        "duration_seconds": null,
+        "status": "denied"
+      },
+      {
+        "kind": "prompt",
+        "seq": 3,
+        "at": 30.0,
+        "agent_id": null,
+        "title": "Prompt",
+        "detail": "Next",
+        "duration_seconds": null,
+        "status": ""
+      },
+      {
+        "kind": "tool",
+        "seq": 4,
+        "at": 31.0,
+        "agent_id": null,
+        "title": "Bash",
+        "detail": "y",
+        "duration_seconds": null,
+        "status": "done"
+      }
+    ],
+    [
+      {
+        "kind": "tool",
+        "seq": 1,
+        "at": 5.0,
+        "agent_id": null,
+        "title": "Bash",
+        "detail": "early",
+        "duration_seconds": null,
+        "status": "waiting"
+      },
+      {
+        "kind": "prompt",
+        "seq": 2,
+        "at": 6.0,
+        "agent_id": null,
+        "title": "Prompt",
+        "detail": "Late",
+        "duration_seconds": null,
+        "status": ""
+      },
+      {
+        "kind": "stop",
+        "seq": 3,
+        "at": 9.5,
+        "agent_id": null,
+        "title": "",
+        "detail": "",
+        "duration_seconds": null,
+        "status": ""
+      }
+    ]
+  ],
+  "span": [
+    0,
+    29,
+    30,
+    90,
+    150,
+    1799,
+    3599,
+    3600,
+    5400,
+    5580,
+    86399,
+    86400,
+    129600,
+    1036800,
+    885600
+  ]
+}

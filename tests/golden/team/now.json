@@ -1,0 +1,368 @@
+{
+  "now": 1794312000.0,
+  "today": 1794268800.0,
+  "cycle": {
+    "since": 1793707200.0,
+    "from": "the last 7 days"
+  },
+  "counts": {
+    "needs_you": 1,
+    "waiting": 1,
+    "working": 1,
+    "done_today": 1,
+    "stale": 1
+  },
+  "groups": {
+    "needs_you": [
+      {
+        "key": "owner:questions:sample/CF-1",
+        "state": "owner",
+        "ticket": {
+          "repository": "sample",
+          "id": "CF-1",
+          "title": "Title of CF-1"
+        },
+        "actor": {
+          "kind": "owner",
+          "name": "you"
+        },
+        "line": "3 open questions",
+        "since": 1794309180.0,
+        "until": null,
+        "also": [
+          {
+            "state": "working",
+            "actor": {
+              "kind": "gate",
+              "name": "gate"
+            },
+            "line": "rust-test",
+            "since": 1794311700.0,
+            "until": null
+          }
+        ],
+        "pull": null
+      }
+    ],
+    "waiting": [
+      {
+        "key": "wait:sample/CF-2",
+        "state": "waiting",
+        "ticket": {
+          "repository": "sample",
+          "id": "CF-2",
+          "title": "Title of CF-2"
+        },
+        "actor": {
+          "kind": "reviewer",
+          "name": "reviewer"
+        },
+        "line": "waiting for a reviewer",
+        "since": 1794310200.0,
+        "until": null,
+        "also": [],
+        "pull": {
+          "number": 20,
+          "url": "https://example.test/pull/20",
+          "gate": "failed",
+          "merge": "open"
+        }
+      }
+    ],
+    "working": [
+      {
+        "key": "agent:builder:CF-3",
+        "state": "working",
+        "ticket": {
+          "repository": "sample",
+          "id": "CF-3",
+          "title": "Title of CF-3"
+        },
+        "actor": {
+          "kind": "agent",
+          "name": "builder"
+        },
+        "line": "build run",
+        "since": 1794307800.0,
+        "until": null,
+        "also": [],
+        "pull": null
+      }
+    ],
+    "done_today": [
+      {
+        "key": "done:sample/CF-4",
+        "state": "merged",
+        "ticket": {
+          "repository": "sample",
+          "id": "CF-4",
+          "title": "Title of CF-4"
+        },
+        "actor": {
+          "kind": "board",
+          "name": "merged"
+        },
+        "line": "",
+        "since": 1794268800.0,
+        "until": 1794308400.0,
+        "also": [],
+        "pull": null
+      }
+    ],
+    "stale": [
+      {
+        "key": "session:ticket-worker 7c2e:CF-5",
+        "state": "stale",
+        "ticket": {
+          "repository": "sample",
+          "id": "CF-5",
+          "title": "Title of CF-5"
+        },
+        "actor": {
+          "kind": "session",
+          "name": "ticket-worker 7c2e"
+        },
+        "line": "Read a.rs; no event since",
+        "since": 1794310800.0,
+        "until": null,
+        "also": [],
+        "pull": null
+      }
+    ]
+  },
+  "idle": [],
+  "paused": [
+    "writer"
+  ],
+  "stages": [
+    {
+      "stage": "first_commit",
+      "today": {
+        "median": 600.0,
+        "count": 2
+      },
+      "cycle": {
+        "median": 600.0,
+        "count": 2
+      }
+    },
+    {
+      "stage": "pull_request",
+      "today": {
+        "median": 5400.0,
+        "count": 1
+      },
+      "cycle": {
+        "median": 5400.0,
+        "count": 1
+      }
+    },
+    {
+      "stage": "gate_pass",
+      "today": {
+        "median": null,
+        "count": 0
+      },
+      "cycle": {
+        "median": null,
+        "count": 0
+      }
+    },
+    {
+      "stage": "merged",
+      "today": {
+        "median": 39600.0,
+        "count": 1
+      },
+      "cycle": {
+        "median": 39600.0,
+        "count": 1
+      }
+    }
+  ],
+  "peek": {
+    "sample/CF-1": {
+      "type": "feature",
+      "column": "build",
+      "milestones": [
+        {
+          "stage": "filed",
+          "at": 1794301200.0,
+          "cycle": null
+        },
+        {
+          "stage": "first_commit",
+          "at": null,
+          "cycle": 600.0
+        },
+        {
+          "stage": "pull_request",
+          "at": null,
+          "cycle": 5400.0
+        },
+        {
+          "stage": "gate_pass",
+          "at": null,
+          "cycle": null
+        },
+        {
+          "stage": "merged",
+          "at": null,
+          "cycle": 39600.0
+        }
+      ],
+      "events": [
+        {
+          "at": 1794301200.0,
+          "words": "created"
+        }
+      ]
+    },
+    "sample/CF-2": {
+      "type": "feature",
+      "column": "review",
+      "milestones": [
+        {
+          "stage": "filed",
+          "at": 1794304800.0,
+          "cycle": null
+        },
+        {
+          "stage": "first_commit",
+          "at": 1794306000.0,
+          "cycle": 600.0
+        },
+        {
+          "stage": "pull_request",
+          "at": 1794310200.0,
+          "cycle": 5400.0
+        },
+        {
+          "stage": "gate_pass",
+          "at": null,
+          "cycle": null
+        },
+        {
+          "stage": "merged",
+          "at": null,
+          "cycle": 39600.0
+        }
+      ],
+      "events": [
+        {
+          "at": 1794310200.0,
+          "words": "Pull request opened (https://example.test/pull/20)"
+        },
+        {
+          "at": 1794306600.0,
+          "words": "Checks failed"
+        },
+        {
+          "at": 1794304800.0,
+          "words": "created"
+        }
+      ]
+    },
+    "sample/CF-3": {
+      "type": "feature",
+      "column": "build",
+      "milestones": [
+        {
+          "stage": "filed",
+          "at": null,
+          "cycle": null
+        },
+        {
+          "stage": "first_commit",
+          "at": null,
+          "cycle": 600.0
+        },
+        {
+          "stage": "pull_request",
+          "at": null,
+          "cycle": 5400.0
+        },
+        {
+          "stage": "gate_pass",
+          "at": null,
+          "cycle": null
+        },
+        {
+          "stage": "merged",
+          "at": null,
+          "cycle": 39600.0
+        }
+      ],
+      "events": []
+    },
+    "sample/CF-4": {
+      "type": "feature",
+      "column": "merged",
+      "milestones": [
+        {
+          "stage": "filed",
+          "at": 1794268800.0,
+          "cycle": null
+        },
+        {
+          "stage": "first_commit",
+          "at": 1794269400.0,
+          "cycle": 600.0
+        },
+        {
+          "stage": "pull_request",
+          "at": null,
+          "cycle": 5400.0
+        },
+        {
+          "stage": "gate_pass",
+          "at": null,
+          "cycle": null
+        },
+        {
+          "stage": "merged",
+          "at": 1794308400.0,
+          "cycle": 39600.0
+        }
+      ],
+      "events": [
+        {
+          "at": 1794268800.0,
+          "words": "created"
+        }
+      ]
+    },
+    "sample/CF-5": {
+      "type": "feature",
+      "column": "build",
+      "milestones": [
+        {
+          "stage": "filed",
+          "at": null,
+          "cycle": null
+        },
+        {
+          "stage": "first_commit",
+          "at": null,
+          "cycle": 600.0
+        },
+        {
+          "stage": "pull_request",
+          "at": null,
+          "cycle": 5400.0
+        },
+        {
+          "stage": "gate_pass",
+          "at": null,
+          "cycle": null
+        },
+        {
+          "stage": "merged",
+          "at": null,
+          "cycle": 39600.0
+        }
+      ],
+      "events": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+# Publish only PostgreSQL for a Factory process running on the host.
+name: code-factory
+
+services:
+  credentials:
+    container_name: "${COMPOSE_PROJECT_NAME}-postgres-init"
+  db:
+    container_name: "${COMPOSE_PROJECT_NAME}-postgres"
+    ports:
+      - "127.0.0.1::5432"

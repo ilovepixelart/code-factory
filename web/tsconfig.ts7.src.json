@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.app.json",
+  "include": ["src/**/*.ts", "tsconfig.ts7.d.ts"],
+  "exclude": [],
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.ts7.src.tsbuildinfo",
+    "types": ["node", "vite/client"]
+  }
+}

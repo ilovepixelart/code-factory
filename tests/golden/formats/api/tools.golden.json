@@ -1,0 +1,156 @@
+{
+  "search_memory": {
+    "gate": [
+      {
+        "id": "2026-10-02-the-gate-ran-twice",
+        "kind": "lesson",
+        "date": "2026-10-02",
+        "source": "CF-2",
+        "statement": "The gate ran twice on one tree",
+        "why": "",
+        "guard": "",
+        "status": "active"
+      }
+    ],
+    "keep small": [
+      {
+        "id": "2026-10-01-keep-it-small",
+        "kind": "rule",
+        "date": "2026-10-01",
+        "source": "conversation",
+        "statement": "Keep it small and test first",
+        "why": "",
+        "guard": "",
+        "status": "active"
+      }
+    ],
+    "nothing matches this": [],
+    "": [
+      {
+        "id": "2026-10-01-keep-it-small",
+        "kind": "rule",
+        "date": "2026-10-01",
+        "source": "conversation",
+        "statement": "Keep it small and test first",
+        "why": "",
+        "guard": "",
+        "status": "active"
+      },
+      {
+        "id": "2026-10-02-the-gate-ran-twice",
+        "kind": "lesson",
+        "date": "2026-10-02",
+        "source": "CF-2",
+        "statement": "The gate ran twice on one tree",
+        "why": "",
+        "guard": "",
+        "status": "active"
+      },
+      {
+        "id": "2026-10-03-ship-small",
+        "kind": "decision",
+        "date": "2026-10-03",
+        "source": "chat",
+        "statement": "Ship small pull requests",
+        "why": "",
+        "guard": "",
+        "status": "active"
+      }
+    ]
+  },
+  "search_knowledge": {
+    "gate": [
+      {
+        "path": ".code-factory/memory/2026-10-02-the-gate-ran-twice.md",
+        "snippet": "...CF-2\n---\nThe gate ran twice on one tree\n"
+      },
+      {
+        "path": "docs/notes.md",
+        "snippet": "# Notes\n\nThe gate refuses a push whose checks did not pass on..."
+      }
+    ],
+    "keep small": [
+      {
+        "path": ".code-factory/memory/2026-10-01-keep-it-small.md",
+        "snippet": "...conversation\n---\nKeep it small and test first\n"
+      },
+      {
+        "path": "docs/notes.md",
+        "snippet": "...Keep tickets small.\n"
+      }
+    ],
+    "nothing matches this": [],
+    "": []
+  },
+  "read_ticket": {
+    "CF-1": {
+      "id": "CF-1",
+      "title": "Questions waiting",
+      "type": "feature",
+      "stage": "spec",
+      "requirements": [],
+      "documents": {
+        "uat": "# UAT\n\n### Open Questions\n* Ship when?\n",
+        "spec": "# BRD\n\nProblem.\n\n## Open questions\n\n- Which colour?\n  Answer: blue\n- Which size?\n- Which name?\nAnswer: not indented, so not an answer\n\n## Next\n\n- not a question\n"
+      }
+    },
+    "CF-2": {
+      "id": "CF-2",
+      "title": "A bug in flight",
+      "type": "bug",
+      "stage": "build",
+      "requirements": [],
+      "documents": {
+        "spec": "# BRD\n\nStarted.\n"
+      }
+    },
+    "CF-99": {
+      "error": "no ticket CF-99: list_board names the open tickets"
+    }
+  },
+  "list_artifacts": {
+    "CF-2": {
+      "artifacts": [
+        {
+          "kind": "check",
+          "at": 1791111600.0,
+          "summary": "passed on 1234567",
+          "path": "y.log"
+        },
+        {
+          "kind": "check",
+          "at": 1791108000.0,
+          "summary": "failed (exit 1) on abcdef1",
+          "path": "x.log"
+        },
+        {
+          "kind": "document",
+          "at": 1790001000.0,
+          "summary": "spec.md",
+          "path": "{root}/.code-factory/tickets/CF-2/spec.md"
+        },
+        {
+          "kind": "session",
+          "at": 1790000630.0,
+          "summary": "session idle",
+          "path": "s-rest"
+        },
+        {
+          "kind": "run",
+          "at": 1790000500.0,
+          "summary": "build agent running",
+          "path": "a.log"
+        },
+        {
+          "kind": "run",
+          "at": 1789999100.0,
+          "summary": "build agent ended (exit 0), stopped: iteration cap reached (8)",
+          "path": "d.log"
+        }
+      ]
+    },
+    "CF-99": {
+      "error": "no ticket CF-99: list_board names the open tickets"
+    }
+  }
+}

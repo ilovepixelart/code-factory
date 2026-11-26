@@ -1,0 +1,41 @@
+{
+  "files": [
+    "tests/a.py",
+    "tests/b.py",
+    "tests/sub/c.py",
+    "tests/sub/deep/d.rs",
+    "tests/.dot.py",
+    ".hidden/e.py",
+    "src/lib.rs",
+    "src/[x].txt",
+    "top.py",
+    "src/]x.txt"
+  ],
+  "dirs": [
+    "empty"
+  ],
+  "patterns": [
+    "tests/**",
+    "tests/**/*.py",
+    "**/*.py",
+    "*/*.py",
+    "tests/*",
+    "tests/?.py",
+    "tests/[ab].py",
+    "tests/[!a].py",
+    "tests/",
+    "tests//a.py",
+    "./tests/a.py",
+    "**",
+    "*",
+    "src/[[]x].txt",
+    "src/*.rs",
+    "tests/sub/**/*.rs",
+    "missing/*.py",
+    "empty/**",
+    "tests/a.py/",
+    "top.py",
+    "**/deep/*",
+    "src/[]]x.txt"
+  ]
+}

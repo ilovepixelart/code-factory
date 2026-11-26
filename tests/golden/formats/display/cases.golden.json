@@ -1,0 +1,465 @@
+{
+  "labels": {
+    "ui": "bg-chart-1",
+    "agents": "bg-chart-7",
+    "UI ": "bg-chart-1",
+    "rewrite": "bg-chart-8",
+    "quality": "bg-chart-1",
+    "Café": "bg-chart-6",
+    "🚀": "bg-chart-7",
+    "a": "bg-chart-4",
+    "": "bg-chart-1",
+    "infrastructure": "bg-chart-1",
+    "long label with spaces": "bg-chart-7"
+  },
+  "money": [
+    [
+      0,
+      "$0.00"
+    ],
+    [
+      0.5,
+      "$0.50"
+    ],
+    [
+      1.25,
+      "$1.25"
+    ],
+    [
+      4.25,
+      "$4.25"
+    ],
+    [
+      1234.5,
+      "$1,234.50"
+    ],
+    [
+      1000000,
+      "$1,000,000.00"
+    ],
+    [
+      0.125,
+      "$0.12"
+    ],
+    [
+      0.375,
+      "$0.38"
+    ],
+    [
+      2.675,
+      "$2.67"
+    ],
+    [
+      1.005,
+      "$1.00"
+    ],
+    [
+      0.001,
+      "$0.00"
+    ],
+    [
+      99.999,
+      "$100.00"
+    ],
+    [
+      1e-9,
+      "$0.00"
+    ],
+    [
+      12345678.9,
+      "$12,345,678.90"
+    ]
+  ],
+  "days": [
+    {
+      "raw": "2026-10-10",
+      "date": "2026-10-10",
+      "today": "2026-10-05",
+      "text": "10 Oct"
+    },
+    {
+      "raw": "2026-01-03",
+      "date": "2026-01-03",
+      "today": "2026-10-05",
+      "text": "3 Jan"
+    },
+    {
+      "raw": "2025-12-31",
+      "date": "2025-12-31",
+      "today": "2026-10-05",
+      "text": "31 Dec 2025"
+    },
+    {
+      "raw": "20261004",
+      "date": "2026-10-04",
+      "today": "2026-10-05",
+      "text": "4 Oct"
+    },
+    {
+      "raw": "2026-W40-1",
+      "date": "2026-09-28",
+      "today": "2026-10-05",
+      "text": "28 Sep"
+    },
+    {
+      "raw": "2027-W01",
+      "date": "2027-01-04",
+      "today": "2026-10-05",
+      "text": "4 Jan 2027"
+    },
+    {
+      "raw": "not a date",
+      "date": null,
+      "today": "2026-10-05",
+      "text": "not a date"
+    },
+    {
+      "raw": "",
+      "date": null,
+      "today": "2026-10-05",
+      "text": ""
+    },
+    {
+      "raw": "2026-02-30",
+      "date": null,
+      "today": "2026-10-05",
+      "text": "2026-02-30"
+    }
+  ],
+  "count": [
+    [
+      0,
+      "0"
+    ],
+    [
+      999,
+      "999"
+    ],
+    [
+      1000,
+      "1k"
+    ],
+    [
+      1049,
+      "1k"
+    ],
+    [
+      1050,
+      "1.1k"
+    ],
+    [
+      1250,
+      "1.2k"
+    ],
+    [
+      2250,
+      "2.2k"
+    ],
+    [
+      1500,
+      "1.5k"
+    ],
+    [
+      999949,
+      "999.9k"
+    ],
+    [
+      999950,
+      "1000k"
+    ],
+    [
+      1000000,
+      "1M"
+    ],
+    [
+      1250000,
+      "1.2M"
+    ],
+    [
+      81100000,
+      "81.1M"
+    ],
+    [
+      123456789,
+      "123.5M"
+    ]
+  ],
+  "dur": [
+    [
+      null,
+      ""
+    ],
+    [
+      0,
+      "0ms"
+    ],
+    [
+      0.0004,
+      "0ms"
+    ],
+    [
+      0.0005,
+      "0ms"
+    ],
+    [
+      0.35,
+      "350ms"
+    ],
+    [
+      0.9994,
+      "999ms"
+    ],
+    [
+      0.9996,
+      "1000ms"
+    ],
+    [
+      1,
+      "1.0s"
+    ],
+    [
+      1.85,
+      "1.9s"
+    ],
+    [
+      1.25,
+      "1.2s"
+    ],
+    [
+      59.94,
+      "59.9s"
+    ],
+    [
+      59.96,
+      "60.0s"
+    ],
+    [
+      60,
+      "1m 0s"
+    ],
+    [
+      95.4,
+      "1m 35s"
+    ],
+    [
+      3725,
+      "62m 5s"
+    ]
+  ],
+  "span": [
+    [
+      0,
+      "0s"
+    ],
+    [
+      29,
+      "29s"
+    ],
+    [
+      30,
+      "30s"
+    ],
+    [
+      90,
+      "2m"
+    ],
+    [
+      150,
+      "2m"
+    ],
+    [
+      1799,
+      "30m"
+    ],
+    [
+      3599,
+      "60m"
+    ],
+    [
+      3600,
+      "1h"
+    ],
+    [
+      5400,
+      "1.5h"
+    ],
+    [
+      5580,
+      "1.6h"
+    ],
+    [
+      86399,
+      "24h"
+    ],
+    [
+      86400,
+      "1d"
+    ],
+    [
+      129600,
+      "1.5d"
+    ],
+    [
+      1036800,
+      "12d"
+    ],
+    [
+      885600,
+      "10.2d"
+    ]
+  ],
+  "trim": [
+    [
+      "short",
+      140,
+      "short"
+    ],
+    [
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      140,
+      "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…"
+    ],
+    [
+      "abcdef",
+      4,
+      "abc…"
+    ],
+    [
+      "abcd",
+      4,
+      "abcd"
+    ],
+    [
+      "日本語テキスト",
+      3,
+      "日本…"
+    ],
+    [
+      "",
+      5,
+      ""
+    ]
+  ],
+  "turns": [
+    [],
+    [
+      {
+        "index": 1,
+        "prompt_text": "",
+        "entries": [
+          1
+        ],
+        "started_at": 100,
+        "duration_seconds": null,
+        "calls": 0,
+        "failed_calls": 0,
+        "outcome": "running",
+        "open_by_default": true,
+        "continued": false
+      }
+    ],
+    [
+      {
+        "index": 1,
+        "prompt_text": "Fix it",
+        "entries": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "started_at": 100,
+        "duration_seconds": 10,
+        "calls": 1,
+        "failed_calls": 0,
+        "outcome": "done",
+        "open_by_default": true,
+        "continued": false
+      }
+    ],
+    [
+      {
+        "index": 1,
+        "prompt_text": "One",
+        "entries": [
+          1,
+          2,
+          3
+        ],
+        "started_at": 10,
+        "duration_seconds": 2,
+        "calls": 1,
+        "failed_calls": 1,
+        "outcome": "done",
+        "open_by_default": true,
+        "continued": false
+      },
+      {
+        "index": 2,
+        "prompt_text": "Two",
+        "entries": [
+          4,
+          5,
+          6
+        ],
+        "started_at": 20,
+        "duration_seconds": 5,
+        "calls": 1,
+        "failed_calls": 0,
+        "outcome": "done",
+        "open_by_default": true,
+        "continued": false
+      }
+    ],
+    [
+      {
+        "index": 1,
+        "prompt_text": "Only",
+        "entries": [
+          1,
+          2
+        ],
+        "started_at": 10,
+        "duration_seconds": 1,
+        "calls": 1,
+        "failed_calls": 1,
+        "outcome": "done",
+        "open_by_default": true,
+        "continued": false
+      },
+      {
+        "index": 2,
+        "prompt_text": "Next",
+        "entries": [
+          3,
+          4
+        ],
+        "started_at": 30,
+        "duration_seconds": null,
+        "calls": 1,
+        "failed_calls": 0,
+        "outcome": "running",
+        "open_by_default": true,
+        "continued": false
+      }
+    ],
+    [
+      {
+        "index": 1,
+        "prompt_text": "Late",
+        "entries": [
+          1,
+          2,
+          3
+        ],
+        "started_at": 5,
+        "duration_seconds": 4.5,
+        "calls": 1,
+        "failed_calls": 0,
+        "outcome": "done",
+        "open_by_default": true,
+        "continued": false
+      }
+    ]
+  ]
+}

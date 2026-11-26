@@ -1,0 +1,6 @@
+dist
+pnpm-lock.yaml
+src/generated
+src/styles/shadcn-vue.css
+test-results
+playwright-report

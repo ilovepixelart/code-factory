@@ -1,0 +1,187 @@
+# Every piece of code the page shows, read by web/app.py and build_static.py to render it and by
+# tests/site/test_site_snippets.py to prove it: an MCP call is checked against the tool listings
+# pinned in tests/golden/mcp/, a command line against the real `code-factory` parser, and a
+# config.toml against the rules `code-factory config check` applies.
+#
+# lang: "mcp" (a JSON-RPC tools/call request), "shell" or "toml".
+
+# The panes beside the page's sections.
+
+[panes.quickstart]
+label = "Quick start"
+lang = "shell"
+source = '''
+# Local mode · use Claude Code or Codex installed on your machine
+sh scripts/start.sh --local
+
+# Server mode · run the app and PostgreSQL in Docker
+sh scripts/compose.sh
+'''
+
+[panes.ask]
+label = "ask_question, from a run"
+lang = "mcp"
+source = '''
+{
+  "method": "tools/call",
+  "params": {
+    "name": "ask_question",
+    "arguments": {
+      "question": "Remove the old endpoint now?",
+      "choices": [
+        {"text": "Keep it a release", "recommended": true,
+         "reason": "Two clients call it"},
+        {"text": "Remove it"}
+      ]
+    }
+  }
+}
+'''
+
+[panes.config]
+label = ".code-factory/config.toml"
+lang = "toml"
+source = '''
+[checks]
+command = "sh scripts/gate.sh --force --secrets"
+fast = "sh scripts/gate.sh --fast --force --secrets"
+timeout = 1200                   # seconds a checks run may take
+
+[agents]
+# a head that touches these paths, or a change larger than
+# large_change, is the owner's to merge
+sensitive_paths = ["alembic/**", ".github/**"]
+large_change = 400
+'''
+
+# The example browser, in the order its sidebar lists them.
+
+[examples.document]
+title = "Write the spec"
+lang = "mcp"
+source = '''
+{
+  "method": "tools/call",
+  "params": {
+    "name": "write_document",
+    "arguments": {
+      "name": "spec",
+      "base_version": 2,
+      "content": "# Export\n\n## Clauses\n\n- EX-1: one row per merged ticket\n"
+    }
+  }
+}
+'''
+
+[examples.followup]
+title = "File a follow-up"
+lang = "mcp"
+source = '''
+{
+  "method": "tools/call",
+  "params": {
+    "name": "create_ticket",
+    "arguments": {
+      "title": "The archive search ignores labels",
+      "type": "bug",
+      "priority": "medium",
+      "labels": ["board"]
+    }
+  }
+}
+'''
+
+[examples.lesson]
+title = "Propose a lesson"
+lang = "mcp"
+source = '''
+{
+  "method": "tools/call",
+  "params": {
+    "name": "propose_memory",
+    "arguments": {
+      "kind": "lesson",
+      "statement": "Read the default branch from git, never assume main",
+      "why": "A repository on trunk merged into a branch nobody reads",
+      "guard": "test_the_default_branch_is_read_from_the_remote",
+      "cites": ["src/code_factory/git/adapters/runner.py"]
+    }
+  }
+}
+'''
+
+[examples.answer]
+title = "Answer a question"
+lang = "mcp"
+source = '''
+{
+  "method": "tools/call",
+  "params": {
+    "name": "answer_question",
+    "arguments": {"question_id": 41, "choices": ["CSV"]}
+  }
+}
+'''
+
+[examples.token]
+title = "Connect a client"
+lang = "shell"
+source = '''
+# a bearer token for an MCP client, valid for 30 days
+uv run code-factory token create --label laptop --days 30
+
+# sign the browser in to the running board
+uv run code-factory open
+'''
+
+[examples.stage]
+title = "A ticket's stage"
+lang = "shell"
+source = '''
+# the column, its checklist, why a move is refused and what holds it
+uv run code-factory stage show CF-12
+
+# read git for every live ticket and print what changed
+uv run code-factory stage observe
+'''
+
+[examples.release]
+title = "Release notes"
+lang = "shell"
+source = '''
+# notes drafted from the merged tickets
+uv run code-factory release draft 1.4.0
+uv run code-factory release edit 1.4.0 --file notes.md
+
+# final: the tickets they name leave the board
+uv run code-factory release publish 1.4.0
+'''
+
+[examples.push]
+title = "Push to a phone"
+lang = "shell"
+source = '''
+# one message per new Inbox item, with a link that answers it
+uv run code-factory push ntfy https://ntfy.sh/my-board
+'''
+
+[examples.config]
+title = "Repository config"
+lang = "toml"
+source = '''
+[checks]
+command = "sh scripts/gate.sh"
+fast = "uv run pytest -x -q"
+
+[agents]
+sensitive_paths = ["alembic/**"]
+large_change = 400
+'''
+
+[examples.check]
+title = "Check the config"
+lang = "shell"
+source = '''
+# each defect as path:line: message, exit 1 when there is one
+uv run code-factory config check ~/src/app
+'''

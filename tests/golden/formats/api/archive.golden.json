@@ -1,0 +1,111 @@
+[
+  {
+    "q": "",
+    "sort": "",
+    "dir": "",
+    "archived_count": 2,
+    "rows": [
+      {
+        "repository": "sample",
+        "id": "CF-5",
+        "title": "Released already",
+        "type": "feature",
+        "stage": "released",
+        "archived": false,
+        "archived_at": 1790001000.0,
+        "release": "0.1.0"
+      },
+      {
+        "repository": "sample",
+        "id": "CF-4",
+        "title": "Archived",
+        "type": "feature",
+        "stage": "spec",
+        "archived": true,
+        "archived_at": 0.0,
+        "release": ""
+      }
+    ]
+  },
+  {
+    "q": "",
+    "sort": "id",
+    "dir": "asc",
+    "archived_count": 2,
+    "rows": [
+      {
+        "repository": "sample",
+        "id": "CF-4",
+        "title": "Archived",
+        "type": "feature",
+        "stage": "spec",
+        "archived": true,
+        "archived_at": 0.0,
+        "release": ""
+      },
+      {
+        "repository": "sample",
+        "id": "CF-5",
+        "title": "Released already",
+        "type": "feature",
+        "stage": "released",
+        "archived": false,
+        "archived_at": 1790001000.0,
+        "release": "0.1.0"
+      }
+    ]
+  },
+  {
+    "q": "",
+    "sort": "title",
+    "dir": "desc",
+    "archived_count": 2,
+    "rows": [
+      {
+        "repository": "sample",
+        "id": "CF-5",
+        "title": "Released already",
+        "type": "feature",
+        "stage": "released",
+        "archived": false,
+        "archived_at": 1790001000.0,
+        "release": "0.1.0"
+      },
+      {
+        "repository": "sample",
+        "id": "CF-4",
+        "title": "Archived",
+        "type": "feature",
+        "stage": "spec",
+        "archived": true,
+        "archived_at": 0.0,
+        "release": ""
+      }
+    ]
+  },
+  {
+    "q": "rel",
+    "sort": "",
+    "dir": "",
+    "archived_count": 2,
+    "rows": [
+      {
+        "repository": "sample",
+        "id": "CF-5",
+        "title": "Released already",
+        "type": "feature",
+        "stage": "released",
+        "archived": false,
+        "archived_at": 1790001000.0,
+        "release": "0.1.0"
+      }
+    ]
+  },
+  {
+    "q": "zzz",
+    "sort": "",
+    "dir": "",
+    "archived_count": 2,
+    "rows": []
+  }
+]

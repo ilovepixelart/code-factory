@@ -1,0 +1,232 @@
+{
+ "pulls": {
+  "cases": [
+   {
+    "state": "OPEN",
+    "reviewDecision": "APPROVED",
+    "headRefOid": "abc",
+    "statusCheckRollup": [
+     {
+      "__typename": "CheckRun",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS"
+     },
+     {
+      "__typename": "StatusContext",
+      "state": "SUCCESS"
+     }
+    ]
+   },
+   {
+    "state": "OPEN",
+    "reviewDecision": "CHANGES_REQUESTED",
+    "headRefOid": "def",
+    "statusCheckRollup": [
+     {
+      "__typename": "CheckRun",
+      "status": "IN_PROGRESS"
+     },
+     {
+      "__typename": "CheckRun",
+      "status": "COMPLETED",
+      "conclusion": "NEUTRAL"
+     }
+    ]
+   },
+   {
+    "state": "OPEN",
+    "reviewDecision": null,
+    "headRefOid": null,
+    "statusCheckRollup": [
+     {
+      "__typename": "StatusContext",
+      "state": "PENDING"
+     },
+     {
+      "__typename": "CheckRun",
+      "status": "COMPLETED",
+      "conclusion": "FAILURE"
+     }
+    ]
+   },
+   {
+    "state": "MERGED",
+    "statusCheckRollup": null
+   },
+   {
+    "state": "CLOSED",
+    "statusCheckRollup": [
+     {
+      "__typename": "StatusContext",
+      "state": "EXPECTED"
+     },
+     {
+      "__typename": "StatusContext",
+      "state": "ERROR"
+     },
+     "junk"
+    ]
+   },
+   {
+    "statusCheckRollup": "not a list"
+   },
+   {
+    "state": "OPEN",
+    "statusCheckRollup": [
+     {
+      "__typename": "CheckRun",
+      "status": "COMPLETED",
+      "conclusion": "SKIPPED"
+     },
+     {
+      "__typename": "CheckRun",
+      "status": "COMPLETED",
+      "conclusion": "CANCELLED"
+     }
+    ]
+   },
+   {
+    "state": "OPEN",
+    "isDraft": true,
+    "reviewDecision": null,
+    "headRefOid": "ghi",
+    "statusCheckRollup": []
+   },
+   {
+    "state": "OPEN",
+    "isDraft": false,
+    "reviewDecision": null,
+    "headRefOid": "jkl",
+    "statusCheckRollup": []
+   }
+  ],
+  "expected": [
+   {
+    "state": "open",
+    "review": "approved",
+    "ci": "passed",
+    "head": "abc"
+   },
+   {
+    "state": "open",
+    "review": "changes_requested",
+    "ci": "pending",
+    "head": "def"
+   },
+   {
+    "state": "open",
+    "review": "",
+    "ci": "failed",
+    "head": ""
+   },
+   {
+    "state": "merged",
+    "review": "",
+    "ci": "none",
+    "head": ""
+   },
+   {
+    "state": "closed",
+    "review": "",
+    "ci": "failed",
+    "head": ""
+   },
+   {
+    "state": "",
+    "review": "",
+    "ci": "none",
+    "head": ""
+   },
+   {
+    "state": "open",
+    "review": "",
+    "ci": "failed",
+    "head": ""
+   },
+   {
+    "state": "open",
+    "review": "",
+    "ci": "none",
+    "head": "ghi",
+    "draft": true
+   },
+   {
+    "state": "open",
+    "review": "",
+    "ci": "none",
+    "head": "jkl"
+   }
+  ]
+ },
+ "triage": {
+  "cases": [
+   [
+    "bug",
+    "priority: high"
+   ],
+   [
+    "Priority-Urgent"
+   ],
+   [
+    "P2",
+    "enhancement"
+   ],
+   [
+    "BUG"
+   ],
+   [
+    "p9",
+    "low"
+   ],
+   [],
+   [
+    "  high  "
+   ],
+   [
+    "priority high"
+   ],
+   [
+    "prio: high",
+    "P0"
+   ]
+  ],
+  "expected": [
+   [
+    "bug",
+    "high"
+   ],
+   [
+    "feature",
+    "urgent"
+   ],
+   [
+    "feature",
+    "medium"
+   ],
+   [
+    "bug",
+    ""
+   ],
+   [
+    "feature",
+    "low"
+   ],
+   [
+    "feature",
+    ""
+   ],
+   [
+    "feature",
+    "high"
+   ],
+   [
+    "feature",
+    "high"
+   ],
+   [
+    "feature",
+    "urgent"
+   ]
+  ]
+ }
+}

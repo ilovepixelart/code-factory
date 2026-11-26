@@ -1,0 +1,6 @@
+# These commands expect a provisioned runner with the project's test database and toolchain.
+# The default board sandbox cannot reach the host PostgreSQL used by the local gate.
+[checks]
+command = "sh scripts/gate.sh --force"
+fast = "sh scripts/gate.sh --fast --force"
+main = "sh scripts/gate.sh --force"

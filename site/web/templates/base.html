@@ -1,0 +1,74 @@
+{# The page's spacing, defined once. A section that wants different padding is a section that has
+   drifted, so these are the only vertical numbers in the markup: `band` is a section's own top
+   and bottom, `lede` the gap under a heading block, `cols` the split between two columns, and
+   `pad` the horizontal gutter and cap. #}
+{% set pad = "w-full mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 xl:px-16 2xl:px-24" %}
+{% set band = "py-14 sm:py-16" %}
+{% set lede = "mt-8" %}
+{% set cols = "gap-12 xl:gap-20" %}
+{% set root = base | default('') %}
+<!doctype html>
+<html lang="en" class="[color-scheme:light] [&.dark]:[color-scheme:dark]">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="htmx-config" content='{"selfRequestsOnly": true, "historyCacheSize": 0, "allowEval": false, "allowScriptTags": false}' />
+  {% set summary = "A board that takes software work from a ticket to merged code. Coding agents work in worktrees of their own and reach the board through MCP tools and hooks; the owner decides what ships." %}
+  <title>{% block title %}code-factory: from ticket to merged code{% endblock %}</title>
+  <meta name="description" content="{{ summary }}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="code-factory" />
+  <meta property="og:title" content="From ticket to merged code, with agents." />
+  <meta property="og:description" content="{{ summary }}" />
+  {# --background, dark: the page opens dark whatever the OS says. #}
+  <meta name="theme-color" content="#0a0a0a" />
+  {% set v = asset_v() %}
+  <script src="{{ root }}/assets/theme-early.js?v={{ v }}"></script>
+  <link rel="icon" href="{{ root }}/assets/mark.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="{{ root }}/assets/app.css?v={{ v }}" />
+  <link rel="stylesheet" href="{{ root }}/assets/code.css?v={{ v }}" />
+  <script src="{{ root }}/assets/js/htmx.min.js?v={{ v }}" defer></script>
+  <script src="{{ root }}/assets/site.js?v={{ v }}" defer></script>
+</head>
+<body class="antialiased selection:bg-foreground/15">
+  <header class="border-b border-border bg-background/70 backdrop-blur sticky top-0 z-20">
+    <div class="{{ pad }} h-14 flex items-center gap-3">
+      <img src="{{ root }}/assets/mark.svg" alt="" class="size-6" />
+      <span class="font-semibold tracking-tight text-base">code-factory</span>
+      <span class="badge font-mono">{{ version }}</span>
+      <nav class="ml-auto flex items-center gap-4 sm:gap-6 text-sm">
+        <a class="hidden sm:inline text-muted-foreground hover:text-foreground transition-colors" href="#how">How it works</a>
+        <a class="hidden sm:inline text-muted-foreground hover:text-foreground transition-colors" href="#examples">Examples</a>
+        <a class="text-muted-foreground hover:text-foreground transition-colors" href="#start">Start</a>
+        <button type="button" title="Toggle theme" data-theme-toggle class="btn btn-ghost px-2 text-muted-foreground">
+          <svg class="size-4 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"/>
+          </svg>
+          <svg class="size-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
+          </svg>
+          <span class="sr-only">Toggle theme</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+  <main>{% block body %}{% endblock %}</main>
+  <footer class="border-t border-border">
+    <div class="{{ pad }} {{ band }} grid sm:grid-cols-[minmax(0,1fr)_auto] gap-6 items-start">
+      <div>
+        <p class="text-sm font-medium">code-factory <span class="text-muted-foreground font-normal">&middot; from ticket to merged code</span></p>
+        <p class="mt-1.5 text-sm text-muted-foreground max-w-[56ch]">
+          A board on one machine, over PostgreSQL. The documentation is in the repository:
+          start with <span class="font-mono text-xs text-foreground">README.md</span> and
+          <span class="font-mono text-xs text-foreground">docs/quickstart.md</span>.
+        </p>
+      </div>
+      <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        <a class="text-muted-foreground hover:text-foreground" href="#how">How it works</a>
+        <a class="text-muted-foreground hover:text-foreground" href="#examples">Examples</a>
+        <a class="text-muted-foreground hover:text-foreground" href="#start">Start</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,155 @@
+{
+  "repository": {
+    "steps": [
+      {
+        "write": ".code-factory/tickets/CF-1/ticket.md",
+        "text": "---\nid: CF-1\ntitle: Specs written\nlabels: docs\n---\nThe first.\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-1/spec.md",
+        "text": "# BRD\n\nProblem.\n\n## Open questions\n\n- Which colour?\n  Answer: blue\n- Which size?\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-1/requirements.md",
+        "text": "# FRD\n\nRequirements.\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-1/uat.md",
+        "text": "# UAT\n\nCases.\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-2/ticket.md",
+        "text": "---\nid: CF-2\ntitle: Bare\nrank: 2\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-3/ticket.md",
+        "text": "---\nid: CF-3\ntitle: Declared\nstage: build\nstage_since: 2026-09-20T08:00:00Z\nparent: CF-1\nrank: 1\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-4/ticket.md",
+        "text": "---\nid: CF-4\ntitle: Archived\narchived: true\n---\n"
+      },
+      {
+        "write": ".code-factory/templates/ticket-feature.md",
+        "text": "## Goal\n\nWhat it lets someone do.\n"
+      },
+      {
+        "write": ".code-factory/templates/ticket-bug.md",
+        "text": "## Steps\n\n1. \n\n## Expected\n\n## Actual\n"
+      },
+      {
+        "commit": "Start"
+      }
+    ]
+  },
+  "second": {
+    "steps": [
+      {
+        "write": ".code-factory/tickets/CF-1/ticket.md",
+        "text": "---\nid: CF-1\ntitle: Elsewhere\npriority: medium\nlabels: ops\n---\n"
+      },
+      {
+        "commit": "Start"
+      }
+    ]
+  },
+  "now": 1790001000.0,
+  "spool": {},
+  "raw": {},
+  "runs": [
+    {
+      "id": "run-1",
+      "ticket_id": "CF-1",
+      "repository": "{root}",
+      "branch": "main",
+      "worktree": "{root}",
+      "stage": "spec",
+      "pid": 2147483647,
+      "started_at": 1790000900.0,
+      "log": "run-1.log",
+      "loop": false
+    }
+  ],
+  "home_files": {
+    "board.json": {
+      "theme": "dark",
+      "wip": {
+        "spec": 2,
+        "bogus": 1
+      }
+    }
+  },
+  "steps": [
+    {"do": "create", "body": {"repository": "sample", "title": "  New thing ", "type": "bug", "labels": "a, b,", "priority": "high", "due": "2026-11-01"}},
+    {"do": "create", "body": {"repository": "sample", "title": "Plain"}},
+    {"do": "create", "body": {"repository": "nowhere", "title": "Lost"}},
+    {"do": "create", "body": {"repository": "sample", "title": "Late", "stage": "build"}},
+    {"do": "create", "body": {"repository": "sample", "title": "Epic", "type": "epic"}},
+    {"do": "create", "body": {"repository": "sample", "title": "Soon", "priority": "soon"}},
+    {"do": "create", "body": {"repository": "sample", "title": "Bad day", "due": "2026-13-01"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"title": "Renamed"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"description": "A longer story.\n"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"budget": "abc"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"budget": "-1"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"budget": "0"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"budget": "1000"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"budget": "1__0"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"budget": " 3.5 "}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"blocked_by": "CF-2"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"blocked_by": "CF-9"}},
+    {"do": "update", "ticket": "sample/CF-1", "body": {"parent": "CF-3"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"blocked_by": " CF-1 ,, CF-3"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"priority": "soon"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"archived": "maybe"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"stage": "review"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"stage": "spec", "labels": "x, y"}},
+    {"do": "update", "ticket": "sample/CF-2", "body": {"archived": "true"}},
+    {"do": "undo"},
+    {"do": "undo"},
+    {"do": "update", "ticket": "sample/CF-99", "body": {"title": "Nobody"}},
+    {"do": "update", "ticket": "nowhere/CF-2", "body": {"title": "Nobody"}},
+    {"do": "move", "ticket": "sample/CF-3", "body": {"stage": "spec", "order": ["sample/CF-3", "sample/CF-2", "second/CF-1"]}},
+    {"do": "undo"},
+    {"do": "move", "ticket": "sample/CF-3", "body": {"stage": "build", "order": ["sample/CF-2", "sample/CF-3"]}},
+    {"do": "move", "ticket": "sample/CF-5", "body": {"stage": "spec", "order": ["sample/CF-5", "sample/CF-3"]}},
+    {"do": "move", "ticket": "sample/CF-5", "body": {"stage": "build", "order": ["sample/CF-5"]}},
+    {"do": "move", "ticket": "sample/CF-5", "body": {"stage": "review", "order": ["sample/CF-5"]}},
+    {"do": "move", "ticket": "sample/CF-99", "body": {"stage": "spec", "order": ["sample/CF-99"]}},
+    {"do": "duplicate", "ticket": "sample/CF-5"},
+    {"do": "delete", "ticket": "sample/CF-7"},
+    {"do": "undo"},
+    {"do": "delete", "ticket": "sample/CF-7"},
+    {"do": "delete", "ticket": "sample/CF-1"},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2", "second/CF-1"], "priority": "low"}},
+    {"do": "undo"},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2", "second/CF-1"], "label": "ops"}},
+    {"do": "bulk", "body": {"tickets": ["second/CF-1"], "archived": "true"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2"], "stage": "build"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-5", "sample/CF-2"], "stage": "spec"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2"], "stage": "build", "priority": "low"}},
+    {"do": "bulk", "body": {"tickets": [], "priority": "low"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2"], "stage": "later"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2"], "priority": "soon"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-99"], "priority": "soon"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2"], "label": "a, b"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2"], "archived": "yes"}},
+    {"do": "bulk", "body": {"tickets": ["sample/CF-2", "sample/CF-99"], "priority": "low"}},
+    {"do": "limit", "stage": "build", "body": {"limit": "3"}},
+    {"do": "limit", "stage": "build", "body": {"limit": "0"}},
+    {"do": "limit", "stage": "build", "body": {"limit": "many"}},
+    {"do": "limit", "stage": "later", "body": {"limit": "2"}},
+    {"do": "limit", "stage": "spec", "body": {"limit": ""}},
+    {"do": "comment", "ticket": "sample/CF-1", "body": {"text": "  Looks good  "}},
+    {"do": "comment", "ticket": "sample/CF-1", "body": {"text": "Rename this", "path": "src/a.py", "line": "12"}},
+    {"do": "comment", "ticket": "sample/CF-1", "body": {"text": "   "}},
+    {"do": "answer", "ticket": "sample/CF-1", "body": {"document": "spec.md", "index": "1", "question": "Which size?", "answer": "  Large   enough "}},
+    {"do": "answer", "ticket": "sample/CF-1", "body": {"document": "spec.md", "index": "0", "question": "Which colour?", "answer": "green", "replace": true}},
+    {"do": "answer", "ticket": "sample/CF-1", "body": {"document": "spec.md", "index": "9", "question": "Which size?", "answer": "none"}},
+    {"do": "answer", "ticket": "sample/CF-1", "body": {"document": "../spec.md", "index": "0", "question": "Which colour?", "answer": "none"}},
+    {"do": "answer", "ticket": "sample/CF-1", "body": {"document": "../CF-1/spec.md", "index": "0", "question": "Which colour?", "answer": "none"}},
+    {"do": "answer", "ticket": "sample/CF-1", "body": {"document": "spec.md", "index": "0", "question": "Which colour?", "answer": "  "}},
+    {"do": "update", "ticket": "sample/CF-3", "body": {"archived": "true"}},
+    {"do": "wait", "seconds": 31},
+    {"do": "undo"}
+  ]
+}

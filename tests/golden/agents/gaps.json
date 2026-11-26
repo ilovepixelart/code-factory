@@ -1,0 +1,9 @@
+{
+  "claude": [],
+  "codex": [
+    {
+      "guarantee": "permission requests reach the Inbox",
+      "why": "Codex runs with the board's worktree sandbox and approval policy set to never. The Codex CLI declines native permission requests without sending them to the Inbox. Ticket questions can still reach the Inbox through the board's MCP tools."
+    }
+  ]
+}

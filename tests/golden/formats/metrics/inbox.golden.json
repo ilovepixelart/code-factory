@@ -1,0 +1,227 @@
+{
+  "main": [],
+  "questions": [
+    {
+      "since": 1790001000.0,
+      "kind": "",
+      "reason": "",
+      "note": "",
+      "count": 0,
+      "images": [],
+      "ticket": {
+        "repository": "sample",
+        "id": "CF-11",
+        "title": "Pick a palette"
+      },
+      "question": {
+        "document": "spec.md",
+        "index": 0,
+        "text": "Which colour?",
+        "choices": [],
+        "several": false
+      },
+      "session": null,
+      "request": null,
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": null
+    }
+  ],
+  "permissions": [
+    {
+      "since": 1790000880.0,
+      "kind": "permission",
+      "reason": "Bash npm test --watch",
+      "note": "allowed 2 of 3 times before",
+      "count": 0,
+      "images": [],
+      "ticket": {
+        "repository": "sample",
+        "id": "CF-5",
+        "title": "Export a report"
+      },
+      "question": null,
+      "session": null,
+      "request": {
+        "id": "0123456789ab",
+        "tool": "Bash",
+        "summary": "npm test --watch"
+      },
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": null
+    }
+  ],
+  "rules": [
+    {
+      "since": null,
+      "kind": "rule",
+      "reason": "Bash uv run pytest",
+      "note": "",
+      "count": 5,
+      "images": [],
+      "ticket": null,
+      "question": null,
+      "session": null,
+      "request": null,
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": null
+    }
+  ],
+  "memory": [],
+  "sessions": [
+    {
+      "since": 1790000821.0,
+      "kind": "",
+      "reason": "",
+      "note": "",
+      "count": 0,
+      "images": [],
+      "ticket": null,
+      "question": null,
+      "session": {
+        "session_id": "s-block",
+        "cwd": "{root}",
+        "action": {
+          "tool": "Edit",
+          "summary": "/x/a.py"
+        }
+      },
+      "request": null,
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": null
+    }
+  ],
+  "stopped": [
+    {
+      "since": 1789923240.0,
+      "kind": "",
+      "reason": "no progress in 3 iterations",
+      "note": "",
+      "count": 0,
+      "images": [],
+      "ticket": {
+        "repository": "sample",
+        "id": "CF-7",
+        "title": "Rewrite the importer"
+      },
+      "question": null,
+      "session": null,
+      "request": null,
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": null
+    }
+  ],
+  "screens": [
+    {
+      "since": 1790000400.0,
+      "kind": "screens",
+      "reason": "e9d00393a69552ae",
+      "note": "",
+      "count": 0,
+      "images": [
+        "tickets-light.png",
+        "tickets-dark.png"
+      ],
+      "ticket": {
+        "repository": "sample",
+        "id": "CF-9",
+        "title": "New sidebar"
+      },
+      "question": null,
+      "session": null,
+      "request": null,
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": null
+    }
+  ],
+  "mergeable": [
+    {
+      "since": 1790000200.0,
+      "kind": "merge",
+      "reason": "https://github.com/o/r/pull/12",
+      "note": "",
+      "count": 0,
+      "images": [],
+      "ticket": {
+        "repository": "sample",
+        "id": "CF-12",
+        "title": "Audit log"
+      },
+      "question": null,
+      "session": null,
+      "request": null,
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": {
+        "additions": 86,
+        "deletions": 12,
+        "changed_files": 4
+      }
+    }
+  ],
+  "failing": [
+    {
+      "since": 1790000300.0,
+      "kind": "failing",
+      "reason": "https://github.com/o/r/pull/13",
+      "note": "",
+      "count": 0,
+      "images": [],
+      "ticket": {
+        "repository": "sample",
+        "id": "CF-13",
+        "title": "Retry uploads"
+      },
+      "question": null,
+      "session": null,
+      "request": null,
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": null
+    }
+  ],
+  "idle": [],
+  "reviews": [
+    {
+      "since": 1789828200.0,
+      "kind": "",
+      "reason": "",
+      "note": "",
+      "count": 0,
+      "images": [],
+      "ticket": {
+        "repository": "sample",
+        "id": "CF-12",
+        "title": "Audit log"
+      },
+      "question": null,
+      "session": null,
+      "request": null,
+      "memory": null,
+      "main": null,
+      "diagnosis": null,
+      "size": null
+    }
+  ],
+  "diagnoses": [],
+  "count": 7,
+  "latest": "CF-11 asks: Which colour?",
+  "push": null,
+  "next_up": {
+    "section": "stopped",
+    "index": 0
+  }
+}

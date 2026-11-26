@@ -1,0 +1,92 @@
+{
+  "s-block": {
+    "input": 1,
+    "output": 2,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": 2.0,
+    "reported_at": 1790000500.0,
+    "cost_incomplete": false
+  },
+  "s-block2": {
+    "input": 0,
+    "output": 0,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": null,
+    "reported_at": null,
+    "cost_incomplete": false
+  },
+  "zz": {
+    "input": 0,
+    "output": 0,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": null,
+    "reported_at": null,
+    "cost_incomplete": false
+  },
+  "": {
+    "input": 0,
+    "output": 0,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": null,
+    "reported_at": null,
+    "cost_incomplete": false
+  },
+  "s-sub": {
+    "input": 101,
+    "output": 51000,
+    "cache_read": 950000,
+    "cache_write": 0,
+    "cost": null,
+    "reported_at": null,
+    "cost_incomplete": false
+  },
+  "s-work": {
+    "input": 15,
+    "output": 1501,
+    "cache_read": 1000,
+    "cache_write": 50,
+    "cost": 1.5,
+    "reported_at": 1790000101.5,
+    "cost_incomplete": true
+  },
+  "s-stale": {
+    "input": 0,
+    "output": 0,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": null,
+    "reported_at": null,
+    "cost_incomplete": false
+  },
+  "s-rest": {
+    "input": 0,
+    "output": 0,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": null,
+    "reported_at": null,
+    "cost_incomplete": false
+  },
+  "s-idle": {
+    "input": 0,
+    "output": 0,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": null,
+    "reported_at": null,
+    "cost_incomplete": false
+  },
+  "s-end": {
+    "input": 0,
+    "output": 0,
+    "cache_read": 0,
+    "cache_write": 0,
+    "cost": null,
+    "reported_at": null,
+    "cost_incomplete": false
+  }
+}

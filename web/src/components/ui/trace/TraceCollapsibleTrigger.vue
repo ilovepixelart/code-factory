@@ -1,0 +1,33 @@
+<script setup lang="ts">
+import type { CollapsibleTriggerProps } from 'reka-ui'
+
+import type { HTMLAttributes } from 'vue'
+import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/vue'
+import { reactiveOmit } from '@vueuse/core'
+import { cn } from 'cn'
+import { CollapsibleTrigger } from '@/components/ui/collapsible'
+import TraceIcon from './TraceIcon.vue'
+
+const props = defineProps<CollapsibleTriggerProps & { class?: HTMLAttributes['class'] }>()
+
+const delegatedProps = reactiveOmit(props, 'class')
+</script>
+
+<template>
+  <CollapsibleTrigger
+    data-slot="trace-collapsible-trigger"
+    v-bind="delegatedProps as CollapsibleTriggerProps"
+    :class="
+      cn(
+        'gap-1 rounded-md focus-visible:ring-3 focus-visible:ring-ring/50 group/trace-collapsible-trigger flex w-fit max-w-full min-w-0 cursor-pointer items-center text-left text-muted-foreground transition-colors outline-none hover:text-foreground has-[[data-status=error]]:text-destructive',
+        props.class,
+      )
+    "
+  >
+    <slot />
+    <TraceIcon class="transition-transform group-aria-expanded/trace-collapsible-trigger:rotate-90">
+      <HugeiconsIcon :icon="ArrowRight01Icon" />
+    </TraceIcon>
+  </CollapsibleTrigger>
+</template>

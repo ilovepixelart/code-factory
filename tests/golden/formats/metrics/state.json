@@ -1,0 +1,741 @@
+{
+  "repository": {
+    "steps": [
+      {
+        "write": ".code-factory/config.toml",
+        "text": "[agents]\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-1/ticket.md",
+        "text": "---\nid: CF-1\ntitle: Ship the login\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-2/ticket.md",
+        "text": "---\nid: CF-2\ntitle: Search tickets\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-4/ticket.md",
+        "text": "---\nid: CF-4\ntitle: Search crashes on quotes\ntype: hotfix\n---\nBroke in CF-2.\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-3/ticket.md",
+        "text": "---\nid: CF-3\ntitle: Login fails on an empty password\ntype: bug\ncaused_by: CF-1\nsource: CF-1\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-5/ticket.md",
+        "text": "---\nid: CF-5\ntitle: Export a report\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-6/ticket.md",
+        "text": "---\nid: CF-6\ntitle: Dark mode for charts\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-7/ticket.md",
+        "text": "---\nid: CF-7\ntitle: Rewrite the importer\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-8/ticket.md",
+        "text": "---\nid: CF-8\ntitle: Bulk tags\ntype: feature\nstage: spec\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-8/spec.md",
+        "text": "# BRD\n\nWritten.\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-8/requirements.md",
+        "text": "# FRD\n\nWritten.\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-8/uat.md",
+        "text": "# UAT\n\nWritten.\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-9/ticket.md",
+        "text": "---\nid: CF-9\ntitle: New sidebar\ntype: feature\nlabels: ui\nstage: review\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-10/ticket.md",
+        "text": "---\nid: CF-10\ntitle: Faster checks\ntype: feature\nstage: build\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-11/ticket.md",
+        "text": "---\nid: CF-11\ntitle: Pick a palette\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-11/spec.md",
+        "text": "# BRD\n\n## Open questions\n\n- Which colour?\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-12/ticket.md",
+        "text": "---\nid: CF-12\ntitle: Audit log\ntype: feature\nstage: review\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-13/ticket.md",
+        "text": "---\nid: CF-13\ntitle: Retry uploads\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-20/ticket.md",
+        "text": "---\nid: CF-20\ntitle: Small change 20\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-21/ticket.md",
+        "text": "---\nid: CF-21\ntitle: Small change 21\ntype: bug\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-22/ticket.md",
+        "text": "---\nid: CF-22\ntitle: Small change 22\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-23/ticket.md",
+        "text": "---\nid: CF-23\ntitle: Small change 23\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-24/ticket.md",
+        "text": "---\nid: CF-24\ntitle: Small change 24\ntype: bug\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-25/ticket.md",
+        "text": "---\nid: CF-25\ntitle: Small change 25\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-26/ticket.md",
+        "text": "---\nid: CF-26\ntitle: Small change 26\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-27/ticket.md",
+        "text": "---\nid: CF-27\ntitle: Small change 27\ntype: bug\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-28/ticket.md",
+        "text": "---\nid: CF-28\ntitle: Small change 28\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-29/ticket.md",
+        "text": "---\nid: CF-29\ntitle: Small change 29\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-30/ticket.md",
+        "text": "---\nid: CF-30\ntitle: Small change 30\ntype: bug\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-31/ticket.md",
+        "text": "---\nid: CF-31\ntitle: Small change 31\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-32/ticket.md",
+        "text": "---\nid: CF-32\ntitle: Small change 32\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-33/ticket.md",
+        "text": "---\nid: CF-33\ntitle: Small change 33\ntype: bug\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-34/ticket.md",
+        "text": "---\nid: CF-34\ntitle: Small change 34\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-35/ticket.md",
+        "text": "---\nid: CF-35\ntitle: Small change 35\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-36/ticket.md",
+        "text": "---\nid: CF-36\ntitle: Small change 36\ntype: bug\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-37/ticket.md",
+        "text": "---\nid: CF-37\ntitle: Small change 37\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-38/ticket.md",
+        "text": "---\nid: CF-38\ntitle: Small change 38\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-39/ticket.md",
+        "text": "---\nid: CF-39\ntitle: Small change 39\ntype: bug\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-40/ticket.md",
+        "text": "---\nid: CF-40\ntitle: Small change 40\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-41/ticket.md",
+        "text": "---\nid: CF-41\ntitle: Small change 41\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-50/ticket.md",
+        "text": "---\nid: CF-50\ntitle: Idea 50\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-51/ticket.md",
+        "text": "---\nid: CF-51\ntitle: Idea 51\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-52/ticket.md",
+        "text": "---\nid: CF-52\ntitle: Idea 52\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-53/ticket.md",
+        "text": "---\nid: CF-53\ntitle: Idea 53\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-54/ticket.md",
+        "text": "---\nid: CF-54\ntitle: Idea 54\ntype: feature\n---\n"
+      },
+      {
+        "write": ".code-factory/releases/0.1.0.md",
+        "text": "# 0.1.0\n\n- CF-1: Ship the login\n- CF-2: Search tickets\n"
+      },
+      {
+        "commit": "Start"
+      },
+      {
+        "write": ".code-factory/releases/0.2.0.md",
+        "text": "# 0.2.0\n\n- CF-4: Search crashes on quotes\n"
+      },
+      {
+        "commit": "Release 0.2.0"
+      },
+      {
+        "checkout": "ticket/cf-50",
+        "create": true
+      },
+      {
+        "write": "src/flow.txt",
+        "text": "shipped\n"
+      },
+      {
+        "commit": "CF-50: ship it"
+      },
+      {
+        "checkout": "main"
+      },
+      {
+        "merge": "ticket/cf-50",
+        "message": "Merge pull request #7 from o/ticket/cf-50"
+      },
+      {
+        "write": ".code-factory/tickets/CF-1/activity.jsonl",
+        "text": "{\"at\": \"2026-08-12T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-14T14:30:00Z\", \"kind\": \"stage\", \"to\": \"spec\"}\n{\"at\": \"2026-08-17T14:30:00Z\", \"kind\": \"stage\", \"to\": \"spec\"}\n{\"at\": \"2026-08-19T14:30:00Z\", \"kind\": \"stage\", \"to\": \"spec\"}\n{\"at\": \"2026-08-22T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-24T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n{\"at\": \"2026-08-25T14:30:00Z\", \"kind\": \"stage\", \"to\": \"merged\"}\n{\"at\": \"2026-08-16T14:30:00Z\", \"kind\": \"comment\", \"text\": \"Looks right\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-2/activity.jsonl",
+        "text": "{\"at\": \"2026-08-22T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-28T14:30:00Z\", \"kind\": \"evidence\", \"stage\": \"spec\", \"present\": true}\n{\"at\": \"2026-08-31T14:30:00Z\", \"kind\": \"evidence\", \"stage\": \"build\", \"present\": true}\n{\"at\": \"2026-09-02T14:30:00Z\", \"kind\": \"stage\", \"to\": \"merged\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-4/activity.jsonl",
+        "text": "{\"at\": \"2026-09-11T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-12T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-13T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n{\"at\": \"2026-09-14T14:30:00Z\", \"kind\": \"stage\", \"to\": \"merged\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-3/activity.jsonl",
+        "text": "{\"at\": \"2026-09-21T14:25:00Z\", \"kind\": \"created\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-5/activity.jsonl",
+        "text": "{\"at\": \"2026-09-09T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-13T14:30:00Z\", \"kind\": \"evidence\", \"stage\": \"spec\", \"present\": true}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-6/activity.jsonl",
+        "text": "{\"at\": \"2026-09-19T14:30:00Z\", \"kind\": \"created\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-7/activity.jsonl",
+        "text": "{\"at\": \"2026-08-02T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-07T14:30:00Z\", \"kind\": \"stage\", \"to\": \"spec\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-8/activity.jsonl",
+        "text": "{\"at\": \"2026-09-15T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-16T14:30:00Z\", \"kind\": \"stage\", \"to\": \"spec\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-9/activity.jsonl",
+        "text": "{\"at\": \"2026-09-12T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-15T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-18T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n{\"at\": \"2026-09-21T14:20:00Z\", \"kind\": \"capture\", \"tree\": \"{clean_capture:HEAD}\", \"images\": [\"tickets-light.png\", \"tickets-dark.png\"], \"scrollbar\": 0}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-10/activity.jsonl",
+        "text": "{\"at\": \"2026-09-17T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-18T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-21T14:15:00Z\", \"kind\": \"tests_changed\", \"run\": \"r10\", \"files\": [\"tests/test_a.py\", \"tests/test_b.py\"]}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-11/activity.jsonl",
+        "text": "{\"at\": \"2026-09-20T14:30:00Z\", \"kind\": \"created\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-12/activity.jsonl",
+        "text": "{\"at\": \"2026-09-13T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-16T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-19T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n{\"at\": \"2026-09-20T02:30:00Z\", \"kind\": \"pull_request\", \"url\": \"https://github.com/o/r/pull/12\", \"head\": \"1212121212121212121212121212121212121212\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-13/activity.jsonl",
+        "text": "{\"at\": \"2026-09-05T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-05T19:18:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-07T14:30:00Z\", \"kind\": \"stage\", \"to\": \"spec\"}\n{\"at\": \"2026-09-08T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-20/activity.jsonl",
+        "text": "{\"at\": \"2026-08-30T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-30T20:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-31T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-21/activity.jsonl",
+        "text": "{\"at\": \"2026-08-21T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-24T02:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-26T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-22/activity.jsonl",
+        "text": "{\"at\": \"2026-08-13T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-17T08:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-21T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-23/activity.jsonl",
+        "text": "{\"at\": \"2026-08-16T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-16T08:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-16T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-24/activity.jsonl",
+        "text": "{\"at\": \"2026-09-16T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-18T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-20T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-25/activity.jsonl",
+        "text": "{\"at\": \"2026-09-08T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-11T20:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-15T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-26/activity.jsonl",
+        "text": "{\"at\": \"2026-08-30T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-05T02:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-10T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-27/activity.jsonl",
+        "text": "{\"at\": \"2026-09-02T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-04T02:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-05T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-28/activity.jsonl",
+        "text": "{\"at\": \"2026-08-25T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-28T08:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-31T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-29/activity.jsonl",
+        "text": "{\"at\": \"2026-08-16T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-21T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-26T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-30/activity.jsonl",
+        "text": "{\"at\": \"2026-08-19T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-20T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-21T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-31/activity.jsonl",
+        "text": "{\"at\": \"2026-08-11T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-13T20:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-16T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-32/activity.jsonl",
+        "text": "{\"at\": \"2026-09-11T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-16T02:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-20T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-33/activity.jsonl",
+        "text": "{\"at\": \"2026-09-14T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-15T02:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-15T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-34/activity.jsonl",
+        "text": "{\"at\": \"2026-09-06T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-08T08:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-10T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-35/activity.jsonl",
+        "text": "{\"at\": \"2026-08-28T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-01T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-05T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-36/activity.jsonl",
+        "text": "{\"at\": \"2026-08-20T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-25T20:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-31T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-37/activity.jsonl",
+        "text": "{\"at\": \"2026-08-23T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-24T20:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-26T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-38/activity.jsonl",
+        "text": "{\"at\": \"2026-08-14T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-18T02:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-21T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-39/activity.jsonl",
+        "text": "{\"at\": \"2026-08-06T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-08-11T08:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-08-16T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-40/activity.jsonl",
+        "text": "{\"at\": \"2026-09-18T02:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-19T08:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-20T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-41/activity.jsonl",
+        "text": "{\"at\": \"2026-09-09T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-12T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-15T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-50/activity.jsonl",
+        "text": "{\"at\": \"2026-09-18T14:30:00Z\", \"kind\": \"created\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-51/activity.jsonl",
+        "text": "{\"at\": \"2026-09-17T14:30:00Z\", \"kind\": \"created\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-52/activity.jsonl",
+        "text": "{\"at\": \"2026-09-16T14:30:00Z\", \"kind\": \"created\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-53/activity.jsonl",
+        "text": "{\"at\": \"2026-09-15T14:30:00Z\", \"kind\": \"created\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/CF-54/activity.jsonl",
+        "text": "{\"at\": \"2026-09-14T14:30:00Z\", \"kind\": \"created\"}\n"
+      }
+    ]
+  },
+  "second": {
+    "steps": [
+      {
+        "write": ".code-factory/config.toml",
+        "text": "[agents]\n"
+      },
+      {
+        "write": ".code-factory/tickets/AB-1/ticket.md",
+        "text": "---\nid: AB-1\ntitle: Other repository bug\ntype: bug\n---\n"
+      },
+      {
+        "write": ".code-factory/tickets/AB-2/ticket.md",
+        "text": "---\nid: AB-2\ntitle: Other repository feature\ntype: feature\n---\n"
+      },
+      {
+        "commit": "Start"
+      },
+      {
+        "write": ".code-factory/tickets/AB-1/activity.jsonl",
+        "text": "{\"at\": \"2026-09-01T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-06T14:30:00Z\", \"kind\": \"stage\", \"to\": \"build\"}\n{\"at\": \"2026-09-09T14:30:00Z\", \"kind\": \"stage\", \"to\": \"review\"}\n"
+      },
+      {
+        "write": ".code-factory/tickets/AB-2/activity.jsonl",
+        "text": "{\"at\": \"2026-09-16T14:30:00Z\", \"kind\": \"created\"}\n{\"at\": \"2026-09-18T14:30:00Z\", \"kind\": \"stage\", \"to\": \"spec\"}\n"
+      }
+    ]
+  },
+  "now": 1790001000.0,
+  "spool": {
+    "s-block.jsonl": [
+      {
+        "session_id": "s-block",
+        "hook_event_name": "SessionStart",
+        "cwd": "{root}",
+        "source": "startup",
+        "transcript_path": "{home}/transcripts/s-block.jsonl",
+        "_captured_at": 1790000800.0
+      },
+      {
+        "session_id": "s-block",
+        "hook_event_name": "UserPromptSubmit",
+        "prompt": "Edit it",
+        "_captured_at": 1790000810.0
+      },
+      {
+        "session_id": "s-block",
+        "hook_event_name": "PreToolUse",
+        "tool_name": "Edit",
+        "tool_use_id": "t3",
+        "tool_input": {
+          "file_path": "/x/a.py"
+        },
+        "_captured_at": 1790000820.0
+      },
+      {
+        "session_id": "s-block",
+        "hook_event_name": "PermissionRequest",
+        "tool_name": "Edit",
+        "_captured_at": 1790000821.0
+      }
+    ]
+  },
+  "raw": {},
+  "runs": [
+    {
+      "id": "r1brd0000001",
+      "ticket_id": "CF-1",
+      "repository": "{root}",
+      "branch": "",
+      "worktree": "{root}",
+      "stage": "spec",
+      "pid": 2147483647,
+      "started_at": 1786588200.0,
+      "log": "r1brd0000001.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1786596840.0,
+      "cost": 0.4,
+      "halted": "",
+      "instructions": "v1",
+      "model": "opus"
+    },
+    {
+      "id": "r1tdd0000001",
+      "ticket_id": "CF-1",
+      "repository": "{root}",
+      "branch": "",
+      "worktree": "{root}",
+      "stage": "build",
+      "pid": 2147483647,
+      "started_at": 1787409000.0,
+      "log": "r1tdd0000001.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1787417640.0,
+      "cost": 1.1,
+      "halted": "",
+      "instructions": "v1",
+      "model": "opus"
+    },
+    {
+      "id": "r2tdd0000001",
+      "ticket_id": "CF-2",
+      "repository": "{root}",
+      "branch": "",
+      "worktree": "{root}",
+      "stage": "build",
+      "pid": 2147483647,
+      "started_at": 1788100200.0,
+      "log": "r2tdd0000001.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1788108840.0,
+      "cost": 0.9,
+      "halted": "",
+      "instructions": "v1",
+      "model": "opus"
+    },
+    {
+      "id": "r2tdd0000002",
+      "ticket_id": "CF-2",
+      "repository": "{root}",
+      "branch": "",
+      "worktree": "{root}",
+      "stage": "build",
+      "pid": 2147483647,
+      "started_at": 1788104520.0,
+      "log": "r2tdd0000002.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1788107112.0,
+      "cost": 0.3,
+      "halted": "",
+      "instructions": "v1",
+      "model": "opus"
+    },
+    {
+      "id": "r13tdd000001",
+      "ticket_id": "CF-13",
+      "repository": "{root}",
+      "branch": "",
+      "worktree": "{root}",
+      "stage": "build",
+      "pid": 2147483647,
+      "started_at": 1788661800.0,
+      "log": "r13tdd000001.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1788670440.0,
+      "cost": 2.0,
+      "halted": "",
+      "instructions": "v2",
+      "model": "opus"
+    },
+    {
+      "id": "r7frd0000001",
+      "ticket_id": "CF-7",
+      "repository": "{root}",
+      "branch": "",
+      "worktree": "{root}",
+      "stage": "spec",
+      "pid": 2147483647,
+      "started_at": 1786199400.0,
+      "log": "r7frd0000001.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1786208040.0,
+      "cost": 0.2,
+      "halted": "no progress in 3 iterations",
+      "instructions": "v1",
+      "model": "opus"
+    },
+    {
+      "id": "r7frd0000002",
+      "ticket_id": "CF-7",
+      "repository": "{root}",
+      "branch": "",
+      "worktree": "{root}",
+      "stage": "spec",
+      "pid": 2147483647,
+      "started_at": 1786285800.0,
+      "log": "r7frd0000002.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1786294440.0,
+      "cost": 0.2,
+      "halted": "no progress in 3 iterations",
+      "instructions": "v1",
+      "model": "opus"
+    },
+    {
+      "id": "r7frd0000003",
+      "ticket_id": "CF-7",
+      "repository": "{root}",
+      "branch": "",
+      "worktree": "{root}",
+      "stage": "spec",
+      "pid": 2147483647,
+      "started_at": 1789914600.0,
+      "log": "r7frd0000003.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1789923240.0,
+      "cost": 0.2,
+      "halted": "no progress in 3 iterations",
+      "instructions": "v1",
+      "model": "opus"
+    },
+    {
+      "id": "rot100000001",
+      "ticket_id": "AB-1",
+      "repository": "{second}",
+      "branch": "",
+      "worktree": "{second}",
+      "stage": "build",
+      "pid": 2147483647,
+      "started_at": 1788705000.0,
+      "log": "rot100000001.log",
+      "loop": true,
+      "exit_code": 0,
+      "ended_at": 1788713640.0,
+      "cost": 0.7,
+      "halted": "",
+      "instructions": "",
+      "model": ""
+    }
+  ],
+  "home_files": {
+    "pull_requests.json": {
+      "{root}/CF-9": {
+        "state": "open",
+        "review": "",
+        "ci": "failed",
+        "head": "a",
+        "url": "https://github.com/o/r/pull/9",
+        "at": "1790000300.0"
+      },
+      "{root}/CF-13": {
+        "state": "open",
+        "review": "",
+        "ci": "failed",
+        "head": "b",
+        "url": "https://github.com/o/r/pull/13",
+        "at": "1790000300.0"
+      },
+      "{root}/CF-12": {
+        "state": "open",
+        "review": "approved",
+        "ci": "passed",
+        "head": "1212121212121212121212121212121212121212",
+        "url": "https://github.com/o/r/pull/12",
+        "at": "1790000200.0"
+      }
+    },
+    "permissions/0123456789ab.json": {
+      "id": "0123456789ab",
+      "repository": "{root}",
+      "ticket_id": "CF-5",
+      "tool": "Bash",
+      "summary": "npm test --watch",
+      "at": 1790000880.0,
+      "kind": "Bash npm test"
+    }
+  },
+  "home_texts": {
+    "permissions/answers.jsonl": "{\"id\": \"a0\", \"kind\": \"Bash uv run pytest\", \"allowed\": true}\n{\"id\": \"a1\", \"kind\": \"Bash uv run pytest\", \"allowed\": true}\n{\"id\": \"a2\", \"kind\": \"Bash uv run pytest\", \"allowed\": true}\n{\"id\": \"a3\", \"kind\": \"Bash uv run pytest\", \"allowed\": true}\n{\"id\": \"a4\", \"kind\": \"Bash uv run pytest\", \"allowed\": true}\n{\"id\": \"b0\", \"kind\": \"Bash npm test\", \"allowed\": true}\n{\"id\": \"b1\", \"kind\": \"Bash npm test\", \"allowed\": false}\n{\"id\": \"b2\", \"kind\": \"Bash npm test\", \"allowed\": true}\n"
+  },
+  "slices": [
+    "",
+    "type=bug",
+    "repository=second",
+    "type=feature&repository=sample"
+  ],
+  "forecasts": [
+    {
+      "sample": [
+        0,
+        0,
+        0
+      ],
+      "open": 3
+    },
+    {
+      "sample": [
+        0,
+        0,
+        1
+      ],
+      "open": 0
+    },
+    {
+      "sample": [
+        0,
+        0,
+        1
+      ],
+      "open": 1
+    },
+    {
+      "sample": [
+        0,
+        2,
+        0,
+        1,
+        0,
+        0,
+        3,
+        1,
+        0,
+        0,
+        1,
+        0
+      ],
+      "open": 7
+    },
+    {
+      "sample": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "open": 40
+    }
+  ]
+}

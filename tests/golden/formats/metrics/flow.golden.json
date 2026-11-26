@@ -1,0 +1,225 @@
+[
+  {
+    "query": "",
+    "flow": {
+      "range": "7d",
+      "since": 1789396200.0,
+      "now": 1790001000.0,
+      "merged": [
+        {
+          "repository": "sample",
+          "pull": 7,
+          "url": null,
+          "branch": "ticket/cf-50",
+          "ticket": "CF-50",
+          "title": "Idea 50",
+          "at": 1790000240.0,
+          "lead": 180.0,
+          "from": "filed",
+          "autonomy": "unknown",
+          "reverted": false,
+          "fixes": [],
+          "checks": "none"
+        }
+      ],
+      "lead": {
+        "median": 180.0,
+        "p85": 180.0,
+        "p95": 180.0,
+        "count": 1
+      },
+      "completion": {
+        "started": 0,
+        "merged": 0
+      },
+      "cost": {
+        "median": null,
+        "estimated": false,
+        "count": 0,
+        "of": 1
+      },
+      "autonomy": {
+        "share": null,
+        "autonomous": 0,
+        "assisted": 0,
+        "unknown": 1
+      },
+      "columns": {
+        "spec": 4320.0,
+        "build": null,
+        "review": null
+      },
+      "in_flight": 0,
+      "stuck_after": 86400.0,
+      "stuck": [],
+      "agents": [
+        {
+          "agent": "the default agent",
+          "model": "opus",
+          "connection": "",
+          "runs": 1,
+          "finished": 1,
+          "failed": 0,
+          "stopped": 0,
+          "running": 0,
+          "endings": [],
+          "tokens": null,
+          "cost": 0.2
+        }
+      ]
+    }
+  },
+  {
+    "query": "range=24h",
+    "flow": {
+      "range": "24h",
+      "since": 1789914600.0,
+      "now": 1790001000.0,
+      "merged": [
+        {
+          "repository": "sample",
+          "pull": 7,
+          "url": null,
+          "branch": "ticket/cf-50",
+          "ticket": "CF-50",
+          "title": "Idea 50",
+          "at": 1790000240.0,
+          "lead": 180.0,
+          "from": "filed",
+          "autonomy": "unknown",
+          "reverted": false,
+          "fixes": [],
+          "checks": "none"
+        }
+      ],
+      "lead": {
+        "median": 180.0,
+        "p85": 180.0,
+        "p95": 180.0,
+        "count": 1
+      },
+      "completion": {
+        "started": 0,
+        "merged": 0
+      },
+      "cost": {
+        "median": null,
+        "estimated": false,
+        "count": 0,
+        "of": 1
+      },
+      "autonomy": {
+        "share": null,
+        "autonomous": 0,
+        "assisted": 0,
+        "unknown": 1
+      },
+      "columns": {
+        "spec": 4320.0,
+        "build": null,
+        "review": null
+      },
+      "in_flight": 0,
+      "stuck_after": 86400.0,
+      "stuck": [],
+      "agents": [
+        {
+          "agent": "the default agent",
+          "model": "opus",
+          "connection": "",
+          "runs": 1,
+          "finished": 1,
+          "failed": 0,
+          "stopped": 0,
+          "running": 0,
+          "endings": [],
+          "tokens": null,
+          "cost": 0.2
+        }
+      ]
+    }
+  },
+  {
+    "query": "range=30d",
+    "flow": {
+      "range": "30d",
+      "since": 1787409000.0,
+      "now": 1790001000.0,
+      "merged": [
+        {
+          "repository": "sample",
+          "pull": 7,
+          "url": null,
+          "branch": "ticket/cf-50",
+          "ticket": "CF-50",
+          "title": "Idea 50",
+          "at": 1790000240.0,
+          "lead": 180.0,
+          "from": "filed",
+          "autonomy": "unknown",
+          "reverted": false,
+          "fixes": [],
+          "checks": "none"
+        }
+      ],
+      "lead": {
+        "median": 180.0,
+        "p85": 180.0,
+        "p95": 180.0,
+        "count": 1
+      },
+      "completion": {
+        "started": 4,
+        "merged": 0
+      },
+      "cost": {
+        "median": null,
+        "estimated": false,
+        "count": 0,
+        "of": 1
+      },
+      "autonomy": {
+        "share": null,
+        "autonomous": 0,
+        "assisted": 0,
+        "unknown": 1
+      },
+      "columns": {
+        "spec": 4320.0,
+        "build": null,
+        "review": null
+      },
+      "in_flight": 0,
+      "stuck_after": 86400.0,
+      "stuck": [],
+      "agents": [
+        {
+          "agent": "the default agent",
+          "model": "opus",
+          "connection": "",
+          "runs": 5,
+          "finished": 5,
+          "failed": 0,
+          "stopped": 0,
+          "running": 0,
+          "endings": [],
+          "tokens": null,
+          "cost": 4.5
+        },
+        {
+          "agent": "the default agent",
+          "model": "",
+          "connection": "",
+          "runs": 1,
+          "finished": 1,
+          "failed": 0,
+          "stopped": 0,
+          "running": 0,
+          "endings": [],
+          "tokens": null,
+          "cost": 0.7
+        }
+      ]
+    }
+  }
+]

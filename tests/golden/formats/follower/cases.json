@@ -1,0 +1,622 @@
+{
+ "queues": {
+  "cases": [
+   {
+    "name": "slots-and-order",
+    "slots": {
+     "/r/sample": 2,
+     "/r/other": 0
+    },
+    "cards": [
+     {
+      "id": "CF-3",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "low",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-1",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "high",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-2",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "high",
+      "rank": 1,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-10",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-4",
+      "repository": "other",
+      "repository_path": "/r/other",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     }
+    ],
+    "runs": [],
+    "overall": null,
+    "limits": {}
+   },
+   {
+    "name": "not-ready",
+    "slots": {
+     "/r/sample": 9
+    },
+    "cards": [
+     {
+      "id": "CF-1",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": true,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-2",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "review",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-3",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": true,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-4",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 1,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-5",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 2,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-6",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "no progress at BRD",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-7",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "waiting",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-8",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [
+       "CF-1"
+      ],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-9",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": 1.0,
+      "spent": 1.0
+     },
+     {
+      "id": "CF-11",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": 1.0,
+      "spent": 0.5
+     },
+     {
+      "id": "CF-12",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "build",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     }
+    ],
+    "runs": [],
+    "overall": null,
+    "limits": {}
+   },
+   {
+    "name": "caps",
+    "slots": {
+     "/r/sample": 3,
+     "/r/other": 1
+    },
+    "cards": [
+     {
+      "id": "CF-1",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-2",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-3",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-4",
+      "repository": "other",
+      "repository_path": "/r/other",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-5",
+      "repository": "other",
+      "repository_path": "/r/other",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     },
+     {
+      "id": "CF-6",
+      "repository": "sample",
+      "repository_path": "/r/sample",
+      "stage": "spec",
+      "priority": "",
+      "rank": 0,
+      "archived": false,
+      "blocked": "",
+      "work_done": false,
+      "runs": 0,
+      "unanswered": 0,
+      "halted": "",
+      "open_blockers": [],
+      "budget": null,
+      "spent": 0.0
+     }
+    ],
+    "runs": [
+     {
+      "repository": "/r/sample",
+      "ticket_id": "CF-9",
+      "stage": "spec",
+      "active": true
+     },
+     {
+      "repository": "/r/sample",
+      "ticket_id": "CF-6",
+      "stage": "spec",
+      "active": true
+     },
+     {
+      "repository": "/r/other",
+      "ticket_id": "CF-8",
+      "stage": "spec",
+      "active": false
+     }
+    ],
+    "overall": 3,
+    "limits": {
+     "frd": 2
+    }
+   }
+  ],
+  "expected": {
+   "slots-and-order": [
+    {
+     "id": "CF-2",
+     "reason": ""
+    },
+    {
+     "id": "CF-1",
+     "reason": ""
+    },
+    {
+     "id": "CF-3",
+     "reason": "sample 2 of 2"
+    },
+    {
+     "id": "CF-10",
+     "reason": "sample 2 of 2"
+    }
+   ],
+   "not-ready": [
+    {
+     "id": "CF-11",
+     "reason": ""
+    },
+    {
+     "id": "CF-12",
+     "reason": ""
+    }
+   ],
+   "caps": [
+    {
+     "id": "CF-1",
+     "reason": ""
+    },
+    {
+     "id": "CF-2",
+     "reason": "sample 3 of 3"
+    },
+    {
+     "id": "CF-3",
+     "reason": "sample 3 of 3"
+    },
+    {
+     "id": "CF-4",
+     "reason": "all agents 3 of 3"
+    },
+    {
+     "id": "CF-5",
+     "reason": "all agents 3 of 3"
+    }
+   ]
+  }
+ },
+ "periods": {
+  "cases": [
+   {
+    "every": "day",
+    "at": 1790001000.0
+   },
+   {
+    "every": "day",
+    "at": 1798761599.0
+   },
+   {
+    "every": "day",
+    "at": 1798761600.0
+   },
+   {
+    "every": "day",
+    "at": 1830297600.0
+   },
+   {
+    "every": "week",
+    "at": 1790001000.0
+   },
+   {
+    "every": "week",
+    "at": 1798761599.0
+   },
+   {
+    "every": "week",
+    "at": 1798761600.0
+   },
+   {
+    "every": "week",
+    "at": 1830297600.0
+   },
+   {
+    "every": "month",
+    "at": 1790001000.0
+   },
+   {
+    "every": "month",
+    "at": 1798761599.0
+   },
+   {
+    "every": "month",
+    "at": 1798761600.0
+   },
+   {
+    "every": "month",
+    "at": 1830297600.0
+   },
+   {
+    "every": "year",
+    "at": 1790001000.0
+   },
+   {
+    "every": "year",
+    "at": 1798761599.0
+   },
+   {
+    "every": "year",
+    "at": 1798761600.0
+   },
+   {
+    "every": "year",
+    "at": 1830297600.0
+   },
+   {
+    "every": "",
+    "at": 1790001000.0
+   },
+   {
+    "every": "",
+    "at": 1798761599.0
+   },
+   {
+    "every": "",
+    "at": 1798761600.0
+   },
+   {
+    "every": "",
+    "at": 1830297600.0
+   }
+  ],
+  "expected": [
+   "2026-09-21",
+   "2026-12-31",
+   "2027-01-01",
+   "2028-01-01",
+   "2026-W39",
+   "2026-W53",
+   "2026-W53",
+   "2027-W52",
+   "2026-09",
+   "2026-12",
+   "2027-01",
+   "2028-01",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ]
+ },
+ "transient": {
+  "cases": [
+   "all fine\n",
+   "Error: API Error: 529 overloaded\n",
+   "rate-limit exceeded",
+   "HTTP 503 Service Unavailable",
+   "status: 404",
+   "request timed out after 600s",
+   "ECONNRESET",
+   "Connection Reset by peer",
+   "x\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\noverloaded\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n",
+   "ratelimit"
+  ],
+  "expected": [
+   false,
+   true,
+   true,
+   true,
+   false,
+   true,
+   true,
+   true,
+   false,
+   true
+  ]
+ }
+}
