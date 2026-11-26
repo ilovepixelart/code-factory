@@ -83,6 +83,14 @@ def test_gate_delta_selects_module_tests_and_broadens_for_shared_inputs(tmp_path
     assert delta(repo, "affected").stdout.splitlines() == ["full"]
 
 
+def test_affected_gate_delta_changes_select_only_its_test_file(tmp_path: Path) -> None:
+    repo = make_repo(tmp_path)
+    write(repo, "scripts/gate_delta.py", "# changed\n")
+    write(repo, "tests/test_gate_delta.py", "def test_gate():\n    assert True\n")
+
+    assert delta(repo, "affected").stdout.splitlines() == ["python tests/test_gate_delta.py"]
+
+
 def test_delta_coverage_rejects_a_new_file_missing_from_both_reports(tmp_path: Path) -> None:
     repo = make_repo(tmp_path)
     write(repo, "src/code_factory/new.py", "answer = 42\n")
