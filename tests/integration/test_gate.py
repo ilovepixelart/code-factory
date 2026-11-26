@@ -161,4 +161,92 @@ esac
     if pytest_args is not None:
         assert f"run --no-sync {pytest_args}" in lines
     if selected == "vue":
-        assert any("exec vitest run" in line for line in lines)
+        assert any("exec vitest run --project unit" in line for line in lines)
+
+
+def _run_part(tmp_path: Path, *args: str) -> tuple[subprocess.CompletedProcess[str], list[str]]:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    gate = scripts / GATE.name
+    gate.write_bytes(GATE.read_bytes())
+    tools = tmp_path / "bin"
+    tools.mkdir()
+    seen = tmp_path / "seen"
+    seen.touch()
+    _fake(tools, "security", f'echo "database" >> "{seen}"\necho fake-password')
+    _fake(tools, "pnpm", f'echo "pnpm $*" >> "{seen}"')
+    _fake(tools, "gitleaks", "exit 0")
+    _fake(
+        tools,
+        "uv",
+        f"""
+printf '%s\\n' "$*" >> "{seen}"
+case "$*" in
+  *"gate_delta.py base") echo base ;;
+esac
+""",
+    )
+    result = subprocess.run(  # noqa: S603  # the gate and its fake commands are local fixtures
+        ["/bin/sh", str(gate), "--force", *args],
+        env={
+            **os.environ,
+            "PATH": f"{tools}:{os.environ['PATH']}",
+            "CODE_FACTORY_GATE_DATABASE_URL": "",
+            "CODE_FACTORY_TEST_DATABASE": "code_factory_gate_probe_test",
+            "CODE_FACTORY_TEST_WORKERS": "3",
+        },
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    return result, seen.read_text(encoding="utf-8").splitlines()
+
+
+@pytest.mark.parametrize(
+    ("part", "runs", "database"),
+    [
+        ("static", "run --no-sync lint-imports", False),
+        (
+            "backend-unit",
+            "run --no-sync pytest -n 3 --dist worksteal --cov-fail-under=0 tests/unit",
+            False,
+        ),
+        (
+            "backend-integration",
+            "run --no-sync pytest -n 3 --dist worksteal --cov-fail-under=0 tests/integration",
+            True,
+        ),
+        (
+            "backend-e2e",
+            "run --no-sync pytest -n 3 --dist worksteal --cov-fail-under=0 tests/e2e",
+            True,
+        ),
+        ("web", "pnpm --dir web build", False),
+    ],
+)
+def test_a_gate_part_runs_its_own_suite_and_nothing_of_the_others(
+    tmp_path: Path, part: str, runs: str, *, database: bool
+) -> None:
+    result, lines = _run_part(tmp_path, "--secrets", "--part", part)
+
+    assert result.returncode == 0, result.stderr
+    assert runs in lines
+    assert ("database" in lines) == database
+    assert any("pytest" in line for line in lines) == part.startswith("backend-")
+    assert any(line.startswith("pnpm") for line in lines) == (part == "web")
+    branch_checks = {
+        "run --no-sync python scripts/gate_delta.py review --base base",
+        "run --no-sync python scripts/gate_scan.py gitleaks base",
+    }
+    assert branch_checks <= set(lines) if part == "static" else not branch_checks & set(lines)
+
+
+def test_an_unknown_gate_part_is_refused_with_the_parts_named(tmp_path: Path) -> None:
+    result, lines = _run_part(tmp_path, "--part", "everything")
+
+    assert (result.returncode, result.stderr.strip()) == (
+        2,
+        "gate: --part takes static, backend-unit, backend-integration, backend-e2e or web",
+    )
+    assert lines == []

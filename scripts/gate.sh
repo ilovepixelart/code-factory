@@ -15,6 +15,7 @@ diff_coverage=0
 mutation=0
 semgrep_rules=""
 spec_receipt=""
+part=""
 while [ "$#" -gt 0 ]; do
   case $1 in
     --force) force=1 ;;
@@ -39,6 +40,16 @@ while [ "$#" -gt 0 ]; do
       semgrep_rules=$2
       shift
       ;;
+    --part)
+      case ${2:-} in
+        static | backend-unit | backend-integration | backend-e2e | web) part=$2 ;;
+        *)
+          echo "gate: --part takes static, backend-unit, backend-integration, backend-e2e or web" >&2
+          exit 2
+          ;;
+      esac
+      shift
+      ;;
     --base)
       if [ "$#" -lt 2 ] || [ -z "$2" ]; then
         echo "gate: --base needs a Git ref" >&2
@@ -48,7 +59,7 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
     *)
-      echo "usage: sh scripts/gate.sh [--force] [--fast] [--base REF] [--secrets] [--audit]" >&2
+      echo "usage: sh scripts/gate.sh [--force] [--fast] [--part PART] [--base REF] [--secrets] [--audit]" >&2
       echo "       [--diff-coverage] [--semgrep FILE] [--spec-lock FILE] [--mutation]" >&2
       exit 2
       ;;
@@ -196,19 +207,24 @@ affected_python() {
 timed prepare prepare
 base=$(delta base)
 base_ref=$base
-timed test-delta delta review
-if [ -n "$spec_receipt" ]; then
+# A part other than `static` runs only its own suite; the checks against the base are static's.
+branch_checks=0
+[ -n "$part" ] && [ "$part" != static ] || branch_checks=1
+[ "$branch_checks" = 0 ] || timed test-delta delta review
+if [ "$branch_checks" = 1 ] && [ -n "$spec_receipt" ]; then
   (unset CODE_FACTORY_DATABASE_URL; timed spec-lock uv run --no-sync python scripts/gate_spec_lock.py verify "$spec_receipt")
 fi
-if [ "$secrets" = 1 ] || command -v gitleaks >/dev/null 2>&1; then
+if [ "$branch_checks" = 0 ]; then
+  :
+elif [ "$secrets" = 1 ] || command -v gitleaks >/dev/null 2>&1; then
   (unset CODE_FACTORY_DATABASE_URL; timed secrets uv run --no-sync python scripts/gate_scan.py gitleaks "$base")
 else
   echo "gate: Gitleaks is unavailable. Use --secrets to require the scan."
 fi
-if [ "$audit" = 1 ]; then
+if [ "$branch_checks" = 1 ] && [ "$audit" = 1 ]; then
   (unset CODE_FACTORY_DATABASE_URL; timed audit sh scripts/audit.sh --changed --base "$base")
 fi
-if [ -n "$semgrep_rules" ]; then
+if [ "$branch_checks" = 1 ] && [ -n "$semgrep_rules" ]; then
   (unset CODE_FACTORY_DATABASE_URL; timed semgrep uv run --no-sync python scripts/gate_scan.py semgrep "$base" --config "$semgrep_rules")
 fi
 
@@ -224,7 +240,7 @@ if [ "$fast" = 1 ] && [ "$diff_coverage" = 0 ] && [ "$mutation" = 0 ]; then
     if printf '%s\n' "$selected" | grep -qx vue; then
       unset CODE_FACTORY_DATABASE_URL
       timed web-install web_install
-      timed affected-web pnpm --dir web exec vitest run --maxWorkers="$WEB_TEST_WORKERS"
+      timed affected-web pnpm --dir web exec vitest run --project unit --maxWorkers="$WEB_TEST_WORKERS"
     fi
     if [ -z "$selected" ]; then
       echo "gate: no affected test suites"
@@ -233,6 +249,27 @@ if [ "$fast" = 1 ] && [ "$diff_coverage" = 0 ] && [ "$mutation" = 0 ]; then
   fi
   echo "gate: shared inputs changed, running the full gate"
 fi
+
+# One part of the gate, as a CI job runs it beside the others. Each pytest part checks no coverage
+# floor: the parts' coverage files are combined and the floor is checked once, over all of them.
+part_tests() {
+  uv run --no-sync pytest -n "$PYTEST_WORKERS" --dist worksteal --cov-fail-under=0 "$1"
+}
+case $part in
+  "") ;;
+  static) timed static static_checks; exit 0 ;;
+  backend-unit) (unset CODE_FACTORY_DATABASE_URL; timed backend-unit part_tests tests/unit); exit 0 ;;
+  backend-integration | backend-e2e)
+    timed database prepare_database
+    timed "$part" part_tests "tests/${part#backend-}"
+    exit 0
+    ;;
+  web)
+    timed web web_checks
+    timed build web_build
+    exit 0
+    ;;
+esac
 
 CACHE_FILE=.pytest_cache/code-factory-gate-pass
 key=""

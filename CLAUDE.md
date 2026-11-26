@@ -42,7 +42,7 @@ Alembic revision, tests in `tests/unit/<name>/` and `tests/integration/<name>/`.
 
 | Command | Does |
 |---|---|
-| `sh scripts/gate.sh` | the gate, run before every commit: static checks, then pytest and the web checks side by side |
+| `sh scripts/gate.sh` | the gate, run before every commit: static checks, then pytest and the web checks side by side; `--part static` (or `backend-unit`, `backend-integration`, `backend-e2e`, `web`) runs one part, as each CI job does |
 | `uv run pytest --no-cov tests/unit` (or `tests/integration`, `tests/e2e`, one file) | a subset (add `-n 4` for workers); `tests/unit` needs no database |
 | `pnpm --dir web test` (or `lint`, `typecheck`, `build`) | one web check; `test` runs `web/tests/unit` |
 | `pnpm --dir web test:component` / `e2e` | the DOM component tests and the browser tests: on demand, never in the gate or CI |
