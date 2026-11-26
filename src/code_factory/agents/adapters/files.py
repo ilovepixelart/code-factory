@@ -13,6 +13,8 @@ from code_factory.agents.models.claude_agents import ClaudeAgent, ClaudeAgentLis
 from code_factory.agents.rules.claude_agents import parse_claude_agent
 from code_factory.platform.errors import BadRequestError
 
+CLAUDE_FOLDER = ".claude"
+
 MAX_AGENT_FILE = 256 * 1024
 MAX_FILES_PER_FOLDER = 1000
 MAX_LOG = 64 * 1024 * 1024
@@ -65,7 +67,7 @@ def _list(global_agents: Path, projects: list[Path]) -> ClaudeAgentList:
         places.append((global_agents, "global"))
     for project in projects:
         for folder in (project, *project.parents):
-            agents = folder / ".claude" / "agents"
+            agents = folder / CLAUDE_FOLDER / "agents"
             if agents != global_agents and all(agents != seen for seen, _ in places):
                 places.append((agents, folder.name))
     agents: list[ClaudeAgent] = []
@@ -100,9 +102,9 @@ def default_claude_home() -> Path:
     if configured:
         return Path(configured)
     try:
-        return Path.home() / ".claude"
+        return Path.home() / CLAUDE_FOLDER
     except RuntimeError:
-        return Path(".claude")
+        return Path(CLAUDE_FOLDER)
 
 
 def _read_login(path: Path) -> str | None:

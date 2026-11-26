@@ -124,6 +124,9 @@ jobs:
             -Dsonar.python.coverage.reportPaths=coverage/python.xml
             -Dsonar.javascript.lcov.reportPaths=coverage/web.info
             -Dsonar.exclusions=web/src/components/ui/**,web/src/styles/shadcn-vue.css,web/src/generated/**,src/code_factory/platform/web/static/docs-assets/swagger-ui/**,site/web/static/code.css,site/web/static/js/htmx.min.js
+            -Dsonar.issue.ignore.multicriteria=migrations
+            -Dsonar.issue.ignore.multicriteria.migrations.ruleKey=python:S1192
+            -Dsonar.issue.ignore.multicriteria.migrations.resourceKey=src/code_factory/platform/db/alembic/versions/**
       - name: Audit the locked dependencies
         run: |
           sh scripts/audit.sh
