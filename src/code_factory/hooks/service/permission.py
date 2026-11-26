@@ -31,14 +31,14 @@ class PermissionMixin(Collaborators):
         payload: dict[str, Any],
         *,
         sandboxed: bool,
-        alive: Callable[[], Awaitable[bool]],
+        alive: Callable[[], Awaitable[bool]] | None = None,
     ) -> str | None:
         """The hook text for a request, or `None` to print nothing.
 
         Nothing for an actor with no ticket and when the hook closed (`alive` turned false: the
-        request is withdrawn). A request nobody answers in the wait gets the words that tell the
-        run to do it another way. Each answer is recorded on the ticket; a failure to record is
-        logged and the run still hears the answer.
+        request is withdrawn); without `alive` there is no connection to watch. A request nobody
+        answers in the wait gets the words that tell the run to do it another way. Each answer is
+        recorded on the ticket; a failure to record is logged and the run still hears the answer.
         """
         if actor.ticket_id is None or actor.run_id is None:
             return None
@@ -73,10 +73,7 @@ class PermissionMixin(Collaborators):
             await permissions.record(actor.run_id, tool, allow=True, by="owner", reason=STANDING)
             return True
 
-        async def open_connection() -> bool:
-            return True
-
-        said = await self.permission(actor, payload, sandboxed=False, alive=open_connection)
+        said = await self.permission(actor, payload, sandboxed=False)
         return said is not None and '"behavior": "allow"' in said
 
     async def _answered(
@@ -84,7 +81,7 @@ class PermissionMixin(Collaborators):
         run_id: str,
         payload: dict[str, Any],
         sandboxed: bool,
-        alive: Callable[[], Awaitable[bool]],
+        alive: Callable[[], Awaitable[bool]] | None,
     ) -> dict[str, Any] | None:
         """The service's answer; `None` when the hook closed, `TimeoutError` past the wait."""
         loop = asyncio.get_running_loop()
@@ -97,10 +94,11 @@ class PermissionMixin(Collaborators):
                 left = deadline - loop.time()
                 if left <= 0:
                     raise TimeoutError
-                done, _ = await asyncio.wait({request}, timeout=min(self._poll_s, left))
+                poll = left if alive is None else min(self._poll_s, left)
+                done, _ = await asyncio.wait({request}, timeout=poll)
                 if done:
                     return request.result()
-                if not await self._open(alive):
+                if alive is not None and not await self._open(alive):
                     return None
         finally:
             await self._stop(request)
