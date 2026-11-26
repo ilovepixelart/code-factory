@@ -69,7 +69,7 @@ class _Receiver:
         """Return when the client has gone."""
         await self._body_done.wait()
         while (await self._receive())["type"] != "http.disconnect":
-            pass
+            continue  # every message before the disconnect is read and dropped
 
 
 def _headers(scope: Scope) -> list[tuple[str, str]]:

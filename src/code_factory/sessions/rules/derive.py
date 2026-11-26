@@ -110,13 +110,12 @@ def summary(tool_input: object) -> str:
 
 
 def _action_of(event: Event) -> Action:
+    found = text_field(event.payload, "tool_use_id")
     return Action(
         tool=field(event, "tool_name"),
         summary=summary(event.payload.get("tool_input")),
         started_at=event.captured_at,
-        tool_use_id=None
-        if (found := text_field(event.payload, "tool_use_id")) is None
-        else clean(found),
+        tool_use_id=None if found is None else clean(found),
     )
 
 

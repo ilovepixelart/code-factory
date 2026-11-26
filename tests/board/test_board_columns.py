@@ -107,4 +107,4 @@ def test_the_etag_of_an_empty_object() -> None:
 
 def test_the_body_is_compact_json_that_keeps_unicode() -> None:
     assert body_of({"b": [1, "é"], "a": {}}) == '{"b":[1,"é"],"a":{}}'
-    assert body_of({"a": 1}) == body_of({"a": 1})
+    assert body_of({"a": 1}) == '{"a":1}'
