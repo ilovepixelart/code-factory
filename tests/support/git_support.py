@@ -9,7 +9,7 @@ from code_factory.git.adapters.runner import GitRunner
 from code_factory.git.models import HookOutcome, PullRef, TicketRef
 from code_factory.git.service import GitPorts, GitService
 from code_factory.platform.db import UnitOfWork
-from code_factory.platform.errors import NotFoundError
+from code_factory.platform.errors import ConflictError, NotFoundError
 
 ENV = {
     **os.environ,
@@ -82,13 +82,9 @@ class FakeForge:
         self.opened.append(asked)
         return PullRef(number=1, url="https://example.test/pull/1")
 
-    async def pull_state(self, ref: PullRef) -> str:  # noqa: ARG002
-        return self.state
-
-    def is_clean(self, state: str) -> bool:
-        return state == "clean"
-
-    async def merge(self, ref: PullRef, head: str) -> None:  # noqa: ARG002
+    async def merge(self, ticket_id: str, ref: PullRef, head: str) -> None:  # noqa: ARG002
+        if self.state != "clean":
+            raise ConflictError(self.state)
         self.merged.append(head)
 
 

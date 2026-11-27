@@ -1,15 +1,21 @@
 """What the end of a run sets off: a build's commits go to their checks, a review to its verdict."""
 
 import asyncio
+from collections.abc import Callable
+from pathlib import Path
 
 import pytest
 
-from code_factory.platform.errors import ConflictError
+from code_factory.platform.db import UnitOfWork
+from code_factory.platform.errors import ConflictError, DatabaseBusyError
+from code_factory.runs.adapters.processes import ProcessRegistry
 from code_factory.runs.models import Run, StartOptions
 from code_factory.runs.ports import TicketFacts
 from code_factory.runs.rules.records import state_of
 from code_factory.runs.service import RunService
+from code_factory.tickets.rules.feed import describe
 from runs_fakes import Fakes
+from runs_values import FakeClock
 
 
 async def _ended(runs: RunService, facts: TicketFacts, stage: str = "build") -> Run:
@@ -28,6 +34,18 @@ def committing(fakes: Fakes) -> Fakes:
     fakes.trees.heads = ["head0", "head1"]
     fakes.trees.new_commits = ["c1", "c2"]
     return fakes
+
+
+@pytest.fixture
+def restart_collector(
+    uow: UnitOfWork, fakes: Fakes, tmp_path: Path, clock: FakeClock
+) -> Callable[[], RunService]:
+    def restarted() -> RunService:
+        return RunService(
+            uow, fakes.ports, ProcessRegistry(), state_dir=tmp_path / "state", clock=clock
+        )
+
+    return restarted
 
 
 async def test_a_build_run_that_committed_sends_its_newest_commit_to_the_checks(
@@ -88,8 +106,47 @@ async def test_a_refused_review_decision_still_settles_the_run(
     fakes.flow.error = ConflictError("no review submitted by the run")
 
     run = await _ended(runs, facts, stage="review")
+    await runs.collect()
 
     assert run.settled_at is not None
+    assert fakes.flow.calls == [("review", facts.id, run.id, "head0")]
+    (event,) = [e for e in fakes.tickets.events if e[1] == "run.handoff_refused"]
+    assert event[2] == run.id
+    assert describe(event[1], event[3]) == (
+        "Review handoff refused: no review submitted by the run"
+    )
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [DatabaseBusyError("the verdict store is busy"), OSError("the verdict store is unavailable")],
+)
+async def test_a_transient_review_handoff_resumes_when_the_collector_restarts(
+    runs: RunService,
+    fakes: Fakes,
+    facts: TicketFacts,
+    restart_collector: Callable[[], RunService],
+    failure: Exception,
+) -> None:
+    fakes.agents.script = "exit 0"
+    fakes.flow.error = failure
+
+    run = await _ended(runs, facts, stage="review")
+    call = ("review", facts.id, run.id, "head0")
+
+    assert run.exit_code == 0
+    assert run.settled_at is None
+    assert fakes.flow.calls == [call]
+    assert all(event[1] != "run.handoff_refused" for event in fakes.tickets.events)
+
+    fakes.flow.error = None
+    restarted = restart_collector()
+    await restarted.collect()
+    await restarted.collect()
+
+    assert (await restarted.get(run.id)).settled_at is not None
+    assert fakes.flow.calls == [call, call]
+    assert sum(event[1] == "run.ended" for event in fakes.tickets.events) == 1
 
 
 async def test_a_stopped_review_run_decides_nothing(
