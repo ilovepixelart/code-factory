@@ -16,6 +16,7 @@ mutation=0
 semgrep_rules=""
 spec_receipt=""
 part=""
+shard=""
 while [ "$#" -gt 0 ]; do
   case $1 in
     --force) force=1 ;;
@@ -50,6 +51,14 @@ while [ "$#" -gt 0 ]; do
       esac
       shift
       ;;
+    --shard)
+      if [ "$#" -lt 2 ] || [ -z "$2" ]; then
+        echo "gate: --shard needs INDEX/COUNT, such as 1/2" >&2
+        exit 2
+      fi
+      shard=$2
+      shift
+      ;;
     --base)
       if [ "$#" -lt 2 ] || [ -z "$2" ]; then
         echo "gate: --base needs a Git ref" >&2
@@ -59,7 +68,7 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
     *)
-      echo "usage: sh scripts/gate.sh [--force] [--fast] [--part PART] [--base REF] [--secrets] [--audit]" >&2
+      echo "usage: sh scripts/gate.sh [--force] [--fast] [--part PART [--shard I/N]] [--base REF] [--secrets] [--audit]" >&2
       echo "       [--diff-coverage] [--semgrep FILE] [--spec-lock FILE] [--mutation]" >&2
       exit 2
       ;;
@@ -252,8 +261,16 @@ fi
 
 # One part of the gate, as a CI job runs it beside the others. Each pytest part checks no coverage
 # floor: the parts' coverage files are combined and the floor is checked once, over all of them.
+# With --shard a part runs only its share of the folder's test files (scripts/gate_shard.py).
 part_tests() {
-  uv run --no-sync pytest -n "$PYTEST_WORKERS" --dist worksteal --cov-fail-under=0 "$1"
+  if [ -z "$shard" ]; then
+    uv run --no-sync pytest -n "$PYTEST_WORKERS" --dist worksteal --cov-fail-under=0 "$1"
+    return
+  fi
+  files=$(uv run --no-sync python scripts/gate_shard.py "$1" "$shard") || return 2
+  set -f
+  # shellcheck disable=SC2086  # one test file path per word; paths hold no spaces
+  uv run --no-sync pytest -n "$PYTEST_WORKERS" --dist worksteal --cov-fail-under=0 $files
 }
 case $part in
   "") ;;

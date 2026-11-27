@@ -1,6 +1,8 @@
 """The run listener: loopback only, released on stop, and no header or log of its own."""
 
 import asyncio
+import contextlib
+import gc
 import logging
 import signal
 import socket
@@ -99,3 +101,30 @@ async def test_a_listener_that_cannot_start_says_so(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr("uvicorn.Server.serve", never)
     with pytest.raises(UnavailableError, match="listener"):
         await listener.start()
+
+
+def _open_loopback_sockets() -> set[int]:
+    found = set()
+    for item in gc.get_objects():
+        if (
+            isinstance(item, socket.socket)
+            and item.family == socket.AF_INET
+            and item.fileno() != -1
+        ):
+            with contextlib.suppress(OSError):
+                if item.getsockname()[0] == "127.0.0.1":
+                    found.add(id(item))
+    return found
+
+
+async def test_a_start_cancelled_before_it_serves_releases_its_socket_and_server() -> None:
+    before = _open_loopback_sockets()
+    starting = asyncio.create_task(RunListener(hello, shutdown_timeout_s=2).start())
+    await asyncio.sleep(0)  # the socket is bound and the server task created, not yet serving
+    starting.cancel()
+
+    with pytest.raises(asyncio.CancelledError):
+        await starting
+    serving = [t for t in asyncio.all_tasks() if t.get_name() == "broker-listener-serve"]
+    assert [t for t in serving if not t.done()] == []
+    assert _open_loopback_sockets() - before == set()

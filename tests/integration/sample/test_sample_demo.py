@@ -4,10 +4,11 @@ Expected values come from what the sample files (its titles, questions, sessions
 domain's own rules (a pass review moves nothing, a changes review sends the ticket to Build).
 """
 
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 
 import pytest
+import pytest_asyncio
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -34,6 +35,7 @@ from code_factory.team.service import TeamService
 from code_factory.ticket_writes.service import TicketWriteService
 from code_factory.tickets.models import Column, TicketFilter
 from code_factory.tickets.service import TicketService
+from isolated_sessions import isolated_sessions
 
 # The tables the demo leaves empty, each with the reason. A table missing from here that is empty
 # after the load fails the test, so a page whose source the demo stops filling is noticed.
@@ -80,24 +82,48 @@ LEFT_EMPTY = {
 }
 
 
-@pytest.fixture
+# Loading the demo takes seconds and every test here only reads it: one load serves the module, on
+# a connection of its own whose transaction is rolled back when the module ends.
+pytestmark = pytest.mark.asyncio(loop_scope="module")
+
+
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
+async def demo_connection(settings: Settings, migrated: None) -> AsyncGenerator[AsyncConnection]:  # noqa: ARG001
+    """A connection inside a transaction that is rolled back when the module's tests end."""
+    engine = create_engine(settings)
+    try:
+        async with engine.connect() as connection:
+            transaction = await connection.begin()
+            try:
+                yield connection
+            finally:
+                await transaction.rollback()
+    finally:
+        await engine.dispose()
+
+
+@pytest_asyncio.fixture(scope="module", loop_scope="module")
 async def demo(
-    settings: Settings, uow: UnitOfWork, tmp_path: Path
-) -> tuple[Services, dict[str, str]]:
-    """The services as `app.py` wires them, the demo loaded, its git under the test's folder."""
-    own = settings.model_copy(update={"state_dir": tmp_path / "state"})
-    resources = Resources(own, create_engine(own), uow, BackgroundTasks())
-    services = build_services(resources, IDLE_MODULES)
-    return services, await services.get(SampleService).load("demo")
+    settings: Settings, demo_connection: AsyncConnection, tmp_path_factory: pytest.TempPathFactory
+) -> AsyncGenerator[tuple[Services, dict[str, str]]]:
+    """The services as `app.py` wires them, the demo loaded once, its git under a module folder."""
+    own = settings.model_copy(update={"state_dir": tmp_path_factory.mktemp("demo") / "state"})
+    engine = create_engine(own)
+    try:
+        uow = UnitOfWork(isolated_sessions(demo_connection))
+        services = build_services(Resources(own, engine, uow, BackgroundTasks()), IDLE_MODULES)
+        yield services, await services.get(SampleService).load("demo")
+    finally:
+        await engine.dispose()
 
 
 @pytest.mark.usefixtures("demo")
 async def test_every_table_a_page_reads_holds_rows_and_the_rest_say_why_not(
-    connection: AsyncConnection,
+    demo_connection: AsyncConnection,
 ) -> None:
     empty = set()
     for table in Base.metadata.sorted_tables:
-        if await connection.scalar(select(func.count()).select_from(table)) == 0:
+        if await demo_connection.scalar(select(func.count()).select_from(table)) == 0:
             empty.add(table.name)
     assert empty - set(LEFT_EMPTY) == set(), "filled by no page's source"
     assert set(LEFT_EMPTY) - empty == set(), "listed as empty but filled"

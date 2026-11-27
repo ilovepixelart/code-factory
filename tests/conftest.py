@@ -21,13 +21,12 @@ import sys
 import uuid
 from collections.abc import AsyncGenerator, Iterator
 from pathlib import Path
-from typing import Self, override
 
 import httpx
 import pytest
 from fastapi import FastAPI
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
 
 from app_lifespan import DB_SCHEMA_VARIABLE, IDLE_MODULES, running_lifespan
 from code_factory.app import create_app
@@ -50,6 +49,7 @@ from code_factory.tickets.service import (
     TicketService,
 )
 from database_guard import UnsafeDatabaseError, assert_test_database
+from isolated_sessions import isolated_sessions
 from memory_values import NOW as MEMORY_NOW
 from ticket_values import NOW as TICKETS_NOW
 from ticket_values import OWNER
@@ -210,72 +210,16 @@ async def connection(settings: Settings, migrated: None) -> AsyncGenerator[Async
         await engine.dispose()
 
 
-class _Turns:
-    """Whose turn it is on the test's one connection: one task at a time, as often as it nests."""
-
-    def __init__(self) -> None:
-        self._lock = asyncio.Lock()
-        self._owner: asyncio.Task[object] | None = None
-        self._depth = 0
-
-    async def take(self) -> None:
-        task = asyncio.current_task()
-        if self._owner is not task:
-            await self._lock.acquire()
-            self._owner = task
-        self._depth += 1
-
-    def give(self) -> None:
-        self._depth -= 1
-        if self._depth == 0:
-            self._owner = None
-            self._lock.release()
-
-
-class _TurnSession(AsyncSession):
-    """A session on the test's one connection; sessions of concurrent tasks take turns.
-
-    A service may read in parallel (the team fans out over the runs). On their own connections in
-    the app that is safe; here every session is a savepoint of one connection, which two tasks
-    must not interleave.
-    """
-
-    @override
-    async def __aenter__(self) -> Self:
-        await self.info[_TURNS].take()
-        return await super().__aenter__()
-
-    @override
-    async def __aexit__(self, type_: object, value: object, traceback: object) -> None:
-        try:
-            await super().__aexit__(type_, value, traceback)
-        finally:
-            self.info[_TURNS].give()
-
-
-_TURNS = "turns"
-
-
-def _session_factory(connection: AsyncConnection) -> async_sessionmaker[AsyncSession]:
-    return async_sessionmaker(
-        bind=connection,
-        join_transaction_mode="create_savepoint",
-        expire_on_commit=False,
-        class_=_TurnSession,
-        info={_TURNS: _Turns()},
-    )
-
-
 @pytest.fixture
 def uow(connection: AsyncConnection) -> UnitOfWork:
     """What a service is built with: units of work on the isolated connection."""
-    return UnitOfWork(_session_factory(connection))
+    return UnitOfWork(isolated_sessions(connection))
 
 
 @pytest.fixture
 async def db_session(connection: AsyncConnection) -> AsyncGenerator[AsyncSession]:
     """A session on the isolated connection."""
-    async with _session_factory(connection)() as session:
+    async with isolated_sessions(connection)() as session:
         yield session
 
 
@@ -303,7 +247,7 @@ async def offline_client(offline_app: FastAPI) -> AsyncGenerator[httpx.AsyncClie
 async def app(settings: Settings, connection: AsyncConnection) -> AsyncGenerator[FastAPI]:
     """The app with its lifespan running and its sessions on the isolated connection."""
     application = create_app(
-        settings, _session_factory(connection), guarded=False, modules=IDLE_MODULES
+        settings, isolated_sessions(connection), guarded=False, modules=IDLE_MODULES
     )
     async with running_lifespan(application):
         yield application
@@ -314,7 +258,7 @@ async def guarded_client(
     settings: Settings, connection: AsyncConnection
 ) -> AsyncGenerator[httpx.AsyncClient]:
     """A client of the app as `serve` builds it: the sign-in guard on."""
-    application = create_app(settings, _session_factory(connection), modules=IDLE_MODULES)
+    application = create_app(settings, isolated_sessions(connection), modules=IDLE_MODULES)
     async with (
         running_lifespan(application),
         httpx.AsyncClient(

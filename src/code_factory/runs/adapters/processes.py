@@ -210,6 +210,8 @@ class ProcessRegistry:
         """Let go of every held process without signalling it: runs outlive a board restart."""
         for watcher in list(self._watchers):
             watcher.cancel()
+        if not self._held:
+            return  # no transport is let go, so none needs the collection below to finalise it
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", ResourceWarning)  # one per transport let go of
             self._held.clear()

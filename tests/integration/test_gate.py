@@ -183,6 +183,10 @@ def _run_part(tmp_path: Path, *args: str) -> tuple[subprocess.CompletedProcess[s
 printf '%s\\n' "$*" >> "{seen}"
 case "$*" in
   *"gate_delta.py base") echo base ;;
+  *"gate_shard.py tests/integration 2/3")
+    echo tests/integration/a/test_x.py
+    echo tests/integration/test_y.py
+    ;;
 esac
 """,
     )
@@ -250,3 +254,15 @@ def test_an_unknown_gate_part_is_refused_with_the_parts_named(tmp_path: Path) ->
         "gate: --part takes static, backend-unit, backend-integration, backend-e2e or web",
     )
     assert lines == []
+
+
+def test_a_sharded_part_runs_only_the_files_of_its_shard(tmp_path: Path) -> None:
+    result, lines = _run_part(tmp_path, "--part", "backend-integration", "--shard", "2/3")
+
+    assert result.returncode == 0, result.stderr
+    assert "run --no-sync python scripts/gate_shard.py tests/integration 2/3" in lines
+    assert (
+        "run --no-sync pytest -n 3 --dist worksteal --cov-fail-under=0 "
+        "tests/integration/a/test_x.py tests/integration/test_y.py"
+    ) in lines
+    assert not any(line.endswith("--cov-fail-under=0 tests/integration") for line in lines)

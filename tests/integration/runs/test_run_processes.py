@@ -170,6 +170,23 @@ async def test_detaching_leaves_the_child_running(tmp_path: Path) -> None:
         await ProcessRegistry(term_grace_s=TERM_GRACE_S).stop(target)
 
 
+@pytest.mark.parametrize(("holds", "collections"), [(False, 0), (True, 1)])
+async def test_letting_go_collects_only_when_a_process_was_held(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, holds: bool, collections: int
+) -> None:
+    """A full collection finalises the transports let go of; with none held it is pure cost."""
+    registry = ProcessRegistry()
+    target = await spawn(registry, tmp_path, "sleep 30; :") if holds else None
+    counted: list[int] = []
+    monkeypatch.setattr(processes.gc, "collect", lambda: counted.append(1) or 0)
+    try:
+        registry.detach_all()
+        assert len(counted) == collections
+    finally:
+        if target is not None:
+            await ProcessRegistry(term_grace_s=TERM_GRACE_S).stop(target)
+
+
 class _AnyProcess:
     """A `ps` that says every pid started at the recorded time with the exit file in its command."""
 
