@@ -67,10 +67,9 @@ class PageReader:
         """The page: its keys in the order the web app was written against."""
         sources = self._sources
         repository = world.repositories.get(ticket.repository)
-        checks = await sources.checks.latest_checks([ticket.id])
-        [facts] = await card_facts(sources, world, [ticket], checks)
-        history = await sources.activity.entries(ticket.id)
-        records = checks.get(ticket.id, [])
+        [facts] = await card_facts(sources, world, [ticket])
+        history = await sources.activity.evidence_entries(ticket.id)
+        latest = await sources.checks.latest_attempt(ticket.id)
         card = build_card(facts, world.now)
         spent = await self._spent(facts.runs, repository, card["budget"])
         documents, requirements = await self._documents(ticket)
@@ -100,9 +99,9 @@ class PageReader:
                 world, [link["parent"], *link["child_ids"], *ticket.blocked_by, *link["blocks"]]
             ),
             "description_html": await html_of(ticket.description) if ticket.description else "",
-            **await self._check(ticket, records),
+            **await self._check(ticket, latest),
             "checks_configured": bool(repository and repository.checks_configured),
-            "activity": await self._activity(ticket.id, history),
+            "activity": await self._activity(ticket.id),
             "checking": ticket.id in await sources.checks.running([ticket.id]),
             "month_budget": await self._month_budget(ticket.repository, world),
             "subagents": facts.subagents,
@@ -119,7 +118,7 @@ class PageReader:
 
     async def summary(self, ticket: Ticket) -> dict[str, Any]:
         """What the ticket proved: for the pull request body as well as the page."""
-        history = await self._sources.activity.entries(ticket.id)
+        history = await self._sources.activity.evidence_entries(ticket.id)
         try:
             document = await self._sources.documents.get_document(
                 ticket.id, DocumentName.REQUIREMENTS
@@ -158,8 +157,7 @@ class PageReader:
             "halted": runs.halted,
         }
 
-    async def _check(self, ticket: Ticket, records: Sequence[CheckRecord]) -> dict[str, Any]:
-        latest = records[-1] if records else None
+    async def _check(self, ticket: Ticket, latest: CheckRecord | None) -> dict[str, Any]:
         failed = latest is not None and latest.exit_code != 0
         return {
             "check": None
@@ -206,8 +204,9 @@ class PageReader:
                 break
         return lines
 
-    async def _activity(self, ticket_id: str, history: list[ActivityEntry]) -> list[dict[str, Any]]:
+    async def _activity(self, ticket_id: str) -> list[dict[str, Any]]:
         """The newest `FEED_SIZE` lines of the history and the talk, folded, newest first."""
+        history = await self._sources.activity.feed_entries(ticket_id, FEED_SIZE)
         merged = merge_entries([history, await self._talk(ticket_id)])
         folded = fold_activity(merged)[:FEED_SIZE]
         records = await self._sources.runs.run_records(

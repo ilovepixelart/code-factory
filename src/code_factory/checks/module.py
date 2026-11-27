@@ -16,6 +16,7 @@ from code_factory.board.service import CardChecks
 from code_factory.checks import tables  # noqa: F401  # puts the tables on Base.metadata
 from code_factory.checks.adapters.sandbox import KitSandbox
 from code_factory.checks.cli import checks_command
+from code_factory.checks.models import CheckRecord as StoredCheckRecord
 from code_factory.checks.ports import ForgePort
 from code_factory.checks.routes import router
 from code_factory.checks.service import CheckDeps, CheckOptions, CheckService
@@ -78,20 +79,23 @@ class CardChecksAdapter:
             if heads is None
             else await self._checks.card_records(heads)
         )
-        return {
-            ticket_id: [
-                CheckRecord(
-                    commit=r.commit,
-                    exit_code=NO_VERDICT if r.exit_code is None else r.exit_code,
-                    at=stamp(r.at),
-                    tree=r.tree,
-                    reason=r.reason,
-                    log=r.log,
-                )
-                for r in records
-            ]
-            for ticket_id, records in found.items()
-        }
+        return {ticket: [self._record(r) for r in records] for ticket, records in found.items()}
+
+    async def latest_attempt(self, ticket: str) -> CheckRecord | None:
+        """The last attempt, including one with no verdict."""
+        record = await self._checks.latest_attempt(ticket)
+        return self._record(record) if record else None
+
+    @staticmethod
+    def _record(record: StoredCheckRecord) -> CheckRecord:
+        return CheckRecord(
+            commit=record.commit,
+            exit_code=NO_VERDICT if record.exit_code is None else record.exit_code,
+            at=stamp(record.at),
+            tree=record.tree,
+            reason=record.reason,
+            log=record.log,
+        )
 
     async def running(self, ticket_ids: Sequence[str]) -> set[str]:
         """The tickets whose checks are queued or run now."""

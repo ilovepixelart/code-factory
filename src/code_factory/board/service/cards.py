@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from code_factory.board.models import CardFacts, CheckRecord, PullFacts, TicketRuns
+from code_factory.board.models import CardFacts, PullFacts, TicketRuns
 from code_factory.board.rules.card import build_card
 from code_factory.board.rules.parts import delivery_event, latest_check, queue_fields, session_chips
 from code_factory.board.service.sources import BoardSources
@@ -22,21 +22,16 @@ async def card_facts(
     sources: BoardSources,
     world: World,
     tickets: list[Ticket],
-    checks: dict[str, list[CheckRecord]] | None = None,
 ) -> list[CardFacts]:
-    """The facts of these tickets' cards: one bulk read per source, never one per ticket.
-
-    `checks` is the ticket's check records when the caller has read them already.
-    """
+    """The facts of these tickets' cards: one bulk read per source."""
     ids = [t.id for t in tickets]
     asked = await sources.talk.open_counts(ids)
     runs = await sources.runs.card_runs(ids)
     pulls = await sources.delivery.pulls(ids)
     card_pulls = {t.id: pulls.get(t.id) or _own_pull(t) for t in tickets}
-    if checks is None:
-        checks = await sources.checks.latest_checks(
-            ids, heads={ticket: pull.head if pull else "" for ticket, pull in card_pulls.items()}
-        )
+    checks = await sources.checks.latest_checks(
+        ids, heads={ticket: pull.head if pull else "" for ticket, pull in card_pulls.items()}
+    )
     events = await sources.delivery.events(ids)
     holders = await sources.queue.holders(ids)
     relations = world.relations()

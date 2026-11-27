@@ -212,6 +212,11 @@ class QueryMixin(ConcludeMixin):
         found = await self._deps.activity.latest_checks(heads, NO_VERDICT_CODES)
         return {t: [_record(t, item.at, item.data)] for t, item in found.items()}
 
+    async def latest_attempt(self, ticket: str) -> CheckRecord | None:
+        """The last check attempt, including an attempt that produced no verdict."""
+        items = await self._newest_records(ticket, 1)
+        return _record(ticket, items[0].at, items[0].data) if items else None
+
     async def records_of(self, ids: Sequence[str]) -> dict[str, list[CheckRecord]]:
         """Each ticket's `checks` records, oldest first, in one read; none: the ticket is absent."""
         found = await self._deps.activity.records_of(list(ids), "checks")
