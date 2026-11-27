@@ -110,10 +110,10 @@ def facts(path: str, text: str) -> tuple[Counter[str], Counter[str], int]:
 
 
 def review(base: str, changed: list[str]) -> int:
-    """Block obvious removal and skip additions. Warn about assertion-count changes.
+    """Block deleted tests, new skips, and a net loss of assertion lines.
 
     Tests, skips and assertions are compared across every changed test file together, so a
-    test file that moves or splits keeps its own; a file changed in place is also compared alone.
+    move or split preserves the totals. Individual files with fewer assertions get a warning.
     """
     before: Counter[str] = Counter()
     after: Counter[str] = Counter()
@@ -141,8 +141,9 @@ def review(base: str, changed: list[str]) -> int:
             f"Test delta: {where[marker]!r} adds a new skip or expected failure ({marker[:120]})."
         )
     if asserted[1] < asserted[0]:
+        refused = True
         was, now = asserted
-        print(f"Warning: the changed tests have fewer assertion lines ({was} to {now}).")
+        print(f"Test delta: the changed tests have fewer assertion lines ({was} to {now}).")
     if deleted := before - after:
         refused = True
         for name in sorted(deleted):
