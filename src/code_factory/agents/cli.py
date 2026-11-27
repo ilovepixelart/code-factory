@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 
 from code_factory.agents.adapters.credentials import KEY_NAME
+from code_factory.agents.models.answers import ConnectionView
+from code_factory.agents.models.checks import ModelCheck
 from code_factory.agents.service import AgentService
 from code_factory.platform.errors import BadRequestError
 from code_factory.platform.module import Command
@@ -24,23 +26,31 @@ def _configure_agents(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("name", nargs="?", help="check: the agent's name")
 
 
+async def _check_agent(agents: AgentService, name: str) -> int:
+    if not name:
+        msg = "check needs the agent's name; `code-factory agents list` shows them"
+        raise BadRequestError(msg)
+    result = await agents.check_model(name)
+    if result.passed:
+        sys.stdout.write(f"{name}: {result.model} passed its model check\n")
+        return 0
+    sys.stdout.write(f"{name}: {result.problem}\n")
+    return FAILED
+
+
+def _check_state(check: ModelCheck | None) -> str:
+    if check is None:
+        return ""
+    return "passed" if check.passed else check.problem
+
+
 async def _run_agents(args: argparse.Namespace, services: Services) -> int:
     agents = services.get(AgentService)
     if args.action == "check":
-        if not args.name:
-            msg = "check needs the agent's name; `code-factory agents list` shows them"
-            raise BadRequestError(msg)
-        result = await agents.check_model(args.name)
-        if result.passed:
-            sys.stdout.write(f"{args.name}: {result.model} passed its model check\n")
-            return 0
-        sys.stdout.write(f"{args.name}: {result.problem}\n")
-        return FAILED
+        return await _check_agent(agents, str(args.name or ""))
     listed = await agents.list_definitions()
     sys.stdout.write(_line("NAME", "RUNTIME", "CONNECTION", "MODEL", "COLUMNS", "PAUSED", "CHECK"))
     for agent in listed.agents:
-        check = listed.checks.get(agent.name)
-        state = "" if check is None else ("passed" if check.passed else check.problem)
         sys.stdout.write(
             _line(
                 agent.name,
@@ -49,7 +59,7 @@ async def _run_agents(args: argparse.Namespace, services: Services) -> int:
                 agent.model or "-",
                 ",".join(agent.roles) or "-",
                 "yes" if agent.paused_at is not None else "no",
-                state,
+                _check_state(listed.checks.get(agent.name)),
             )
         )
     return 0
@@ -68,10 +78,16 @@ async def _run_connections(args: argparse.Namespace, services: Services) -> int:
     return 0
 
 
+def _key_state(view: ConnectionView) -> str:
+    if not view.connection.key_env:
+        return "-"
+    return "set" if view.key_set else "not set"
+
+
 async def _list_connections(agents: AgentService) -> None:
     sys.stdout.write(_line("NAME", "KIND", "ADDRESS", "KEY"))
     for view in (await agents.list_connections()).connections:
-        key = "-" if not view.connection.key_env else ("set" if view.key_set else "not set")
+        key = _key_state(view)
         sys.stdout.write(
             _line(view.connection.name, view.connection.kind, view.connection.base_url, key)
         )
