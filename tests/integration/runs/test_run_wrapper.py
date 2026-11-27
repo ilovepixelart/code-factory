@@ -196,3 +196,35 @@ async def test_an_agent_whose_output_cannot_be_copied_is_stopped_not_left_runnin
     pid = int(pid_file.read_text())
     with pytest.raises(ProcessLookupError):
         os.kill(pid, 0)
+
+
+def _entries(folder: Path) -> list[str]:
+    return sorted(path.name for path in folder.iterdir())
+
+
+@pytest.mark.parametrize(
+    "exit_file",
+    [
+        "ab12cd34ef56.exit",  # relative
+        "{tmp}/notes.txt",
+        "{tmp}/AB12CD34EF56.exit",
+        "{tmp}/ab12cd34ef5.exit",
+        "{tmp}/sub/../ab12cd34ef56.exit",
+    ],
+)
+async def test_an_exit_file_the_board_would_not_name_is_refused_before_anything_starts(
+    tmp_path: Path, exit_file: str
+) -> None:
+    marker = tmp_path / "started"
+    named = exit_file.format(tmp=tmp_path)
+    process = await asyncio.create_subprocess_exec(
+        *WRAPPER, named, "--", "/bin/sh", "-c", f"touch {marker}",
+        cwd=tmp_path, env=ENV, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
+    )  # fmt: skip
+    out, _ = await asyncio.wait_for(process.communicate(), 30)
+
+    assert (process.returncode, out.decode()) == (
+        2,
+        f"the exit file must be an absolute path ending in <12 hex digits>.exit, not {named}\n",
+    )
+    assert _entries(tmp_path) == []  # nothing started, no exit file written

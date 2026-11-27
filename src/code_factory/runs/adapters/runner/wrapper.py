@@ -3,6 +3,7 @@
 import asyncio
 import json
 import os
+import re
 import signal
 import sys
 from collections.abc import Sequence
@@ -17,6 +18,8 @@ CONTEXT_VARIABLE = "CODE_FACTORY_OWNER_CONTEXT"
 NOT_FOUND = 127
 CHUNK = 64 * 1024
 USAGE_STATUS = 2
+# What the board names an exit file: a run id (`secrets.token_hex(6)`) and `.exit`.
+_EXIT_NAME = re.compile(r"[0-9a-f]{12}\.exit")
 _stop_requested = False
 
 
@@ -51,6 +54,14 @@ def load_redaction(reference: str | None) -> OutputRedaction | None:
         return None
     said = json.loads(Path(reference).read_text())
     return OutputRedaction([(str(found), str(stand_in)) for found, stand_in in said["patterns"]])
+
+
+def exit_file(text: str) -> Path | None:
+    """The exit file `text` names, or None unless it is absolute, has no `..` and is a run's."""
+    path = Path(text)
+    if not path.is_absolute() or ".." in path.parts or _EXIT_NAME.fullmatch(path.name) is None:
+        return None
+    return path
 
 
 def record_exit(path: Path, code: int) -> None:
@@ -133,5 +144,12 @@ def main(argv: Sequence[str]) -> int:
     if timeout_s is not None and (timeout_s < 0 or os.getpgrp() != os.getpid()):
         sys.stderr.write("a run deadline requires positive seconds and its own process group\n")
         return USAGE_STATUS
+    recorded = exit_file(argv[0])
+    if recorded is None:
+        sys.stderr.write(
+            "the exit file must be an absolute path ending in <12 hex digits>.exit, "
+            f"not {argv[0]}\n"
+        )
+        return USAGE_STATUS
     signal.signal(signal.SIGTERM, _request_stop)  # a handler: an ignored signal survives exec
-    return wrapper_status(asyncio.run(run(Path(argv[0]), argv[2:], timeout_s)))
+    return wrapper_status(asyncio.run(run(recorded, argv[2:], timeout_s)))
