@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -7,12 +8,13 @@ import pytest
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "gate_shard.py"
 
 
-def shard(folder: Path, spec: str) -> subprocess.CompletedProcess[str]:
+def shard(folder: Path, spec: str, hash_seed: str = "0") -> subprocess.CompletedProcess[str]:
     return subprocess.run(  # noqa: S603  # the checked-in shard helper on a fixture folder
         [sys.executable, str(SCRIPT), str(folder), spec],
         capture_output=True,
         text=True,
         check=False,
+        env={**os.environ, "PYTHONHASHSEED": hash_seed},
     )
 
 
@@ -40,8 +42,11 @@ def test_every_test_file_is_in_exactly_one_shard(folder: Path, count: int) -> No
     assert len(listed) == len(set(listed)) == 4
 
 
-def test_the_same_folder_splits_the_same_way(folder: Path) -> None:
-    assert shard(folder, "1/2").stdout == shard(folder, "1/2").stdout
+def test_two_processes_split_a_folder_the_same_way_whatever_their_hash_seed(folder: Path) -> None:
+    """Each CI job is its own process: a split by Python's salted hash() would differ."""
+    first, second = shard(folder, "1/2", hash_seed="1"), shard(folder, "1/2", hash_seed="2")
+
+    assert first.stdout.splitlines() == second.stdout.splitlines()
 
 
 @pytest.mark.parametrize("spec", ["0/2", "3/2", "1", "a/b", "1/0"])
