@@ -2,6 +2,7 @@
 
 import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Annotated
 
@@ -84,7 +85,8 @@ def _run_dir() -> Path:
     runtime = os.environ.get("XDG_RUNTIME_DIR", "")
     if runtime:
         return Path(runtime) / "code-factory"
-    return Path(f"/tmp/code-factory-{os.getuid()}")  # noqa: S108  # owner-only, checked on use
+    # The user's own temporary folder (`TMPDIR`), not a name others could take first in `/tmp`.
+    return Path(tempfile.gettempdir()) / f"code-factory-{os.getuid()}"
 
 
 class Settings(BaseSettings):
