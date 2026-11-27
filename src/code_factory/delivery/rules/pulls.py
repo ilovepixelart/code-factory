@@ -54,20 +54,21 @@ def _time(value: object) -> datetime | None:
     return stamp if stamp.tzinfo is not None else None
 
 
+def _review_time(review: object) -> datetime | None:
+    """When a review by a trusted author was submitted; `None` for any other entry."""
+    if (
+        isinstance(review, dict)
+        and review.get("authorAssociation") in _TRUSTED
+        and review.get("state") in {"APPROVED", "CHANGES_REQUESTED", "COMMENTED"}
+    ):
+        return _time(review.get("submittedAt"))
+    return None
+
+
 def _first_review(reviews: object) -> datetime | None:
     if not isinstance(reviews, list):
         return None
-    return min(
-        (
-            when
-            for review in reviews
-            if isinstance(review, dict)
-            and review.get("authorAssociation") in _TRUSTED
-            and review.get("state") in {"APPROVED", "CHANGES_REQUESTED", "COMMENTED"}
-            and (when := _time(review.get("submittedAt"))) is not None
-        ),
-        default=None,
-    )
+    return min((when for review in reviews if (when := _review_time(review))), default=None)
 
 
 def reduce_pull(answer: Mapping[str, Any]) -> PullReading:
