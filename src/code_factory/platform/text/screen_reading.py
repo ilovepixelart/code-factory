@@ -43,7 +43,8 @@ _EMPHASIS = str.maketrans("", "", "*_~`")
 _TAGS = re.compile(r"<!--.*?-->|</?[A-Za-z][^>]*>", re.DOTALL)
 # What a renderer decodes: a backslash before punctuation and a character entity.
 _DECODED = re.compile(
-    r"\\([!-/:-@\[-`{-~])|&(?:#[0-9]{1,7}|#[xX][0-9A-Fa-f]{1,6}|[A-Za-z][A-Za-z0-9]{1,31});"
+    r"\\([!-/:-@\[-`{-~])|&(?:#\d{1,7}|#[xX][0-9A-Fa-f]{1,6}|[A-Za-z][A-Za-z0-9]{1,31});",
+    re.ASCII,
 )
 
 

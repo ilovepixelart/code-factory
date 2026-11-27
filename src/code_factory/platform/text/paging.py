@@ -13,8 +13,9 @@ PAGE_REFUSED = "page must be a whole number from 1"
 SIZE_REFUSED = "size must be a whole number from 1 to 100"
 
 _BIGGEST = 2**63 - 1
-# ASCII digits with no sign, padding or underscore: `int()` and `\d` accept all of those.
-_WHOLE = re.compile(r"[1-9][0-9]*")
+# ASCII digits with no sign, padding or underscore: `int()` accepts all of those, and `\d`
+# without `re.ASCII` the digits of every script.
+_WHOLE = re.compile(r"[1-9]\d*", re.ASCII)
 
 
 def _whole(text: str) -> int | None:

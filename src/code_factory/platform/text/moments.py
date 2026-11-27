@@ -4,8 +4,8 @@ import re
 from datetime import UTC, date, datetime, timedelta
 
 MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-# ASCII digits only: `\d` would take every script's digits.
-_STAMP = re.compile(r"([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})Z")
+# `re.ASCII` keeps `\d` to 0-9: it would otherwise take every script's digits.
+_STAMP = re.compile(r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z", re.ASCII)
 _EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
 _SECONDS_A_DAY = 86400
 _ORDINAL_OF_EPOCH = 719163
