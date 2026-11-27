@@ -81,11 +81,11 @@ class TreesMixin(PlainMixin):
     ) -> TreeInfo:
         """Make the ticket's tree: a recorded clone for a run, a linked worktree for the owner."""
         root = await self._root(repository)
+        ticket = await self._ports.tickets.ticket(repository, ticket_id)
         facts = await self.facts(repository)
         if facts.default_branch not in facts.local:
             msg = "the repository has no commits yet, so no branch or worktree can be created"
             raise BadRequestError(msg)
-        ticket = await self._ports.tickets.ticket(repository, ticket_id)
         own = ticket.branch or branch_for(ticket_id)
         why = branch_refusal(own)
         if why is not None:
