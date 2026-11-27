@@ -96,5 +96,5 @@ async def permission(
 @router.post("/recall", summary="The standing rules and ticket a session starts with")
 async def recall(body: RecallBody, actor: ActorDep, hooks: HooksDep) -> Output:
     """Nothing for a folder outside every tracked repository."""
-    found = await hooks.recall(cwd=body.cwd, actor=actor, session_id=body.session_id)
+    found = await hooks.recall(cwd=body.cwd, actor=actor)
     return Output(output=None if found is None else found.text)

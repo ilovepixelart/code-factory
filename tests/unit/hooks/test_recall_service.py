@@ -25,7 +25,7 @@ async def test_a_run_is_handed_its_memory_its_ticket_and_the_archive_index() -> 
     fakes = remembering()
     fakes.tickets.rows = ["CF-5-R1: It does the thing"]
 
-    recalled = await fakes.service().recall(cwd="/anywhere", actor=run_actor(), session_id="s-1")
+    recalled = await fakes.service().recall(cwd="/anywhere", actor=run_actor())
 
     assert recalled is not None
     assert recalled.text == (
@@ -43,7 +43,7 @@ async def test_a_run_gets_the_context_of_its_ticket_and_records_what_it_received
     fakes = remembering()
     fakes.checkouts.paths = ["web/src/a.vue", "src/b.py"]
 
-    await fakes.service().recall(cwd="/anywhere", actor=run_actor(), session_id="s-1")
+    await fakes.service().recall(cwd="/anywhere", actor=run_actor())
 
     assert fakes.memory.asked == [
         (
@@ -61,7 +61,7 @@ async def test_an_owner_session_finds_its_ticket_by_the_branch_of_its_folder() -
     fakes.checkouts.found = Checkout(repository="sample", branch="ticket/cf-5")
     fakes.tickets.branches[("sample", "ticket/cf-5")] = TICKET
 
-    recalled = await fakes.service().recall(cwd="/r/tree", actor=OWNER_ACTOR, session_id="")
+    recalled = await fakes.service().recall(cwd="/r/tree", actor=OWNER_ACTOR)
 
     assert recalled is not None
     assert TICKET_LINE in recalled.text
@@ -73,7 +73,7 @@ async def test_a_session_in_a_repository_on_a_branch_with_no_ticket_gets_the_mem
     fakes = remembering()
     fakes.checkouts.found = Checkout(repository="sample", branch="main")
 
-    recalled = await fakes.service().recall(cwd="/r", actor=None, session_id="")
+    recalled = await fakes.service().recall(cwd="/r", actor=None)
 
     assert recalled is not None
     assert "Ticket on this branch" not in recalled.text
@@ -83,10 +83,8 @@ async def test_a_session_in_a_repository_on_a_branch_with_no_ticket_gets_the_mem
 async def test_a_folder_outside_every_repository_is_nothing_and_never_an_error() -> None:
     fakes = remembering()
 
-    assert (
-        await fakes.service().recall(cwd="/elsewhere/x", actor=OWNER_ACTOR, session_id="") is None
-    )
-    assert await fakes.service().recall(cwd="/elsewhere/x", actor=None, session_id="") is None
+    assert await fakes.service().recall(cwd="/elsewhere/x", actor=OWNER_ACTOR) is None
+    assert await fakes.service().recall(cwd="/elsewhere/x", actor=None) is None
     assert fakes.memory.asked == []
 
 
@@ -94,13 +92,13 @@ async def test_nothing_to_say_is_nothing() -> None:
     fakes = Fakes()
     fakes.checkouts.found = Checkout(repository="sample", branch="main")
 
-    assert await fakes.service().recall(cwd="/r", actor=None, session_id="") is None
+    assert await fakes.service().recall(cwd="/r", actor=None) is None
 
 
 async def test_a_ticket_alone_is_something_to_say() -> None:
     fakes = Fakes()
 
-    recalled = await fakes.service().recall(cwd="/r", actor=run_actor(), session_id="s")
+    recalled = await fakes.service().recall(cwd="/r", actor=run_actor())
 
     assert recalled is not None
     assert recalled.text == f"{HEADING}\n{TICKET_LINE}\n"
@@ -109,9 +107,7 @@ async def test_a_ticket_alone_is_something_to_say() -> None:
 async def test_a_coordinator_run_has_no_ticket_and_records_no_delivery() -> None:
     fakes = remembering()
 
-    await fakes.service().recall(
-        cwd="/r", actor=run_actor(ticket_id=None, stage=None), session_id="s"
-    )
+    await fakes.service().recall(cwd="/r", actor=run_actor(ticket_id=None, stage=None))
 
     assert fakes.memory.asked == [("sample", MemoryContext(), None, None)]
 
@@ -123,7 +119,7 @@ async def test_a_run_whose_ticket_is_gone_is_not_found() -> None:
     service = fakes.service()
     actor = run_actor()
     with pytest.raises(NotFoundError):
-        await service.recall(cwd="/r", actor=actor, session_id="s")
+        await service.recall(cwd="/r", actor=actor)
 
 
 async def test_four_hundred_requirements_stay_within_the_cap_and_say_what_was_left_out() -> None:
@@ -136,7 +132,7 @@ async def test_four_hundred_requirements_stay_within_the_cap_and_say_what_was_le
         f"CF-5-R{n}: Requirement number {n} reads like a long sentence" for n in range(1, 401)
     ]
 
-    recalled = await fakes.service().recall(cwd="/r", actor=run_actor(), session_id="s")
+    recalled = await fakes.service().recall(cwd="/r", actor=run_actor())
 
     assert recalled is not None
     lines = recalled.text.splitlines()

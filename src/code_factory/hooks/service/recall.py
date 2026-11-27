@@ -15,7 +15,6 @@ class RecallMixin(Collaborators):
         *,
         cwd: str,
         actor: Actor | None,
-        session_id: str = "",  # noqa: ARG002  # the route passes it on
     ) -> RecalledText | None:
         """The recall text, or `None` when there is nothing to say.
 
