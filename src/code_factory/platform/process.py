@@ -181,7 +181,8 @@ async def _finish(process: asyncio.subprocess.Process, grace_s: float) -> None:
 
     Always signalled: a leader that exited on its own may have left workers running.
     """
-    await asyncio.shield(stop_group(process, grace_s))
+    with anyio.CancelScope(shield=True):
+        await asyncio.shield(stop_group(process, grace_s))
 
 
 def _open_log(log: Path) -> IO[bytes]:

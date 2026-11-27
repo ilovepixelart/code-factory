@@ -157,7 +157,7 @@ the code by `code-factory docs`. Layers and the import contracts that hold them 
 | Board | Columns with limits, cards, filters and saved views, bulk changes, archive, a ticket page with documents, links, activity and undo | `board`, `tickets`, `ticket_writes`, `undo` |
 | Inbox | Everything that waits on the owner: questions, permission requests, rules to adopt, memory proposals, stopped agents, screens, failing and mergeable pull requests, failing default branches | `inbox` |
 | Push and reply links | One message per new Inbox item to ntfy or a webhook; a link answers a request or question without signing in | `push` |
-| Agents and runs | Agents and model connections, claims, runs in worktrees, permissions, previews, split runs | `agents`, `team`, `runs` |
+| Agents and runs | Agents and model connections, claims, runs in worktrees, permissions, split runs | `agents`, `team`, `runs` |
 | MCP | Tools for tickets, documents, activity, questions, reviews and memory, per caller and stage | `platform/mcp`, `*/tools.py` |
 | Hooks | Permission requests, news for a running agent, recall at session start, the rewrite guard | `hooks` |
 | Checks, review, delivery | The checks command and its verdicts, review runs and findings, pull requests and merge | `checks`, `stages`, `delivery` |

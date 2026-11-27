@@ -71,6 +71,7 @@ class Claimed(_Frozen):
     """The agent a claim picked (empty: the default agent) and the ones it passed over."""
 
     agent: str = ""
+    lease_id: int | None = None
     passed_over: tuple[str, ...] = ()
 
 
@@ -171,11 +172,17 @@ class Teams(Protocol):
         """Claim the ticket and pick its agent; `ConflictError` with the sentence on refusal."""
         ...
 
-    async def attach_run(self, ticket_id: str, run_id: str) -> None:
+    async def beat_start(self, ticket_id: str, lease_id: int) -> bool:
+        """Keep this exact starting claim while work is being prepared."""
+        ...
+
+    async def attach_run(self, ticket_id: str, run_id: str, *, lease_id: int | None = None) -> None:
         """Record a run under the ticket's claim."""
         ...
 
-    async def end_claim(self, ticket_id: str, run_id: str | None) -> None:
+    async def end_claim(
+        self, ticket_id: str, run_id: str | None, *, lease_id: int | None = None
+    ) -> None:
         """End the claim, with a run only one it is under; nothing when gone or taken again."""
         ...
 
@@ -333,6 +340,10 @@ class PreviewSetup(Protocol):
 
     async def tree_of(self, repository: str, ticket_id: str) -> Path | None:
         """The ticket's worktree, `None` when it has none."""
+        ...
+
+    def unavailable_reason(self) -> str | None:
+        """Why this board cannot start a preview, or None."""
         ...
 
     async def contain(self, argv: Sequence[str], tree: Path, port: int) -> Launch:

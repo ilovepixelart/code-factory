@@ -371,3 +371,25 @@ async def test_a_run_ending_after_its_claim_was_taken_again_leaves_the_new_claim
     with pytest.raises(ConflictError):
         await team.end_claim(ticket.id, run_id="old-run")
     assert [view.agent for view in await team.list_claims()] == [taken.agent.name]
+
+
+async def test_a_starting_claim_can_be_kept_without_beating_its_replacement(
+    team: TeamService, fakes: Fakes, ticket: Ticket, clock: FakeClock
+) -> None:
+    fakes.agents.agents = [agent("writer", "build")]
+    held = await team.claim_for_run(ticket.id, "build")
+    assert held.lease_id is not None
+    clock.now += 55
+    assert await team.beat_start(ticket.id, held.lease_id)
+    clock.now += 55
+    assert await team.keep() == 0
+
+    await team.force_release(ticket.id)
+    replacement = await team.claim_for_run(ticket.id, "build")
+    assert replacement.lease_id != held.lease_id
+    assert not await team.beat_start(ticket.id, held.lease_id)
+    with pytest.raises(ConflictError, match="the ticket's starting claim changed"):
+        await team.attach_run(ticket.id, "late", lease_id=held.lease_id)
+    with pytest.raises(ConflictError, match="the ticket's starting claim changed"):
+        await team.end_claim(ticket.id, lease_id=held.lease_id)
+    assert len(await team.list_claims()) == 1

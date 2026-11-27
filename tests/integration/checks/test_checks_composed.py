@@ -13,6 +13,7 @@ from checks_support import script, write_config
 from code_factory.app import build_services
 from code_factory.checks.models import Verdict
 from code_factory.checks.service import CheckService
+from code_factory.git.service import GitService
 from code_factory.platform.background import BackgroundTasks
 from code_factory.platform.config import Settings
 from code_factory.platform.db import UnitOfWork, create_engine
@@ -115,3 +116,26 @@ async def test_a_check_that_changes_a_tracked_file_gives_no_verdict(
 
     assert row.verdict is not Verdict.PASSED
     assert row.exit_code == -1
+
+
+async def test_agent_worktree_setup_runs_contained_before_it_is_reused(
+    settings: Settings, uow: UnitOfWork, state: Path, started: Ticket, tracked: Path, tmp_path: Path
+) -> None:
+    own = settings.model_copy(update={"state_dir": state})
+    resources = Resources(own, create_engine(own), uow, BackgroundTasks())
+    git_service = build_services(resources, IDLE_MODULES).get(GitService)
+    outside = tmp_path / "outside.txt"
+    command = (
+        'test -d "$CLAUDE_CODE_TMPDIR" && '
+        f"(touch {shlex.quote(str(outside))} || true) && "
+        "(touch .git/setup-marker || true) && echo ran >> ready"
+    )
+    write_config(tracked, f"[agents]\nsetup = {json.dumps(command)}\n")
+
+    made = await git_service.start_worktree(started.repository, started.id)
+    reused = await git_service.start_worktree(started.repository, started.id)
+
+    assert (Path(made.path) / "ready").read_text() == "ran\n"
+    assert (made.made, reused.made, made.path == reused.path) == (True, False, True)
+    assert not outside.exists()
+    assert not (Path(made.path) / ".git" / "setup-marker").exists()
