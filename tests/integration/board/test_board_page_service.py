@@ -21,6 +21,7 @@ from code_factory.platform.db import UnitOfWork
 from code_factory.platform.errors import BadRequestError, NotFoundError
 from code_factory.platform.services import Services
 from code_factory.repositories.service import RepositoryService
+from code_factory.team.service import TicketSource
 from code_factory.tickets.models import DocumentName, DocumentWrite, NewActivity, NewTicket
 from code_factory.tickets.service import ActivityService, DocumentService, TicketService
 
@@ -342,6 +343,21 @@ async def count_statements(
     with recorded(connection) as page_seen:
         await board.archive({})
     return first, len(seen), len(page_seen)
+
+
+async def test_team_activity_queries_do_not_grow_with_open_tickets(
+    services: Services, tickets: TicketService, connection: AsyncConnection
+) -> None:
+    source = services.get(TicketSource)
+    for size in (1, 25):
+        for index in range(size):
+            await tickets.create(
+                NewTicket(repository="sample", title=f"Team ticket {index}"), by="alex"
+            )
+        with recorded(connection) as seen:
+            facts = await source.team_facts(0)
+        assert len(facts) == (1 if size == 1 else 26)
+        assert sum("FROM ticket_activity" in sql for sql in seen) == 2
 
 
 async def test_the_statements_of_a_read_do_not_grow_with_the_tickets(

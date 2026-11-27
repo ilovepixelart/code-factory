@@ -30,7 +30,7 @@ async def card_facts(
     pulls = await sources.delivery.pulls(ids)
     card_pulls = {t.id: pulls.get(t.id) or _own_pull(t) for t in tickets}
     checks = await sources.checks.latest_checks(
-        ids, heads={ticket: pull.head if pull else "" for ticket, pull in card_pulls.items()}
+        {ticket: pull.head if pull else "" for ticket, pull in card_pulls.items()}
     )
     events = await sources.delivery.events(ids)
     holders = await sources.queue.holders(ids)

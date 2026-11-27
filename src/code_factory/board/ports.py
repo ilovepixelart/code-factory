@@ -32,10 +32,8 @@ class CardRuns(Protocol):
 class CardChecks(Protocol):
     """The checks of tickets."""
 
-    async def latest_checks(
-        self, ticket_ids: Sequence[str], *, heads: dict[str, str] | None = None
-    ) -> dict[str, list[CheckRecord]]:
-        """Check history, or just the latest verdict for each supplied head."""
+    async def latest_checks(self, heads: dict[str, str]) -> dict[str, list[CheckRecord]]:
+        """The latest verdict for each supplied head."""
         ...
 
     async def latest_attempt(self, ticket: str) -> CheckRecord | None:

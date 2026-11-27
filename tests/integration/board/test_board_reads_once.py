@@ -23,15 +23,13 @@ NOW = datetime(2026, 11, 23, 9, 30, tzinfo=UTC)
 class CountingChecks(FakeChecks):
     def __init__(self) -> None:
         super().__init__()
-        self.heads: list[dict[str, str] | None] = []
+        self.heads: list[dict[str, str]] = []
         self.attempts: list[str] = []
 
     @override
-    async def latest_checks(
-        self, ticket_ids: Sequence[str], *, heads: dict[str, str] | None = None
-    ) -> dict[str, list[CheckRecord]]:
+    async def latest_checks(self, heads: dict[str, str]) -> dict[str, list[CheckRecord]]:
         self.heads.append(heads)
-        return await super().latest_checks(ticket_ids, heads=heads)
+        return await super().latest_checks(heads)
 
     @override
     async def latest_attempt(self, ticket: str) -> CheckRecord | None:

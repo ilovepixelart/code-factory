@@ -1,6 +1,6 @@
 """A ticket's history: append-only records, read in the order they were written."""
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime
 
 from code_factory.platform.db import UnitOfWork
@@ -130,6 +130,21 @@ class ActivityService:
         async with self._uow() as session:
             rows = await TicketRepository(session).feed_of(ticket_number(ticket), limit)
         return [_entry(row) for row in rows]
+
+    async def selected_entries(
+        self, tickets: Sequence[str], *, kinds: frozenset[str], newest: int
+    ) -> dict[str, list[ActivityEntry]]:
+        """The requested kinds and recent entries for tickets the caller has read."""
+        if not tickets:
+            return {}
+        async with self._uow() as session:
+            rows = await TicketRepository(session).selected_activity(
+                [ticket_number(ticket) for ticket in tickets], kinds, newest
+            )
+        found: dict[str, list[ActivityEntry]] = {}
+        for row in rows:
+            found.setdefault(ticket_id(row.ticket_number), []).append(_entry(row))
+        return found
 
     async def evidence_entries(self, ticket: str) -> list[ActivityEntry]:
         """Stage and evidence records for a ticket that has already been read."""

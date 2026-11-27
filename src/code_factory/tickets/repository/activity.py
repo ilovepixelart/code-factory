@@ -123,6 +123,25 @@ class ActivityQueries:
         order = TicketActivityRow.id.desc() if newest_first else TicketActivityRow.id
         return list(await self._session.scalars(query.order_by(order).limit(limit)))
 
+    async def selected_activity(
+        self, numbers: list[int], kinds: frozenset[str], newest: int
+    ) -> list[TicketActivityRow]:
+        """Each ticket's selected kinds and newest entries in write order."""
+        row = TicketActivityRow
+        recency = func.row_number().over(
+            partition_by=row.ticket_number, order_by=(row.at.desc(), row.id.desc())
+        )
+        ranked = (
+            select(row, recency.label("recency")).where(row.ticket_number.in_(numbers)).subquery()
+        )
+        entry = aliased(row, ranked)
+        rows = await self._session.scalars(
+            select(entry)
+            .where(or_(entry.kind.in_(sorted(kinds)), ranked.c.recency <= newest))
+            .order_by(entry.id)
+        )
+        return list(rows)
+
     async def feed_of(self, number: int, limit: int) -> list[TicketActivityRow]:
         """The newest visible entries, plus the finish records needed to fold those runs."""
         row = TicketActivityRow
