@@ -55,6 +55,14 @@ class CostPort(Protocol):
         ...
 
 
+class MeasurementSpendPort(Protocol):
+    """The persisted spend of evaluations in an Analytics window."""
+
+    async def recorded_spend(self, since: float, until: float) -> float | None:
+        """Known measurement spend, or None while none of those runs has a recorded cost."""
+        ...
+
+
 @runtime_checkable
 class ScorerPort(Protocol):
     """Scorer results."""

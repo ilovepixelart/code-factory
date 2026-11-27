@@ -266,7 +266,7 @@ code-factory
 │       └── POST /api/tickets/{repository}/{ticket_id}/ship
 ├── evals: The evals module: eval suites, review evals, the judge, scorers and consolidation.
 │   ├── commands
-│   │   └── eval: report or compare recorded eval runs
+│   │   └── eval: record, report or compare completed eval runs
 │   ├── tables
 │   │   ├── eval_judge_days
 │   │   ├── eval_judgements

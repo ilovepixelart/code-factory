@@ -28,7 +28,6 @@ from code_factory.platform.db.base import Base
 
 _EMPTY = text("''")
 _FALSE = text("false")
-_ZERO = text("0")
 
 _KIND_SCORES = (
     "(kind = 'build' AND pass_at_1 IS NOT NULL AND pass_k IS NOT NULL AND pass_at_k IS NOT NULL"
@@ -58,6 +57,16 @@ class EvalRecordRow(Base):
         CheckConstraint("tokens IS NULL OR tokens >= 0", name="tokens_not_negative"),
         CheckConstraint(_KIND_SCORES, name="kind_scores"),
         Index("ix_eval_records_set", "repository", "set_name", "id"),
+        Index(
+            "uq_eval_records_receipt",
+            "repository",
+            "receipt",
+            unique=True,
+            postgresql_where=text("receipt IS NOT NULL"),
+        ),
+        Index(
+            "ix_eval_records_measurement", "recorded_at", postgresql_where=text("cost IS NOT NULL")
+        ),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
@@ -80,8 +89,9 @@ class EvalRecordRow(Base):
     caught: Mapped[float | None] = mapped_column(Double, nullable=True)
     false_findings: Mapped[float | None] = mapped_column(Double, nullable=True)
     failed: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    cost: Mapped[float] = mapped_column(Double, server_default=_ZERO)
+    cost: Mapped[float | None] = mapped_column(Double)
     tokens: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    receipt: Mapped[str | None] = mapped_column(Text)
 
 
 class EvalTaskRunRow(Base):
@@ -117,6 +127,7 @@ class JudgementRow(Base):
         CheckConstraint("cost >= 0", name="cost_not_negative"),
         CheckConstraint("started_by IN ('owner', 'schedule')", name="known_starter"),
         CheckConstraint(_SHAPE, name="shape"),
+        Index("ix_eval_judgements_measurement", "at", postgresql_where=text("cost IS NOT NULL")),
         Index(
             "ix_eval_judgements_answers",
             "repository",
@@ -144,7 +155,7 @@ class JudgementRow(Base):
     answer: Mapped[str | None] = mapped_column(Text, nullable=True)
     evidence: Mapped[str] = mapped_column(Text, server_default=_EMPTY)
     log: Mapped[str] = mapped_column(Text, server_default=_EMPTY)
-    cost: Mapped[float] = mapped_column(Double, server_default=_ZERO)
+    cost: Mapped[float | None] = mapped_column(Double)
     started_by: Mapped[str] = mapped_column(Text)
 
 

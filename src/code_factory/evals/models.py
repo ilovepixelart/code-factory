@@ -2,8 +2,9 @@
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Self
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 
 class Frozen(BaseModel):
@@ -130,22 +131,44 @@ class TaskRun(Frozen):
 class EvalRecord(Frozen):
     """One suite run, as recorded."""
 
+    model_config = ConfigDict(extra="forbid")
+
     id: int = 0
     repository: str
     set_name: str
     kind: Kind
-    recorded_at: datetime
+    recorded_at: AwareDatetime
     setup: Setup
-    runs: int
-    pass_at_1: float | None = None
-    pass_k: float | None = None
-    pass_at_k: float | None = None
-    caught: float | None = None
-    false_findings: float | None = None
-    failed: int | None = None
-    cost: float = 0.0
-    tokens: int | None = None
+    runs: int = Field(gt=0)
+    pass_at_1: float | None = Field(default=None, ge=0, le=1)
+    pass_k: float | None = Field(default=None, ge=0, le=1)
+    pass_at_k: float | None = Field(default=None, ge=0, le=1)
+    caught: float | None = Field(default=None, ge=0, le=1)
+    false_findings: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    failed: int | None = Field(default=None, ge=0)
+    cost: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+    tokens: int | None = Field(default=None, ge=0)
     task_runs: tuple[TaskRun, ...] = ()
+    receipt: str | None = Field(default=None, max_length=256, pattern=r"^[A-Za-z0-9_.:/-]+$")
+
+    @model_validator(mode="after")
+    def score_fields(self) -> Self:
+        """An imported suite provides the metrics of its own kind and a valid setup."""
+        if self.receipt is None:
+            return self
+        build = (self.pass_at_1, self.pass_k, self.pass_at_k)
+        review = (self.caught, self.false_findings, self.failed)
+        present, absent = (build, review) if self.kind is Kind.BUILD else (review, build)
+        if any(field is None for field in present) or any(field is not None for field in absent):
+            msg = f"{self.kind.value} suite results must supply all metrics of that kind only"
+            raise ValueError(msg)
+        if self.setup.stage not in Stage:
+            msg = "the setup stage must be spec, build or review"
+            raise ValueError(msg)
+        if not any((self.setup.runtime, self.setup.model, self.setup.agent)):
+            msg = "the receipt must identify the setup by its runtime, model or agent"
+            raise ValueError(msg)
+        return self
 
 
 class Comparison(Frozen):

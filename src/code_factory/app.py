@@ -24,7 +24,7 @@ from code_factory.checks.module import build_module as build_checks
 from code_factory.commands.module import module as commands
 from code_factory.delivery.module import ChecksForge, DeliveredPulls, GitForge
 from code_factory.delivery.module import module as delivery
-from code_factory.evals.module import ScorerAnswers
+from code_factory.evals.module import RecordedMeasurementSpend, ScorerAnswers
 from code_factory.evals.module import module as evals
 from code_factory.factory.models import Improvements
 from code_factory.factory.module import build_module as build_factory
@@ -96,7 +96,7 @@ def _factory_ports(services: Services) -> FactoryPorts:
         runs=BoardRuns(services), pulls=DeliveredPulls(services), costs=RunCosts(services),
         scorers=ScorerAnswers(services), improvements=NoImprovements(),
         repairs=services.get(StageService),
-        role_notes=services.get(ReviewService),
+        role_notes=services.get(ReviewService), measurement=RecordedMeasurementSpend(services),
     )  # fmt: skip
 
 

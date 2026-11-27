@@ -27,6 +27,7 @@ from code_factory.factory.models import (
 from code_factory.factory.ports import (
     CostPort,
     ImprovementPort,
+    MeasurementSpendPort,
     OwnerTimePort,
     PullsPort,
     RepairsPort,
@@ -62,7 +63,7 @@ type Instant = str | float | None
 
 @dataclass(frozen=True)
 class FactoryPorts:
-    """The five providers the factory reads from."""
+    """Read models owned by the modules that recorded the facts."""
 
     runs: RunsPort
     pulls: PullsPort
@@ -72,6 +73,7 @@ class FactoryPorts:
     repairs: RepairsPort | None = None
     role_notes: RoleNotesPort | None = None
     owner_time: OwnerTimePort | None = None
+    measurement: MeasurementSpendPort | None = None
 
 
 @dataclass(frozen=True)
@@ -138,6 +140,11 @@ class FactoryService:
             if ports.role_notes
             else {}
         )
+        measured = (
+            await ports.measurement.recorded_spend(span.from_, span.to)
+            if ports.measurement
+            else measurement_spend(runs, ledger.costs)
+        )
         return Dashboard(
             from_=span.from_,
             to=span.to,
@@ -147,7 +154,7 @@ class FactoryService:
             series=series(group.members, span.from_, span.to, span.now),
             autonomy=autonomy(members_merged),
             cycle=cycle_summary(cycles),
-            cost=cost_summary(costed, measurement_spend(runs, ledger.costs)),
+            cost=cost_summary(costed, measured),
             merged_cost=await self._merged_cost(merged_in_period, ledger, span.now),
             expensive=expensive(costed, EXPENSIVE_ON_DASHBOARD),
             scorers=scorer_views(scorers),

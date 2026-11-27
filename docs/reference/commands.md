@@ -365,12 +365,13 @@ pull requests, the board merge and issue intake
 
 ## code-factory eval
 
-report or compare recorded eval runs
+record, report or compare completed eval runs
 
 - `<action>`
 - `<set_name>`: the task set
 - `--repository`: a tracked repository, the current folder's by default
 - `--agent`: compare: name two agents
+- `--input`: record: JSON receipt for a completed evaluation
 
 ## code-factory follower
 

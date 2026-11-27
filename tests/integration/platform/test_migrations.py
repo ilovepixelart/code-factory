@@ -43,6 +43,9 @@ NULLABLE = {
     ("delivery_pulls", "updated_on_host"),  # null: as created_on_host
     ("delivery_pulls", "merged_on_host"),  # null: GitHub has not recorded a merge
     ("delivery_pulls", "first_review_at"),  # null: no submitted maintainer review is known
+    ("eval_records", "cost"),  # null: absence of a reported cost
+    ("eval_records", "receipt"),  # null: records created before the operator import
+    ("eval_judgements", "cost"),  # null: absence of a reported cost
     ("eval_records", "pass_at_1"),  # null for a review record
     ("eval_records", "pass_k"),
     ("eval_records", "pass_at_k"),

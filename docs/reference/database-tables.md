@@ -1037,8 +1037,9 @@ One suite run of one setup.
 | `caught` | `DOUBLE PRECISION` | yes |  |  |
 | `false_findings` | `DOUBLE PRECISION` | yes |  |  |
 | `failed` | `INTEGER` | yes |  |  |
-| `cost` | `DOUBLE PRECISION` | no | `0` |  |
+| `cost` | `DOUBLE PRECISION` | yes |  |  |
 | `tokens` | `BIGINT` | yes |  |  |
+| `receipt` | `TEXT` | yes |  |  |
 
 ### eval_task_runs
 
@@ -1070,7 +1071,7 @@ A session's score from the judge, or a scorer's answer about it.
 | `answer` | `TEXT` | yes |  |  |
 | `evidence` | `TEXT` | no | `''` |  |
 | `log` | `TEXT` | no | `''` |  |
-| `cost` | `DOUBLE PRECISION` | no | `0` |  |
+| `cost` | `DOUBLE PRECISION` | yes |  |  |
 | `started_by` | `TEXT` | no |  |  |
 
 ### eval_judge_days

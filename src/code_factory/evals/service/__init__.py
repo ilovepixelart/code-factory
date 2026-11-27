@@ -47,6 +47,11 @@ class EvalService:
         async with self._uow() as session:
             return await EvalRepository(session).add_record(record)
 
+    async def measurement_spend(self, since: datetime, until: datetime) -> float | None:
+        """Spend backed by measured evaluation costs in this window."""
+        async with self._uow() as session:
+            return await EvalRepository(session).measurement_spend(since, until)
+
     async def records(self, repository: str, set_name: str) -> list[EvalRecord]:
         """The set's records, oldest first."""
         async with self._uow() as session:
@@ -79,7 +84,7 @@ class JudgeService:
         self._clock = clock
 
     async def record_answer(
-        self, repository: str, row: AnswerRow, *, log: str = "", cost: float = 0.0,
+        self, repository: str, row: AnswerRow, *, log: str = "", cost: float | None = None,
         by: StartedBy = StartedBy.OWNER,
     ) -> None:  # fmt: skip
         """Store a scorer's answer about a session."""
@@ -94,7 +99,7 @@ class JudgeService:
         findings: list[str],
         *,
         log: str = "",
-        cost: float = 0.0,
+        cost: float | None = None,
         by: StartedBy = StartedBy.OWNER,
     ) -> None:
         """Store the judge's score of a session (1 to 5)."""

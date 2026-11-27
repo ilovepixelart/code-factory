@@ -49,17 +49,18 @@ def _passes(record: EvalRecord) -> dict[str, list[bool]]:
 
 def _line(record: EvalRecord) -> str:
     name = setup_name(record.setup)
+    cost = "cost unavailable" if record.cost is None else f"${record.cost:.2f}"
     if record.kind is Kind.REVIEW:
         return (
             f"{name} review: {record.runs} runs per task, caught {_percent(record.caught or 0)}%,"
-            f" {record.false_findings or 0:.2f} false findings per clean run, ${record.cost:.2f}"
+            f" {record.false_findings or 0:.2f} false findings per clean run, {cost}"
         )
     at_k = record.pass_at_k if record.pass_at_k is not None else scores(_passes(record))[2]
     tokens = f", {record.tokens} tokens" if record.tokens is not None else ""
     return (
         f"{record.setup.stage}: {name}: {record.runs} runs per task,"
         f" pass@1 {_percent(record.pass_at_1 or 0)}%, pass@k {_percent(at_k)}%,"
-        f" pass^k {_percent(record.pass_k or 0)}%{tokens}, ${record.cost:.2f}"
+        f" pass^k {_percent(record.pass_k or 0)}%{tokens}, {cost}"
     )
 
 

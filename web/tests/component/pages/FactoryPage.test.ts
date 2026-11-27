@@ -141,7 +141,7 @@ describe('the tiles', () => {
     expect(tileText('Cost per PR')).toBe('$1.75')
     expect(tileNote('Cost per PR')).toBe('median; 6 of 7 PRs priced')
     expect(tileText('Measurement spend')).toBe('$0.50')
-    expect(tileNote('Measurement spend')).toBe('Recorded judge, eval and benchmark costs')
+    expect(tileNote('Measurement spend')).toBe('Recorded evaluation and judge costs')
   })
 
   test('an_estimated_cost_is_led_by_a_tilde', async () => {
@@ -266,9 +266,7 @@ describe('runs', () => {
       ['judge', '1', '8%'],
       ['spec', '1', '8%'],
     ])
-    expect(section('runs-heading')?.textContent).toContain(
-      'Board runs and any recorded measurement runs',
-    )
+    expect(section('runs-heading')?.textContent).toContain('Runs recorded in the board ledger')
   })
 
   test('choosing_another_grouping_shows_its_rows', async () => {

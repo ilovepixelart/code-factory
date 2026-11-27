@@ -73,7 +73,7 @@ const NONE_OPENED = 'no pull requests opened in this range'
           {{
             dashboard.cost.measurement === null
               ? 'No measurement costs recorded'
-              : 'Recorded judge, eval and benchmark costs'
+              : 'Recorded evaluation and judge costs'
           }}
         </p>
       </CardFooter>
