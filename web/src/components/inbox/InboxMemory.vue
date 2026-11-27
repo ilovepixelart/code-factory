@@ -46,6 +46,7 @@ const draft = (item: InboxItem): MemoryDraft => ({
   why: item.memory?.why ?? '',
   source: item.memory?.source ?? '',
   guard: item.memory?.guard ?? '',
+  scope: item.memory?.scope ?? '',
 })
 
 async function save(item: InboxItem, changed: MemoryDraft): Promise<void> {

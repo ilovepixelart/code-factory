@@ -64,9 +64,10 @@ interface InboxSeed {
   }
   rewrite?: { before: string; after: string }
   permission?: { id: string; summary: string }
+  memoryProposal?: { statement: string; why: string; scope: string }
 }
 
-/** Seed an agent's question or permission request in this browser test's own schema. */
+/** Seed an Inbox item in this browser test's own schema. */
 export function seedInbox(served: Served, seed: InboxSeed): void {
   const args = [resolve(ROOT, 'tests/support/browser_question_seed.py'), JSON.stringify(seed)]
   execFileSync(...command(args, 'python'), { env: environment(served.schema), stdio: 'pipe' })

@@ -31,6 +31,7 @@ const proposal: InboxItem = {
     why: 'A guess cost a day',
     source: 'agent',
     guard: '',
+    scope: 'build',
   },
 }
 
@@ -134,6 +135,7 @@ describe('memory proposals in the inbox', () => {
 
     await button(page, 'Edit').trigger('click')
     const form = page.get('section[aria-labelledby="inbox-memory"] form')
+    expect(form.get('select').element.value).toBe('build')
     await form.get('textarea').setValue('Measure before tuning anything')
     await form.trigger('submit')
     await validated()
@@ -147,6 +149,7 @@ describe('memory proposals in the inbox', () => {
     expect(JSON.parse(sent[1]?.body as string)).toMatchObject({
       statement: 'Measure before tuning anything',
       source: 'agent',
+      scope: 'build',
     })
   })
 })
