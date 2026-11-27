@@ -4,11 +4,13 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import cast
 
+import pytest
 from fastapi import FastAPI
 
 from checks_support import write_config
 from code_factory.delivery.models import PullReading
 from code_factory.delivery.repository import DeliveryRepository
+from code_factory.delivery.service import DeliveryService
 from code_factory.inbox.service import InboxService
 from code_factory.platform.db import UnitOfWork
 from code_factory.platform.services import Services
@@ -159,6 +161,36 @@ async def test_a_pull_request_waiting_for_the_boards_checks_is_not_ready_to_merg
 ) -> None:
     root = make_repo(tmp_path)
     write_config(root, "[checks]\ncommand = 'true'\n")
+    await _green_pull(app, uow, root)
+
+    page = await app.state.services.get(InboxService).page()
+
+    assert page["mergeable"] == []
+
+
+async def test_a_repository_that_merges_on_its_own_asks_the_owner_only_when_a_hold_names_it(
+    app: FastAPI, uow: UnitOfWork, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = make_repo(tmp_path)
+    write_config(root, "[agents]\nmerge_approval = false\n")
+    ticket = await _green_pull(app, uow, root)
+    head = git(root, "rev-parse", "HEAD")
+    delivery = app.state.services.get(DeliveryService)
+    holds = {(ticket, head): "the change touches a sensitive path"}
+    monkeypatch.setattr(delivery, "owner_hold", lambda t, h: holds.get((t, h), ""))
+
+    page = await app.state.services.get(InboxService).page()
+
+    assert [(i["ticket"]["id"], i["note"]) for i in page["mergeable"]] == [
+        (ticket, "the change touches a sensitive path")
+    ]
+
+
+async def test_a_repository_that_merges_on_its_own_leaves_an_unheld_pull_to_the_board(
+    app: FastAPI, uow: UnitOfWork, tmp_path: Path
+) -> None:
+    root = make_repo(tmp_path)
+    write_config(root, "[agents]\nmerge_approval = false\n")
     await _green_pull(app, uow, root)
 
     page = await app.state.services.get(InboxService).page()
