@@ -1,9 +1,11 @@
 """Fixtures of the checks tests: the service over real services, a real repository, fakes for
 the forge and the sandbox, a movable clock and a state folder in `tmp_path`."""
 
+from functools import partial
 from pathlib import Path
 
 import pytest
+from sqlalchemy.ext.asyncio import AsyncConnection
 
 from checks_support import (
     ENGINE_SCRIPT,
@@ -17,7 +19,7 @@ from checks_support import (
 from code_factory.agents.service import AgentService
 from code_factory.checks.service import CheckDeps, CheckOptions, CheckService
 from code_factory.git.service import GitService
-from code_factory.platform.db import UnitOfWork
+from code_factory.platform.db import UnitOfWork, try_session_lock
 from code_factory.releases.service import ReleaseService
 from code_factory.repositories.service import RepositoryService
 from code_factory.settings.service import SettingsService
@@ -85,6 +87,7 @@ def options(state: Path) -> CheckOptions:
 @pytest.fixture
 def checks(  # one fixture per service the module reads
     uow: UnitOfWork,
+    connection: AsyncConnection,
     tickets: TicketService,
     activity: ActivityService,
     documents: DocumentService,
@@ -125,6 +128,7 @@ def checks(  # one fixture per service the module reads
         forge=forge,
         sandbox=sandbox,
         denials=sandbox,
+        verify_claim=partial(try_session_lock, connection.engine),
     )
     return CheckService(uow, deps, options, clock)
 

@@ -15,7 +15,7 @@ from code_factory.platform.db.engine import (
     ping,
     unavailable,
 )
-from code_factory.platform.db.locks import lock_key, lock_until_commit
+from code_factory.platform.db.locks import lock_key, lock_until_commit, try_session_lock
 from code_factory.platform.db.schema import (
     DATA_FORMAT_VERSION,
     EXPECTED_REVISION,
@@ -54,6 +54,7 @@ __all__ = [
     "lock_until_commit",
     "ping",
     "read_schema_state",
+    "try_session_lock",
     "unavailable",
     "verify_schema",
 ]

@@ -7,7 +7,7 @@ import socket
 import uuid
 from collections import deque
 from collections.abc import AsyncGenerator, Awaitable, Callable
-from contextlib import asynccontextmanager
+from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -66,6 +66,7 @@ class CheckDeps:
     forge: ForgePort
     sandbox: SandboxSettings
     denials: CheckoutDenials
+    verify_claim: Callable[[str], AbstractAsyncContextManager[bool]]
 
 
 @dataclass(frozen=True)

@@ -66,7 +66,7 @@ async def test_release_verification_waits_for_check_capacity_then_admits_one_rep
     async def due(_repository: str) -> ReleaseRef:
         return ReleaseRef(version="0.1.0", at=clock.now)
 
-    async def verify(repository: str, _release: ReleaseRef) -> None:
+    async def verify(repository: str, _release: ReleaseRef, *, scheduled: bool) -> None:  # noqa: ARG001
         started_releases.put_nowait(repository)
         try:
             await finish_release.get()

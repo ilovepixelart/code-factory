@@ -83,7 +83,9 @@ class UpkeepMixin(PipelineMixin):
 
     async def _verify_release(self, repository: str, release: ReleaseRef) -> None:
         try:
-            await self.verify(repository, release)
+            await self.verify(repository, release, scheduled=True)
+        except ConflictError as error:
+            logger.info("%s", error)
         except Exception:
             logger.exception("the verification of %s failed", repository)
         finally:
