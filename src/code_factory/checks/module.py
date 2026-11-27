@@ -72,15 +72,9 @@ class CardChecksAdapter:
     def __init__(self, checks: CheckService) -> None:
         self._checks = checks
 
-    async def latest_checks(
-        self, ticket_ids: Sequence[str], *, heads: dict[str, str] | None = None
-    ) -> dict[str, list[CheckRecord]]:
-        """Check history, or just the latest verdict for each supplied head."""
-        found = (
-            await self._checks.records_of(ticket_ids)
-            if heads is None
-            else await self._checks.card_records(heads)
-        )
+    async def latest_checks(self, heads: dict[str, str]) -> dict[str, list[CheckRecord]]:
+        """The latest verdict for each supplied head."""
+        found = await self._checks.card_records(heads)
         return {ticket: [self._record(r) for r in records] for ticket, records in found.items()}
 
     async def latest_attempt(self, ticket: str) -> CheckRecord | None:

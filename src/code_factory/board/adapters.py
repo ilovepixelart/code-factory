@@ -44,7 +44,7 @@ _NEWEST = 5
 DeliveryEvents = Callable[[Sequence[str]], Awaitable[dict[str, list[ActivityRecord]]]]
 LedgerMerges = Callable[[Sequence[str]], Awaitable[dict[str, float]]]
 DeliveryPulls = Callable[[Sequence[str]], Awaitable[dict[str, PullFacts]]]
-CheckRecords = Callable[[Sequence[str]], Awaitable[dict[str, list[CheckRecord]]]]
+CheckRecords = Callable[[dict[str, str]], Awaitable[dict[str, list[CheckRecord]]]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -123,10 +123,8 @@ class TeamTickets:
         tickets = await self._tickets.list()
         ids = [t.id for t in tickets]
         events = await self._reads.events(ids)
-        pulls = await self._reads.pulls(ids)
-        checks = await self._reads.checks(ids)
         landed = await self._reads.merges([t.id for t in tickets if t.column is Column.MERGED])
-        found = []
+        visible: list[tuple[Ticket, float | None]] = []
         for ticket in tickets:
             own = events.get(ticket.id, [])
             merged = (
@@ -134,7 +132,19 @@ class TeamTickets:
             )
             if ticket.column is Column.MERGED and (merged is None or merged < since):
                 continue
-            entries = await self._activity.entries(ticket.id)
+            visible.append((ticket, merged))
+
+        shown = [ticket.id for ticket, _ in visible]
+        pulls = await self._reads.pulls(shown)
+        checks = await self._reads.checks(
+            {ticket: pulls[ticket].head if ticket in pulls else "" for ticket in shown}
+        )
+        histories = await self._activity.selected_entries(
+            shown, kinds=_TEAM_KINDS | {"stage"}, newest=_NEWEST
+        )
+        found = []
+        for ticket, merged in visible:
+            entries = histories.get(ticket.id, [])
             waiting = ticket.column in {Column.REVIEW, Column.MERGED}
             moment = self._entered(ticket, entries) if waiting else ticket.updated_at.timestamp()
             request = ticket.pull_request
@@ -149,7 +159,7 @@ class TeamTickets:
                     column_since=moment,
                     merged=merged,
                     pull=pull,
-                    activities=tuple(_history(entries, own)),
+                    activities=tuple(_history(entries, events.get(ticket.id, []))),
                     check=_verdict(checks.get(ticket.id, []), pulls.get(ticket.id)),
                 )
             )

@@ -5,7 +5,7 @@ from typing import cast
 
 from fastapi import FastAPI
 
-from code_factory.delivery.models import DeliveryEvent
+from code_factory.delivery.models import DeliveryEvent, PullReading
 from code_factory.delivery.repository import DeliveryRepository
 from code_factory.metrics.models import Autonomy, ChecksVerdict, MergeFact
 from code_factory.metrics.repository import MetricsRepository
@@ -89,6 +89,30 @@ async def test_a_ticket_carries_the_checks_verdict_the_card_reads(app: FastAPI) 
     facts = await _facts(app, 0)
 
     assert (facts[failed.id].check, facts[killed.id].check) == (False, None)
+
+
+async def test_team_facts_read_the_current_pull_verdict_and_keep_older_gate_history(
+    app: FastAPI, uow: UnitOfWork
+) -> None:
+    tickets = _services(app).get(TicketService)
+    ticket = await tickets.create(NewTicket(repository="sample", title="Review"), by="o")
+    async with uow() as session:
+        await DeliveryRepository(session).record_pull(
+            ticket.id, "sample", URL, PullReading(state="open", head="current"), datetime.now(UTC)
+        )
+    for head, code in (("earlier", 0), ("current", 1), ("current", 137), ("other", 0)):
+        await tickets.record_activity(
+            ticket.id, "checks", {"exit_code": code, "commit": head}, by="c"
+        )
+
+    facts = (await _facts(app, 0))[ticket.id]
+    assert facts.check is False
+    assert [a.text("exit_code") for a in facts.activities if a.kind == "checks"] == [
+        "0",
+        "1",
+        "137",
+        "0",
+    ]
 
 
 async def test_a_merge_the_ledger_read_from_git_dates_a_merge_the_board_did_not_make(
