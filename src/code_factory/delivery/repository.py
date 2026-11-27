@@ -3,13 +3,14 @@
 from collections.abc import Iterable
 from datetime import datetime, timedelta
 
-from sqlalchemy import func, select, update
+from sqlalchemy import and_, case, func, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
-from code_factory.delivery.models import DeliveryEvent, PullReading, PullView
+from code_factory.delivery.models import DeliveryEvent, PullHistory, PullReading, PullView
 from code_factory.delivery.rules import entered_since, ticket_id, ticket_number
-from code_factory.delivery.tables import EventRow, IntakeRow, PollRow, PullRow
+from code_factory.delivery.tables import EventRow, IntakeRow, PollRow, PullHistoryRow, PullRow
 
 POLL_EVERY = timedelta(seconds=60)
 
@@ -78,19 +79,55 @@ class DeliveryRepository:
         rows = await self._session.scalars(select(PullRow).where(PullRow.state == "open"))
         return [_view(row) for row in rows]
 
-    async def all_pulls(self) -> list[PullView]:
-        """Every recorded pull request."""
-        rows = await self._session.scalars(select(PullRow).order_by(PullRow.ticket_number))
-        return [_view(row) for row in rows]
-
-    async def first_at(self, kinds: tuple[str, ...]) -> dict[tuple[str, str], datetime]:
-        """The first event of each (ticket, url) among `kinds`."""
-        rows = await self._session.execute(
-            select(EventRow.ticket_number, EventRow.url, func.min(EventRow.at))
-            .where(EventRow.kind.in_(kinds))
-            .group_by(EventRow.ticket_number, EventRow.url)
+    async def history(self, since: datetime, until: datetime) -> list[PullHistory]:
+        """Pulls opened or merged in the window, with the lifetime count for each ticket."""
+        pull = PullHistoryRow
+        related = aliased(PullHistoryRow)
+        count = (
+            select(func.count())
+            .select_from(related)
+            .where(related.ticket_number == pull.ticket_number)
+            .scalar_subquery()
         )
-        return {(ticket_id(number), url): at for number, url, at in rows}
+        result = await self._session.execute(
+            select(pull, count)
+            .where(
+                or_(
+                    and_(pull.opened_at >= since, pull.opened_at < until),
+                    and_(pull.merged_at >= since, pull.merged_at < until),
+                )
+            )
+            .order_by(pull.opened_at, pull.url)
+        )
+        return [
+            PullHistory(
+                ticket_id=ticket_id(row.ticket_number),
+                repository=row.repository,
+                url=row.url,
+                state=row.state,  # ty: ignore[invalid-argument-type]
+                opened_at=row.opened_at,
+                merged_at=row.merged_at,
+                closed_at=row.closed_at,
+                first_review_at=row.first_review_at,
+                changed_lines=row.changed_lines,
+                ticket_pulls=total,
+            )
+            for row, total in result
+        ]
+
+    async def known_merge(self, ticket: str, url: str) -> bool:
+        """Whether this exact pull request recorded a merge for the named ticket."""
+        pull = PullHistoryRow
+        return (
+            await self._session.scalar(
+                select(pull.url).where(
+                    pull.ticket_number == ticket_number(ticket),
+                    pull.url == url,
+                    pull.merged_at.is_not(None),
+                )
+            )
+            is not None
+        )
 
     async def known_urls(self, repository: str) -> set[str]:
         """The pull request urls recorded for the repository."""
@@ -116,6 +153,52 @@ class DeliveryRepository:
             for name, value in values.items():
                 setattr(row, name, value)
         await self._session.flush()
+        if url:
+            await self._remember_pull(number, repository, url, reading, now)
+
+    async def _remember_pull(
+        self, number: int, repository: str, url: str, reading: PullReading, now: datetime
+    ) -> None:
+        pull = PullHistoryRow
+        changed = (
+            reading.additions + reading.deletions
+            if reading.additions is not None and reading.deletions is not None
+            else None
+        )
+        statement = pg_insert(pull).values(
+            url=url,
+            ticket_number=number,
+            repository=repository,
+            state=reading.state,
+            opened_at=reading.created_on_host or now,
+            merged_at=reading.merged_on_host or (now if reading.state == "merged" else None),
+            closed_at=now if reading.state == "closed" else None,
+            first_review_at=reading.first_review_at,
+            changed_lines=changed,
+        )
+        incoming = statement.excluded
+        await self._session.execute(
+            statement.on_conflict_do_update(
+                index_elements=[pull.url],
+                set_={
+                    "state": case((pull.merged_at.is_not(None), "merged"), else_=incoming.state),
+                    "opened_at": reading.created_on_host or pull.opened_at,
+                    "merged_at": (
+                        reading.merged_on_host or func.coalesce(pull.merged_at, incoming.merged_at)
+                    ),
+                    "closed_at": case(
+                        (
+                            incoming.state == "closed",
+                            func.coalesce(pull.closed_at, incoming.closed_at),
+                        ),
+                        (incoming.state == "", pull.closed_at),
+                        else_=None,
+                    ),
+                    "first_review_at": func.least(pull.first_review_at, incoming.first_review_at),
+                    "changed_lines": func.coalesce(incoming.changed_lines, pull.changed_lines),
+                },
+            )
+        )
 
     async def set_shipped(self, ticket: str, head: str) -> None:
         """The commit the board shipped to the recorded pull request."""
@@ -125,12 +208,19 @@ class DeliveryRepository:
             .values(shipped_head=head)
         )
 
-    async def set_state(self, ticket: str, state: str) -> None:
-        """Mark the recorded pull request merged or closed."""
+    async def _mark_merged(self, ticket: str, url: str, at: datetime) -> None:
+        """Mark this pull merged, even if its ticket now points to a replacement."""
+        number = ticket_number(ticket)
         await self._session.execute(
             update(PullRow)
-            .where(PullRow.ticket_number == ticket_number(ticket))
-            .values(state=state)
+            .where(PullRow.ticket_number == number, PullRow.url == url)
+            .values(state="merged")
+        )
+        pull = PullHistoryRow
+        await self._session.execute(
+            update(pull)
+            .where(pull.ticket_number == number, pull.url == url)
+            .values(state="merged", merged_at=func.least(pull.merged_at, at), closed_at=None)
         )
 
     async def record(self, event: DeliveryEvent) -> bool:
@@ -142,7 +232,17 @@ class DeliveryRepository:
             .on_conflict_do_nothing()
             .returning(EventRow.id)
         )
-        return done.scalar_one_or_none() is not None
+        recorded = done.scalar_one_or_none() is not None
+        if event.kind == "merged_pull_request" and event.url:
+            await self._mark_merged(event.ticket_id, event.url, event.at)
+        elif event.kind == "pull_request" and event.url:
+            pull = PullHistoryRow
+            await self._session.execute(
+                update(pull)
+                .where(pull.ticket_number == ticket_number(event.ticket_id), pull.url == event.url)
+                .values(opened_at=func.least(pull.opened_at, event.at))
+            )
+        return recorded
 
     async def events(self, ids: Iterable[str]) -> dict[str, list[DeliveryEvent]]:
         """Each ticket's events, oldest first."""

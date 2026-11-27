@@ -12,7 +12,6 @@ from code_factory.delivery.models import (
     NotReadyError,
     PullView,
 )
-from code_factory.delivery.repository import DeliveryRepository
 from code_factory.delivery.rules import attempts, merge_decision, merge_due, next_retry
 from code_factory.delivery.service.base import Collaborators, logger
 from code_factory.platform.errors import CodeFactoryError, NotFoundError, UnavailableError
@@ -137,8 +136,6 @@ class MergingMixin(Collaborators):
         url, head = pull.url, pull.shipped_head
         self._owner_holds.pop(ticket_id, None)
         await self._record(self._event(ticket_id, "merged_pull_request", url=url, head=head, by=by))
-        async with self._uow() as session:
-            await DeliveryRepository(session).set_state(ticket_id, "merged")
         await self._ports.tickets.record_pull(ticket_id, url, "merged")
         await self._ports.tickets.record_merged(ticket_id)
         try:

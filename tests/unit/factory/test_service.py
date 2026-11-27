@@ -95,8 +95,9 @@ async def test_the_dashboard_of_the_first_week_is_the_hand_written_golden() -> N
 async def test_the_dashboard_makes_seven_bulk_calls_and_none_per_pull_request() -> None:
     world = World()
     await world.service.dashboard("2026-11-01", "2026-11-08")
+    # The seven-call budget now has headroom because one read covers opens and merges.
     assert sorted(world.calls()) == sorted(
-        ["runs", "opened", "merged", "for_tickets", "costs", "cards", "newest"]
+        ["runs", "in_range", "for_tickets", "costs", "cards", "newest"]
     )
 
 
@@ -284,7 +285,7 @@ async def test_a_large_cohort_is_answered_in_seven_calls_and_inside_the_budget()
     world.runs.holding(runs)
     world.costs.holding(costs)
     got = await world.service.dashboard("2026-11-01", "2026-11-08")  # warms imports and caches
-    assert (got.prs.opened, len(world.calls())) == (300, 7)
+    assert (got.prs.opened, len(world.calls())) == (300, 6)
     elapsed = []
     for _ in range(5):
         begun = time.perf_counter()

@@ -49,10 +49,13 @@ def pr_cost(
     """What the ticket's runs started before this pull request ended cost, split evenly.
 
     Only board runs count; measurement runs are the dashboard's measurement spend. The pull
-    request ends at its merge, else at `now`. The split divides by the ticket's number
-    of pull requests (below 1 reads as 1). `complete` is False when a run in scope has no cost.
+    request ends at its merge or observed closure, else at `now`. The split divides by the
+    ticket's number of pull requests. `complete` is False when a run in scope has no cost.
     """
-    end = pull.merged_at if pull.merged_at is not None and is_merged(pull, now) else now
+    if pull.merged_at is not None and is_merged(pull, now):
+        end = pull.merged_at
+    else:
+        end = min(pull.closed_at, now) if pull.closed_at is not None else now
     scoped = [
         run
         for run in runs

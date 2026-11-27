@@ -20,7 +20,7 @@ from code_factory.platform.db.engine import (
 from code_factory.platform.errors import DatabaseBusyError, SchemaMismatchError
 
 # The head revision of `alembic/versions`; a test fails when it drifts from the script directory.
-EXPECTED_REVISION = "a65e20cf7c84"
+EXPECTED_REVISION = "cca36d85d75a"
 # The data format this build reads and writes. A migration that changes a persisted format raises
 # it in the same revision (`schema_info.data_format_version`) and this constant with it.
 DATA_FORMAT_VERSION = 1

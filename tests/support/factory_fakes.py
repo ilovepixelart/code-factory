@@ -59,16 +59,13 @@ class FakePulls(_Fake):
         self.held = list(pulls)
         return self
 
-    async def opened(self, since: float, until: float) -> list[PullFact]:
-        self._record("opened", since, until)
-        return [p for p in _told("FakePulls", self.held) if since <= p.opened_at < until]
-
-    async def merged(self, since: float, until: float) -> list[PullFact]:
-        self._record("merged", since, until)
+    async def in_range(self, since: float, until: float) -> list[PullFact]:
+        self._record("in_range", since, until)
         return [
             p
             for p in _told("FakePulls", self.held)
-            if p.merged_at is not None and since <= p.merged_at < until
+            if since <= p.opened_at < until
+            or (p.merged_at is not None and since <= p.merged_at < until)
         ]
 
     async def known_merge(self, ticket: str, url: str) -> bool:

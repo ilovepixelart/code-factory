@@ -129,6 +129,14 @@ class TicketLookups:
             found = await TicketRepository(session).merged_among(repository, numbers)
         return frozenset(ticket_id(n) for n in found)
 
+    async def titles(self, ids: builtins.list[str]) -> dict[str, str]:
+        """Titles of the named visible tickets in one read."""
+        if not ids:
+            return {}
+        async with self._uow() as session:
+            found = await TicketRepository(session).titles([ticket_number(i) for i in ids])
+        return {ticket_id(number): title for number, title in found.items()}
+
     async def open_titles(self, repository: str) -> builtins.list[tuple[str, str]]:
         """`(id, title)` of each ticket of the repository neither archived nor merged."""
         async with self._uow() as session:

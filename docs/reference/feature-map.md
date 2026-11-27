@@ -259,6 +259,7 @@ code-factory
 │   │   ├── delivery_intake
 │   │   ├── delivery_issue_status
 │   │   ├── delivery_polls
+│   │   ├── delivery_pull_history
 │   │   └── delivery_pulls
 │   └── routes
 │       ├── POST /api/tickets/{repository}/{ticket_id}/merge

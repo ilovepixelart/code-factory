@@ -81,6 +81,7 @@ class PullFact(Frozen):
     changed_lines: int | None = None
     autonomy: AutonomyClass = AutonomyClass.UNKNOWN
     ticket_pulls: int = 1
+    closed_at: float | None = None
 
 
 class RunCost(Frozen):

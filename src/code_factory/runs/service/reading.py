@@ -104,6 +104,14 @@ class Reading(ServiceBase):
                 found[numbers[run.ticket_id]].append(view_of(run))
         return found
 
+    async def runs_on_tickets(self, ticket_ids: Sequence[str]) -> list[Run]:
+        """Every run for the named tickets in one query."""
+        numbers = [n for ticket in ticket_ids if (n := ticket_number(ticket)) is not None]
+        if not numbers:
+            return []
+        async with self._uow() as session:
+            return await RunRepository(session).for_tickets(numbers)
+
     async def runs_on_ticket(self, ticket_id: str) -> list[Run]:
         """Every run of the ticket, newest first."""
         number = ticket_number(ticket_id)
