@@ -22,7 +22,7 @@ from code_factory.agents.service.base import Shared
 from code_factory.platform.contained import SANDBOX_PROGRAM
 from code_factory.platform.db import AsyncSession
 from code_factory.platform.errors import BadRequestError, ConflictError, NotFoundError
-from code_factory.platform.programs import find_program
+from code_factory.platform.programs import TEMPORARY_FOLDERS, find_program
 from code_factory.platform.text.markdown import INLINE_LIMIT, render
 from code_factory.platform.text.moments import day_minute
 
@@ -51,7 +51,7 @@ class RosterService(Shared):
     @staticmethod
     async def local_harnesses(state_dir: Path) -> dict[str, bool]:
         """Check for installed executables on the board's trusted PATH without running them."""
-        places = (state_dir, Path("/tmp"), Path("/var/tmp"))  # noqa: S108  # exclude temp tools
+        places = (state_dir, *TEMPORARY_FOLDERS)
         programs = (*RUNTIMES, SANDBOX_PROGRAM)
         found = await asyncio.gather(*(find_program(name, places) for name in programs))
         return {name: binary is not None for name, binary in zip(programs, found, strict=True)}

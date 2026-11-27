@@ -38,6 +38,9 @@ REPOSITORY_VARIABLES = (
     "GIT_COMMON_DIR",
     "GIT_PREFIX",
 )
+# The system's shared temporary folders: every run may write there, so they are always among the
+# `places` a program is never taken from.
+TEMPORARY_FOLDERS = (Path("/tmp"), Path("/var/tmp"))  # noqa: S108
 _STICKY = 0o1000
 _OTHERS_WRITE = 0o002
 _GROUP_WRITE = 0o020

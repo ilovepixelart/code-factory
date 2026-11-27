@@ -30,7 +30,7 @@ from code_factory.agents.rules.probes import (
 )
 from code_factory.platform.errors import BadRequestError, UnavailableError
 from code_factory.platform.process import run_process
-from code_factory.platform.programs import find_program
+from code_factory.platform.programs import TEMPORARY_FOLDERS, find_program
 
 PROBE_S = 3.0
 CONNECT_S = 2.0
@@ -41,12 +41,11 @@ HTTP_OK = 200
 CODEX_MODELS_URL = "https://chatgpt.com/backend-api/codex/models"
 CODEX_CACHE_S = 120
 CODEX_VERSION = re.compile(r"\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?")
-TEMP_PLACES = (Path("/tmp"), Path("/var/tmp"))  # noqa: S108  # excluded program locations
 
 
 async def codex_version() -> str:
     """The installed CLI version sent to the Codex catalog."""
-    excluded = (*TEMP_PLACES, Path.cwd())
+    excluded = (*TEMPORARY_FOLDERS, Path.cwd())
     binary = await find_program("codex", excluded)
     if binary is None:
         return ""

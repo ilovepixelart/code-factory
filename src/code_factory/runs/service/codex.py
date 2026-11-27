@@ -17,7 +17,7 @@ from code_factory.broker.service import BrokerService
 from code_factory.git.service import GitService
 from code_factory.platform.contained import SANDBOX_PROGRAM
 from code_factory.platform.errors import UnavailableError
-from code_factory.platform.programs import find_program
+from code_factory.platform.programs import TEMPORARY_FOLDERS, find_program
 from code_factory.platform.served import Served
 from code_factory.platform.services import Services
 from code_factory.runs.adapters import files
@@ -27,7 +27,6 @@ MCP_TOKEN = "CODE_FACTORY_MCP_TOKEN"  # noqa: S105  # variable name
 BROKER_TOKEN = "CODE_FACTORY_CODEX_TOKEN"  # noqa: S105  # variable name
 CODEX_CONNECTION = "choose a connection in Agents before starting a codex run"
 RUNNER = ("-m", "code_factory.runs.adapters.runner")
-TEMP_PLACES = (Path("/tmp"), Path("/var/tmp"))  # noqa: S108  # excluded program locations
 
 
 def run_folder(state: Path, run_id: str) -> Path:
@@ -47,7 +46,7 @@ class CodexLauncher:
         """Build the supervised command inside an outer sandbox."""
         agents = self._services.get(AgentService)
         connection = await agents.connection_definition(plan.given.connection)
-        paths = (self._state, plan.tree.path, *TEMP_PLACES)
+        paths = (self._state, plan.tree.path, *TEMPORARY_FOLDERS)
         codex = await find_program("codex", paths)
         if codex is None:
             raise UnavailableError("codex is not on a trusted PATH; install the Codex CLI")
