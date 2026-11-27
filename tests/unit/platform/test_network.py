@@ -6,6 +6,7 @@ from code_factory.platform.errors import BadRequestError
 from code_factory.platform.network import (
     NETWORK_WARNING,
     board_url,
+    http_url,
     listen_address,
     network_warning,
 )
@@ -75,3 +76,19 @@ def test_the_board_link_says_localhost_only_when_the_board_holds_both_loopbacks(
     address: str, port: int, both: bool, link: str
 ) -> None:
     assert board_url(ip_address(address), port, both) == link
+
+
+@pytest.mark.parametrize(
+    ("host", "port", "path", "query", "url"),
+    [
+        ("127.0.0.1", 4000, "", "", "http://127.0.0.1:4000"),
+        ("localhost", 4000, "/", "", "http://localhost:4000/"),
+        ("::1", 4000, "", "", "http://[::1]:4000"),
+        ("fd00::7", 8080, "/preview/5173", "", "http://[fd00::7]:8080/preview/5173"),
+        ("127.0.0.1", 4000, "/inbox", "a=1&b=2", "http://127.0.0.1:4000/inbox?a=1&b=2"),
+    ],
+)
+def test_the_board_url_brackets_an_ipv6_host_and_keeps_the_path_and_query(
+    host: str, port: int, path: str, query: str, url: str
+) -> None:
+    assert http_url(host, port, path, query) == url

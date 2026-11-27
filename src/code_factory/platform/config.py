@@ -12,6 +12,7 @@ from sqlalchemy.engine import URL, make_url
 from sqlalchemy.exc import ArgumentError
 
 from code_factory.platform.errors import SettingsError
+from code_factory.platform.network import http_url
 
 DATABASE_URL_VARIABLE = "CODE_FACTORY_DATABASE_URL"
 ENV_NAME_VARIABLE = "CODE_FACTORY_ENV"
@@ -163,9 +164,7 @@ class Settings(BaseSettings):
     @property
     def base_url(self) -> str:
         """Where the server is reached: an IPv6 literal is bracketed."""
-        advertised = self.advertised_host
-        host = f"[{advertised}]" if ":" in advertised else advertised
-        return f"http://{host}:{self.port}"
+        return http_url(self.advertised_host, self.port)
 
     @property
     def database_target(self) -> str:

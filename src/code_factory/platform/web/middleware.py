@@ -14,6 +14,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from code_factory.platform.identity import redact
 from code_factory.platform.logging import request_id_var
+from code_factory.platform.network import http_url
 from code_factory.platform.web.errors import error_response, internal_error_response
 
 _RESPONSE_START = "http.response.start"
@@ -154,9 +155,7 @@ class HostGuard:
             return
         if _moves(scope, host):
             query = scope.get("query_string", b"").decode("latin-1")
-            target = f"http://{CANONICAL_HOST}:{self.port}{scope['path']}" + (
-                f"?{query}" if query else ""
-            )
+            target = http_url(CANONICAL_HOST, self.port, scope["path"], query)
             await RedirectResponse(target, status_code=308)(scope, receive, send)
             return
         await self.app(scope, receive, send)

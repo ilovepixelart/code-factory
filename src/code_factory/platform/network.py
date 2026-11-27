@@ -1,6 +1,7 @@
 """The listen address `serve` takes and the link the board names itself by."""
 
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network, ip_address
+from urllib.parse import urlunsplit
 
 from code_factory.platform.errors import BadRequestError
 
@@ -64,6 +65,14 @@ def board_url(address: IPv4Address | IPv6Address, port: int, both: bool) -> str:
     `localhost` may resolve to either; any other address is named itself, an IPv6 one in brackets.
     """
     if both and address == IPv4Address("127.0.0.1"):
-        return f"http://localhost:{port}"
-    host = f"[{address}]" if isinstance(address, IPv6Address) else str(address)
-    return f"http://{host}:{port}"
+        return http_url("localhost", port)
+    return http_url(str(address), port)
+
+
+def http_url(host: str, port: int, path: str = "", query: str = "") -> str:
+    """A link to the board or a preview on `host:port`, an IPv6 host in brackets.
+
+    Plain HTTP: the board serves no TLS, on loopback or, with `NETWORK_WARNING`, a private network.
+    """
+    netloc = f"[{host}]:{port}" if ":" in host else f"{host}:{port}"
+    return urlunsplit(("http", netloc, path, query, ""))
