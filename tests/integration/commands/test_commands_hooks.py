@@ -55,6 +55,15 @@ def test_a_second_install_changes_nothing() -> None:
     assert remove_hooks({}, ENTRIES) is None
 
 
+def test_an_event_that_is_not_a_list_is_left_in_place_on_uninstall() -> None:
+    settings = {"hooks": {"Custom": "keep"}}
+    assert remove_hooks(settings, ENTRIES) is None
+    installed = add_hooks(settings, ENTRIES)
+    assert installed is not None
+    removed = remove_hooks(installed, ENTRIES)
+    assert removed == settings
+
+
 def test_hooks_that_are_not_an_object_are_refused() -> None:
     with pytest.raises(BadRequestError, match="is not an object"):
         add_hooks({"hooks": []}, ENTRIES)
