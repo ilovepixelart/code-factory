@@ -322,7 +322,7 @@ class PreviewSetupAdapter:
 
     async def contain(self, argv: Sequence[str], tree: Path, port: int) -> Launch:  # noqa: ARG002  # no isolated listener
         """Refuse until an isolated preview runtime owns the listener."""
-        raise UnavailableError(self.unavailable_reason())
+        raise UnavailableError(PREVIEW_UNCONTAINED)
 
 
 def epoch(moment: datetime | None) -> float | None:

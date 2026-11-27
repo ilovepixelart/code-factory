@@ -1,3 +1,4 @@
+import asyncio
 from datetime import timedelta
 from pathlib import Path
 
@@ -9,7 +10,7 @@ from code_factory.runs.adapters.processes import ProcessRegistry
 from code_factory.runs.models import Repair, StartOptions
 from code_factory.runs.ports import Given, Settings, TicketFacts
 from code_factory.runs.repository import HaltRepository, RunEnd, RunRepository
-from code_factory.runs.service import RunService
+from code_factory.runs.service import RunService, starting
 from runs_fakes import Fakes
 from runs_values import NOW, a_run, at
 
@@ -40,6 +41,7 @@ async def test_a_start_records_a_run_with_the_process_it_spawned(
 async def test_a_start_claims_then_probes_then_makes_the_tree_before_the_process(
     runs: RunService, fakes: Fakes, facts: TicketFacts
 ) -> None:
+    fakes.teams.lease_id = 14
     await runs.start(facts.id)
     assert fakes.flow.prepared == [facts.id]
     assert fakes.flow.verified == [(facts.id, "head0")]
@@ -53,6 +55,44 @@ async def test_a_start_claims_then_probes_then_makes_the_tree_before_the_process
         "attach",
         "event:run.started",
     ]
+
+
+@pytest.mark.parametrize("lost_after_error", [False, True])
+async def test_a_displaced_preparation_cannot_launch_or_release_the_replacement(
+    runs: RunService,
+    fakes: Fakes,
+    facts: TicketFacts,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    lost_after_error: bool,
+) -> None:
+    entered = asyncio.Event()
+    fakes.teams.lease_id = 23
+    beats: list[tuple[str, int]] = []
+
+    async def setup(_repository: str, _ticket_id: str, _attempt: int) -> None:
+        entered.set()
+        await asyncio.Event().wait()
+
+    async def beat(ticket_id: str, lease_id: int) -> bool:
+        await entered.wait()
+        beats.append((ticket_id, lease_id))
+        if len(beats) == 1:
+            return True
+        if lost_after_error:
+            raise UnavailableError("temporary database error")
+        return False
+
+    monkeypatch.setattr(starting, "START_BEAT_S", 0)
+    monkeypatch.setattr(fakes.trees, "start", setup)
+    monkeypatch.setattr(fakes.teams, "beat_start", beat)
+
+    with pytest.raises(ConflictError, match="the ticket's starting claim changed"):
+        await runs.start(facts.id)
+
+    assert beats == [(facts.id, 23), (facts.id, 23)]
+    assert fakes.agents.plans == []
+    assert fakes.teams.ended_with == [None]
 
 
 async def test_a_failed_spec_check_blocks_build_before_it_takes_a_claim(

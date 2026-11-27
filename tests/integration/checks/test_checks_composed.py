@@ -124,6 +124,9 @@ async def test_agent_worktree_setup_runs_contained_before_it_is_reused(
     own = settings.model_copy(update={"state_dir": state})
     resources = Resources(own, create_engine(own), uow, BackgroundTasks())
     git_service = build_services(resources, IDLE_MODULES).get(GitService)
+    plain = await git_service.start_worktree(started.repository, started.id, attempt=1)
+    assert plain.made
+    assert not (state / "hooks" / f"{plain.name}.setup.log").exists()
     outside = tmp_path / "outside.txt"
     command = (
         'test -d "$CLAUDE_CODE_TMPDIR" && '
