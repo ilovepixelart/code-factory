@@ -14,6 +14,7 @@ from code_factory.app import build_services
 from code_factory.delivery.models import PullReading
 from code_factory.delivery.service import DeliveryService
 from code_factory.follower.models import Card
+from code_factory.follower.rules.queue import ready
 from code_factory.follower.service.neighbours import BoardAdapter, WorkAdapter
 from code_factory.platform.background import BackgroundTasks
 from code_factory.platform.config import Settings
@@ -210,6 +211,33 @@ async def test_a_ticket_the_review_returned_is_due_a_fix_until_a_build_run_commi
 
     assert (returned.stage, returned.fix_due) == ("build", True)
     assert fixed.fix_due is False
+
+
+async def test_a_later_owner_build_pin_does_not_queue_an_automatic_review_fix(
+    board: BoardAdapter,
+    stages: StageService,
+    reviews: ReviewService,
+    in_review: Ticket,
+) -> None:
+    await reviews.submit_review(in_review.id, CHANGES, by="run:r00000000001")
+    await stages.apply_review(in_review.id, "r00000000001", "h1")
+    returned = await _card(board, in_review)
+    assert (returned.stage, returned.work_done, returned.fix_due, ready(returned)) == (
+        "build",
+        True,
+        True,
+        True,
+    )
+
+    await stages.declare(in_review.id, "build", by=OWNER)
+    pinned = await _card(board, in_review)
+
+    assert (pinned.stage, pinned.work_done, pinned.fix_due, ready(pinned)) == (
+        "build",
+        True,
+        False,
+        False,
+    )
 
 
 @pytest.fixture

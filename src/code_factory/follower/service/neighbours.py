@@ -125,9 +125,7 @@ class BoardAdapter(_Neighbour):
         )
         returned_at = None
         if facts.stage == "build" and facts.declared == "build":
-            verdicts = await self._services.get(StageService).review_verdicts(ticket.id)
-            latest = next((v for v in reversed(verdicts) if v.outcome != "skipped"), None)
-            returned_at = latest.at if latest is not None and latest.outcome == "returned" else None
+            returned_at = await self._services.get(StageService).review_return_at(ticket.id)
         runs = [(v.started_at, bool(v.commits)) for v in ended]
         return review, due_for_fix(facts.stage, returned_at, runs)
 
