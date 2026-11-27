@@ -35,6 +35,8 @@ jobs:
         run: gitleaks git --redact=100 --log-opts='--all'
       - name: Run the static checks
         run: sh scripts/gate.sh --force --base "refs/remotes/origin/$BASE_REF" --secrets --part static
+      - name: Check the site lockfile
+        run: uv lock --project site --check
 
   unit:
     name: Backend unit
@@ -161,13 +163,44 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Select dependency lockfiles
+        id: locks
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            lockfiles=$(git --no-replace-objects diff --name-only --no-renames \
+              --no-ext-diff --no-textconv "${PR_BASE_SHA:?}...HEAD" -- \
+              uv.lock site/uv.lock web/pnpm-lock.yaml)
+          else
+            lockfiles=$'uv.lock\nsite/uv.lock\nweb/pnpm-lock.yaml'
+          fi
+          while IFS= read -r lockfile; do
+            case "$lockfile" in
+              uv.lock) echo "backend=true" ;;
+              site/uv.lock) echo "site=true" ;;
+              web/pnpm-lock.yaml) echo "web=true" ;;
+            esac
+          done <<< "$lockfiles" >> "$GITHUB_OUTPUT"
+          if [[ -z "$lockfiles" ]]; then
+            echo "No dependency lockfile changed."
+          fi
       - uses: ./.github/actions/setup-python
+        if: steps.locks.outputs.backend == 'true' || steps.locks.outputs.site == 'true'
       - uses: ./.github/actions/setup-web
-      - name: Audit the locked dependencies
+        if: steps.locks.outputs.web == 'true'
+      - name: Audit backend dependencies
+        if: steps.locks.outputs.backend == 'true'
         run: |
           uv sync --locked
           sh scripts/audit.sh
-          uv audit --project site --locked --preview-features audit-command
+      - name: Audit site dependencies
+        if: steps.locks.outputs.site == 'true'
+        run: uv audit --project site --locked --preview-features audit-command
+      - name: Audit web dependencies
+        if: steps.locks.outputs.web == 'true'
+        run: |
           pnpm --dir web install --frozen-lockfile
           pnpm --dir web audit
 
