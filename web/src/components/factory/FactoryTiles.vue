@@ -65,13 +65,13 @@ const NONE_OPENED = 'no pull requests opened in this range'
       <CardHeader>
         <CardDescription>Measurement spend</CardDescription>
         <TileFigure
-          :value="dashboard.cost.measurement == null ? null : cost(dashboard.cost.measurement)"
+          :value="dashboard.cost.measurement === null ? null : cost(dashboard.cost.measurement)"
         />
       </CardHeader>
       <CardFooter class="text-muted-foreground">
         <p>
           {{
-            dashboard.cost.measurement == null
+            dashboard.cost.measurement === null
               ? 'No measurement costs recorded'
               : 'Recorded judge, eval and benchmark costs'
           }}
