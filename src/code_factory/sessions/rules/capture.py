@@ -37,7 +37,7 @@ _SECRET_KEY = re.compile(
 )
 # The line the gate prints for a failed step: the one thing recurring failures need from a
 # tool output that is too long to keep.
-_GATE_LINE = re.compile(r"gate: [a-z0-9-]+ failed \(exit [0-9]{1,3}\)")
+_GATE_LINE = re.compile(r"gate: [a-z0-9-]+ failed \(exit \d{1,3}\)", re.ASCII)
 MOST_GATE_LINES = 20
 
 _KEY_END = r"""\\*["']?\s*[=:]\s*"""
@@ -109,20 +109,26 @@ def _trimmed(text: str) -> dict[str, object]:
     return marker
 
 
+def _sanitized_object(
+    mapping: dict[str, object], patterns: list[tuple[str, str]] | None
+) -> dict[str, object]:
+    return {
+        key: REDACTED
+        if isinstance(item, str) and _SECRET_KEY.fullmatch(key)
+        else _sanitized(item, patterns)
+        for key, item in mapping.items()
+    }
+
+
 def _sanitized(value: object, patterns: list[tuple[str, str]] | None) -> object:
     match value:
         case str():
             text = mask(apply_redaction(value, patterns or []))
             return _trimmed(text) if len(text) > TRIM_LIMIT else text
-        case dict():
-            return {
-                key: REDACTED
-                if isinstance(item, str) and _SECRET_KEY.fullmatch(key)
-                else _sanitized(item, patterns)
-                for key, item in value.items()
-            }
-        case list():
-            return [_sanitized(item, patterns) for item in value]
+        case dict() as mapping:
+            return _sanitized_object(mapping, patterns)
+        case list() as items:
+            return [_sanitized(item, patterns) for item in items]
         case _:
             return value
 
@@ -161,9 +167,7 @@ def record(
             return Refused("TypeError: payload is not a JSON object")
     except (ValueError, RecursionError) as error:  # JSONDecodeError and UnicodeDecodeError
         return Refused(_reason(error) if isinstance(error, ValueError) else "RecursionError")
-    payload = _sanitized(parsed, redaction)
-    if not isinstance(payload, dict):  # a dict goes in, a dict comes out
-        return Refused("TypeError: payload is not a JSON object")
+    payload = _sanitized_object(parsed, redaction)
     payload["_captured_at"] = now
     line = json.dumps(payload, separators=(",", ":")) + "\n"
     return Record(_spool_name(payload.get("session_id")), line)
