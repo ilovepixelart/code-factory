@@ -1,5 +1,6 @@
 """Queries over a ticket's history, which `TicketRepository` carries as well."""
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import Any
 
@@ -121,6 +122,98 @@ class ActivityQueries:
             query = query.where(beyond)
         order = TicketActivityRow.id.desc() if newest_first else TicketActivityRow.id
         return list(await self._session.scalars(query.order_by(order).limit(limit)))
+
+    async def feed_of(self, number: int, limit: int) -> list[TicketActivityRow]:
+        """The newest visible entries, plus the finish records needed to fold those runs."""
+        row = TicketActivityRow
+        start = aliased(row)
+        run = func.coalesce(row.data["run"].astext, "")
+        has_start = (
+            select(start.id)
+            .where(
+                start.ticket_number == number,
+                start.kind == "run.started",
+                func.coalesce(start.data["run"].astext, "") == run,
+            )
+            .exists()
+        )
+        recent = await self._session.scalars(
+            select(row)
+            .where(row.ticket_number == number, or_(row.kind != "run.ended", ~has_start))
+            .order_by(row.at.desc(), row.id.desc())
+            .limit(limit)
+        )
+        visible = list(recent)
+        runs = [
+            str(item.data["run"])
+            for item in visible
+            if item.kind == "run.started" and item.data.get("run") not in (None, "")
+        ]
+        if runs:
+            visible.extend(await self._run_finishes(number, runs))
+        # The feed merger preserves this order for equal timestamps.
+        return sorted(visible, key=lambda item: item.id)
+
+    async def _run_finishes(self, number: int, runs: Sequence[str]) -> list[TicketActivityRow]:
+        row = TicketActivityRow
+        run = row.data["run"].astext
+        newest = await self._session.scalars(
+            select(row)
+            .where(row.ticket_number == number, row.kind == "run.ended", run.in_(runs))
+            .ext(distinct_on(run))
+            .order_by(run, row.at.desc(), row.id.desc())
+        )
+        return list(newest)
+
+    async def evidence_of(self, number: int) -> list[TicketActivityRow]:
+        """Stage transitions and the check, conflict and capture records that determine state."""
+        row = TicketActivityRow
+        latest_by_kind = (
+            select(row.id)
+            .where(row.ticket_number == number, row.kind.in_(("checks", "capture")))
+            .ext(distinct_on(row.kind))
+            .order_by(row.kind, row.id.desc())
+        )
+        latest_conflict = (
+            select(row.id)
+            .where(
+                row.ticket_number == number,
+                row.kind.in_(("branch_conflict", "branch_conflict_cleared")),
+            )
+            .order_by(row.id.desc())
+            .limit(1)
+        )
+        capture_tree = (
+            select(func.coalesce(row.data["tree"].astext, ""))
+            .where(row.ticket_number == number, row.kind == "capture")
+            .order_by(row.id.desc())
+            .limit(1)
+            .scalar_subquery()
+        )
+        latest_answers = (
+            select(row.id)
+            .where(
+                row.ticket_number == number,
+                row.kind.in_(("capture_approved", "capture_changes")),
+                func.coalesce(row.data["tree"].astext, "") == capture_tree,
+            )
+            .ext(distinct_on(row.kind))
+            .order_by(row.kind, row.id.desc())
+        )
+        rows = await self._session.scalars(
+            select(row)
+            .where(
+                row.ticket_number == number,
+                or_(
+                    row.kind.in_(("created", "stage")),
+                    row.id.in_(latest_by_kind),
+                    row.id.in_(latest_conflict),
+                    row.id.in_(latest_answers),
+                ),
+            )
+            .order_by(row.id)
+        )
+        return list(rows)
 
     async def finding_ids(self, number: int) -> list[str]:
         """The ids of the ticket's findings, in the order they were recorded."""

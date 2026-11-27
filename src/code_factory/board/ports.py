@@ -38,6 +38,10 @@ class CardChecks(Protocol):
         """Check history, or just the latest verdict for each supplied head."""
         ...
 
+    async def latest_attempt(self, ticket: str) -> CheckRecord | None:
+        """The last check attempt, including one with no verdict."""
+        ...
+
     async def running(self, ticket_ids: Sequence[str]) -> set[str]:
         """The tickets whose checks run now."""
         ...

@@ -7,7 +7,15 @@ from pathlib import Path
 from typing import Any
 
 from code_factory.checks.adapters import SetupFailedError
-from code_factory.checks.models import FIX_CHECK_REQUEST, MAIN, CheckRun, Judged, Ran, Scope
+from code_factory.checks.models import (
+    FIX_CHECK_REQUEST,
+    MAIN,
+    CheckRun,
+    Judged,
+    Ran,
+    RunState,
+    Scope,
+)
 from code_factory.checks.rules import kill_policy
 from code_factory.checks.service.command import Attempt, Place
 from code_factory.checks.service.config import RunConfig, run_config
@@ -35,7 +43,7 @@ class PipelineMixin(ReleasingMixin):
         async with self._db() as store:
             adopted = await store.runs.adopt(check_id, self._owner, self._now())
         row = await self._row(check_id)
-        if not adopted:
+        if not adopted or row.state not in {RunState.QUEUED, RunState.RUNNING}:
             return row
         beat = (
             asyncio.create_task(self._beat(check_id), name=f"check-beat-{check_id}")
@@ -60,7 +68,6 @@ class PipelineMixin(ReleasingMixin):
             permit.release()
             self._permits.pop(check_id, None)
             self._running.pop(check_id, None)
-            self._known.discard(check_id)
             self._trees.pop(check_id, None)
         return await self._row(check_id)
 
@@ -69,11 +76,11 @@ class PipelineMixin(ReleasingMixin):
         while True:
             await asyncio.sleep(self._opts.heartbeat_s)
             ids = list(self._running) if check_id is None else [check_id]
-            if not ids:
+            if not ids and not self._admitted:
                 continue
             try:
                 async with asyncio.timeout(self._opts.heartbeat_s), self._db() as store:
-                    await store.runs.beat(ids, self._owner, self._now())
+                    await store.runs.beat(ids, self._owner, self._now(), queued=check_id is None)
             except Exception:  # a missed batch must not stop the supervisor
                 logger.warning("the heartbeat of %d checks failed", len(ids), exc_info=True)
 

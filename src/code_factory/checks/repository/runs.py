@@ -56,6 +56,9 @@ class RunStore:
 
     async def insert(self, values: dict[str, Any]) -> CheckRun | None:
         """A queued row, or None when the subject already has an active one."""
+        # Publish each owner's inserts in id order so a later admission cannot strand an older
+        # container row behind it.
+        await lock_until_commit(self._session, f"checks:admission:{values['owner']}")
         statement = (
             insert(CheckRunRow)
             .values(**values)
@@ -99,6 +102,17 @@ class RunStore:
         rows = await self._session.execute(statement.order_by(CheckRunRow.id))
         return [to_run(row) for row in rows.scalars()]
 
+    async def queued(self, owner: str, admitted: set[int], limit: int) -> list[int]:
+        """The oldest queued ids the process has space to admit."""
+        row = CheckRunRow
+        rows = await self._session.scalars(
+            select(row.id)
+            .where(row.owner == owner, row.state == RunState.QUEUED.value, row.id.not_in(admitted))
+            .order_by(row.id)
+            .limit(limit)
+        )
+        return list(rows)
+
     async def adopt(self, check_id: int, owner: str, now: datetime) -> bool:
         """Make `owner` the process that runs a queued or running row and beat it.
 
@@ -112,20 +126,26 @@ class RunStore:
         )
         return (await self._session.execute(statement)).first() is not None
 
-    async def beat(self, check_ids: Sequence[int], owner: str, now: datetime) -> bool:
-        """Beat the active rows `owner` still holds, in one statement."""
+    async def beat(
+        self, check_ids: Sequence[int], owner: str, now: datetime, *, queued: bool = False
+    ) -> bool:
+        """Beat the active rows `owner` still holds, optionally including the durable queue."""
         ids = bindparam("check_ids", list(check_ids), type_=ARRAY(BigInteger))
-        statement = (
+        matching = CheckRunRow.id == any_(ids)
+        if queued:
+            matching = or_(matching, CheckRunRow.state == RunState.QUEUED.value)
+        beaten = (
             update(CheckRunRow)
             .where(
-                CheckRunRow.id == any_(ids),
+                matching,
                 CheckRunRow.owner == owner,
                 CheckRunRow.state.in_(_ACTIVE),
             )
             .values(beat_at=now)
             .returning(CheckRunRow.id)
+            .cte("beaten")
         )
-        return (await self._session.execute(statement)).first() is not None
+        return bool(await self._session.scalar(select(select(beaten.c.id).exists())))
 
     async def start(self, check_id: int, now: datetime, values: dict[str, Any]) -> None:
         """A queued row begins to run, with what is known of it now (commit, tree id, log)."""

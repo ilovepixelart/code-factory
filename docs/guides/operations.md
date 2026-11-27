@@ -110,7 +110,7 @@ These are read from the process environment only, not from the env files
 | `CODE_FACTORY_FOLLOWER_SECONDS` | `5` | seconds between follower passes | `follower/module.py` |
 | `CODE_FACTORY_DELIVERY_SECONDS` | `10` | seconds between delivery passes (intake polls every 15) | `delivery/module.py` |
 | `CODE_FACTORY_PUSH_SECONDS` | `5` | seconds between push passes | `push/module.py` |
-| `CODE_FACTORY_CHECKS_CONCURRENCY` | `4` | checks runs that may go at once; anything but a whole number from 1 is refused at start | `checks/module.py` |
+| `CODE_FACTORY_CHECKS_CONCURRENCY` | `4` | shared per-process capacity for ticket checks, default-branch checks and scheduled release verification. Queued checks take priority when a slot frees up. Must be a positive integer | `checks/module.py` |
 | `CODE_FACTORY_HEAVY_WAIT` | `1800` | seconds a checks run waits for the gate's heavy-step lock (`gate-heavy.lock`) | `checks/service/command.py` |
 
 The database pool (`CODE_FACTORY_DB_POOL_*`) and the timeouts are ordinary settings, listed in the

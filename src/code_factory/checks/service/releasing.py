@@ -27,7 +27,11 @@ class ReleasingMixin(MainMixin):
         if repository in self._verifying:
             return None
         config = await self._config(repository)
+        if config.verify in (None, "") or config.watch_days == 0:
+            return None
         newest = await self.newest_release(repository)
+        if newest is None:
+            return None
         async with self._db() as store:
             last = await store.records.verify_runs(repository, 1)
         due = verify_due(
@@ -65,7 +69,8 @@ class ReleasingMixin(MainMixin):
             raise ConflictError(msg)
         self._verifying.add(repository)
         try:
-            return await self._verify(repository, release, config.verify, config.timeout)
+            async with self._slots:
+                return await self._verify(repository, release, config.verify, config.timeout)
         finally:
             self._verifying.discard(repository)
 

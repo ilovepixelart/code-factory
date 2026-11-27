@@ -60,6 +60,10 @@ class FakeChecks:
             ticket_ids = list(heads)
         return {i: self.records[i] for i in ticket_ids if i in self.records}
 
+    async def latest_attempt(self, ticket: str) -> CheckRecord | None:
+        records = self.records.get(ticket, [])
+        return records[-1] if records else None
+
     async def running(self, ticket_ids: Sequence[str]) -> set[str]:
         return set(ticket_ids) if self.is_running else set()
 

@@ -134,7 +134,7 @@ class QueryMixin(ConcludeMixin):
         if row is None:
             msg = "checks are already running for this ticket"
             raise ConflictError(msg)
-        self._enqueue(row.id)
+        self._wake.set()
         return row.id
 
     async def queue_head(
@@ -166,17 +166,6 @@ class QueryMixin(ConcludeMixin):
             and code not in NO_VERDICT_CODES
             for record in await self._newest_records(ticket)
         )
-
-    def _enqueue(self, check_id: int) -> None:
-        """Wake the supervisor with the id; with no supervisor `run_now` executes it."""
-        if self._group is None or check_id in self._known:
-            return
-        try:
-            self._queue.put_nowait(check_id)
-        except Exception:  # noqa: BLE001  # a full queue leaves the row queued: the keeper picks it up
-            logger.warning("the checks queue is full; run %s waits for the keeper", check_id)
-            return
-        self._known.add(check_id)
 
     async def _newest_records(self, ticket_id: str, limit: int = RECORDS_READ) -> list[Any]:
         page = await self._deps.activity.list_activity(
@@ -211,6 +200,11 @@ class QueryMixin(ConcludeMixin):
         """At most one verdict-bearing record for each card's requested head."""
         found = await self._deps.activity.latest_checks(heads, NO_VERDICT_CODES)
         return {t: [_record(t, item.at, item.data)] for t, item in found.items()}
+
+    async def latest_attempt(self, ticket: str) -> CheckRecord | None:
+        """The last check attempt, including an attempt that produced no verdict."""
+        items = await self._newest_records(ticket, 1)
+        return _record(ticket, items[0].at, items[0].data) if items else None
 
     async def records_of(self, ids: Sequence[str]) -> dict[str, list[CheckRecord]]:
         """Each ticket's `checks` records, oldest first, in one read; none: the ticket is absent."""

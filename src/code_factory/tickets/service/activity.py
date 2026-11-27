@@ -44,6 +44,17 @@ def _cursor(text: str | None) -> int | None:
     return int(text) if text is not None and text.isdigit() else None
 
 
+def _entry(row: TicketActivityRow) -> ActivityEntry:
+    return ActivityEntry(
+        at=row.at,
+        kind=row.kind,
+        by=row.by,
+        sentence=describe(row.kind, row.data),
+        data=row.data,
+        id=row.id,
+    )
+
+
 class ActivityService:
     """Append to and read a ticket's history."""
 
@@ -112,17 +123,19 @@ class ActivityService:
             if await tickets.find(number) is None:
                 raise not_found(number)
             rows = await tickets.activity_of(number, None, (_ALL, None, False))
-        return [
-            ActivityEntry(
-                at=row.at,
-                kind=row.kind,
-                by=row.by,
-                sentence=describe(row.kind, row.data),
-                data=row.data,
-                id=row.id,
-            )
-            for row in rows
-        ]
+        return [_entry(row) for row in rows]
+
+    async def feed_entries(self, ticket: str, limit: int) -> list[ActivityEntry]:
+        """Up to `limit` visible entries, with their run finishes for folding."""
+        async with self._uow() as session:
+            rows = await TicketRepository(session).feed_of(ticket_number(ticket), limit)
+        return [_entry(row) for row in rows]
+
+    async def evidence_entries(self, ticket: str) -> list[ActivityEntry]:
+        """Stage and evidence records for a ticket that has already been read."""
+        async with self._uow() as session:
+            rows = await TicketRepository(session).evidence_of(ticket_number(ticket))
+        return [_entry(row) for row in rows]
 
     async def records_of(self, tickets: list[str], kind: str) -> dict[str, list[Activity]]:
         """Each ticket's records of `kind`, oldest first, in one read.
