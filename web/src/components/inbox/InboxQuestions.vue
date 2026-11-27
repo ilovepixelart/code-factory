@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import ContentCard from '../ContentCard.vue'
 import SectionCard from '../SectionCard.vue'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { InboxItem } from '../../lib/metrics'
-import { itemHref, questionKey, rowId, useInbox, useSectionPage } from './inbox'
+import { itemHref, questionKey, rowId, ticketApi, useInbox, useSectionPage } from './inbox'
 import InboxAge from './InboxAge.vue'
 import InboxAsk from './InboxAsk.vue'
 import InboxNav from './InboxNav.vue'
@@ -20,9 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ref } from 'vue'
 import { answerBody, recommendedOf } from '../../lib/questions'
-import { ticketApi } from './inbox'
 
 // Questions an agent waits on, one card per ticket holding the questions of it on this page,
 // each answered in place; the card is as old as its longest wait. Every question that recommends
@@ -40,10 +38,15 @@ const confirming = ref(false)
 
 async function acceptAll(): Promise<void> {
   confirming.value = false
-  for (const { item, choice } of batch.value) {
-    const body = answerBody(item.question, { choices: [choice] })
-    await run(questionKey(item), 'POST', `${ticketApi(item)}/answers`, body)
-  }
+  // One answer after the other: each reaches its agent before the next is sent.
+  await batch.value.reduce(
+    (sent, { item, choice }) =>
+      sent.then(() => {
+        const body = answerBody(item.question, { choices: [choice] })
+        return run(questionKey(item), 'POST', `${ticketApi(item)}/answers`, body)
+      }),
+    Promise.resolve<unknown>(undefined),
+  )
 }
 const { paged, offset } = useSectionPage('questions', () => items)
 const { rows } = paged
