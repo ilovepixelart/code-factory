@@ -34,8 +34,9 @@ Only `tickets.prefix` (`CF`) is defaulted here.
 - The configuration is read from a repository's main checkout only. A branch that edits
   `config.toml` takes effect when it merges: `config show` reads the main checkout of the
   repository holding PATH, while `config check` validates the tree it is run in.
-- `load` costs one `stat` per call and caches the parse by modification time, size and inode, for
-  64 roots. The returned object is shared: do not change it.
+- `load` reads up to 256 KiB once per call and caches the parse by exact contents for 64 roots.
+  Same-size rewrites take effect even if the file timestamp stays the same. The returned object is
+  shared.
 - A checks container mount is held away from the secret folders under `~/` read as a synthetic
   `/home` and as the real home folder, so an absolute spelling of either is refused too. Mounts
   compare by the folder they reach: `//` is folded and links are followed only below the real

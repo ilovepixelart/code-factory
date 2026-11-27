@@ -195,13 +195,15 @@ def stalls_first_call(monkeypatch: pytest.MonkeyPatch, name: str) -> threading.E
     return release
 
 
-@pytest.mark.parametrize("helper", ["_stat", "_read"])
+@pytest.mark.parametrize("warm_cache", [False, True])
 async def test_a_file_call_that_times_out_refuses_the_config_and_is_not_remembered(
-    uow: UnitOfWork, tmp_path: Path, home: Path, monkeypatch: pytest.MonkeyPatch, helper: str
+    uow: UnitOfWork, tmp_path: Path, home: Path, monkeypatch: pytest.MonkeyPatch, warm_cache: bool
 ) -> None:
     service = SettingsService(uow, files=Files(timeout=1.0), home=home)
     repo = write_mounts(tmp_path, ["/srv/a"])
-    release = stalls_first_call(monkeypatch, helper)
+    if warm_cache:
+        assert (await service.load(repo)).checks is not None
+    release = stalls_first_call(monkeypatch, "_read")
     try:
         with pytest.raises(ConfigUnjudgedError) as raised:
             await service.load(repo)
