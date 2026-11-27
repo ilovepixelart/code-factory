@@ -24,15 +24,13 @@ from code_factory.settings.models import ConfigUnjudgedError, reviews
 from code_factory.settings.service import SettingsService
 from code_factory.stages.models import StageAssessment
 from code_factory.stages.service import StageService
-from code_factory.talk.models import QuestionFilter
 from code_factory.talk.service import TalkService
 from code_factory.team.service import TeamService
 from code_factory.ticket_writes.service import TicketWriteService
-from code_factory.tickets.models import NewTicket, Ticket
+from code_factory.tickets.models import NewTicket, Ticket, TicketFilter
 from code_factory.tickets.service import DocumentService, TicketService
 
 DEFAULT_SLOTS = 1
-PAGE = 100
 
 
 def _budget(text: str) -> float | None:
@@ -65,23 +63,14 @@ class _Neighbour:
 class BoardAdapter(_Neighbour):
     """Cards, runs, caps and the team's rule."""
 
-    async def _unanswered(self) -> dict[str, int]:
-        talk = self._services.get(TalkService)
-        counts: dict[str, int] = {}
-        cursor: str | None = None
-        while True:
-            page = await talk.list(QuestionFilter(status="open"), limit=PAGE, cursor=cursor)
-            for question in page.items:
-                counts[question.ticket_id] = counts.get(question.ticket_id, 0) + 1
-            cursor = page.next_cursor
-            if cursor is None:
-                return counts
-
-    async def _spent(self, ticket: Ticket) -> float:
-        if _budget(ticket.budget) is None:
-            return 0.0
-        runs = await self._services.get(RunService).runs_on_ticket(ticket.id)
-        return sum(run.cost or 0.0 for run in runs)
+    async def _assess(self, live: list[Ticket], ids: set[str]) -> dict[str, StageAssessment]:
+        """Reuse live snapshots and read only blockers missing from them."""
+        blockers = list(
+            dict.fromkeys(i for ticket in live for i in ticket.blocked_by if i not in ids)
+        )
+        tickets = self._services.get(TicketService)
+        others = await tickets.list(TicketFilter(archived=None, ids=blockers)) if blockers else []
+        return await self._services.get(StageService).assess_tickets([*live, *others])
 
     async def _review_on(self, repository: str, known: dict[str, bool]) -> bool:
         if repository not in known:
@@ -129,46 +118,50 @@ class BoardAdapter(_Neighbour):
             return False, False
         ended = [v for v in views if v.state != "running"]
         last_stage = ended[0].stage if ended else None
-        review = due_for_review(
+        review = facts.stage == "review" and due_for_review(
             facts.stage,
             review_on=await self._review_on(ticket.repository, known),
             last_stage=last_stage,
         )
         returned_at = None
-        if facts.declared == "build":
+        if facts.stage == "build" and facts.declared == "build":
             verdicts = await self._services.get(StageService).review_verdicts(ticket.id)
             latest = next((v for v in reversed(verdicts) if v.outcome != "skipped"), None)
             returned_at = latest.at if latest is not None and latest.outcome == "returned" else None
         runs = [(v.started_at, bool(v.commits)) for v in ended]
         return review, due_for_fix(facts.stage, returned_at, runs)
 
-    async def _build_extras(
+    async def _prepare_card(
         self,
+        card: Card,
         ticket: Ticket,
         views: list[RunView],
         readers: dict[str, tuple[bool, bool]],
-        *,
-        stage: str,
-        fix_due: bool,
-    ) -> tuple[list[str], str]:
-        """The document gaps of a ticket in build, and the reader role it is due, if any."""
-        if stage != "build":
-            return [], ""
+    ) -> Card:
+        """Check repair or first-Build prerequisites only for a card eligible to queue."""
+        if not ready(card):
+            return card
+        if card.repair is not None:
+            hold = await self._services.get(RunService).repair_refusal(ticket.id, card.repair)
+            return card.model_copy(update={"repair_hold": hold})
+        if card.stage != "build" or card.fix_due:
+            return card
         gaps = await self._services.get(DocumentService).build_gaps(ticket.id)
-        if fix_due or gaps:
-            return gaps, ""
-        return gaps, await self._reader_due(ticket, views, readers)
+        reader = "" if gaps else await self._reader_due(ticket, views, readers)
+        return card.model_copy(update={"build_gaps": tuple(gaps), "run_stage": reader})
 
     async def cards(self) -> list[Card]:
         """Every live ticket as a queue card."""
         tickets = await self._services.get(TicketService).list()
-        relevant = dict.fromkeys(i for t in tickets for i in (t.id, *t.blocked_by))
-        assessed = await self._services.get(StageService).assess_many(list(relevant))
+        if not tickets:
+            return []
+        ids = [ticket.id for ticket in tickets]
+        assessed = await self._assess(tickets, set(ids))
         landed = {i for i, facts in assessed.items() if facts.derived in {"merged", "released"}}
-        unanswered = await self._unanswered()
+        unanswered = await self._services.get(TalkService).open_counts(ids)
         runs = self._services.get(RunService)
         running = {a.run.ticket_key for a in await runs.active_runs()}
-        history = await runs.card_runs([t.id for t in tickets])
+        history = await runs.card_runs(ids)
         repairs = await repairs_for(self._services, assessed, running)
         known: dict[str, bool] = {}
         roles: dict[str, list[str]] = {}
@@ -185,9 +178,7 @@ class BoardAdapter(_Neighbour):
             else:
                 stage, review_due, fix_due = "build", False, True
             due_roles = await self._roles_due(ticket, views, roles) if review_due else []
-            gaps, reader = await self._build_extras(
-                ticket, views, readers, stage=stage, fix_due=fix_due
-            )
+            budget = _budget(ticket.budget)
             card = Card(
                 id=ticket.id,
                 repository=ticket.repository,
@@ -202,8 +193,8 @@ class BoardAdapter(_Neighbour):
                 open_blockers=tuple(
                     b for b in ticket.blocked_by if b in assessed and b not in landed
                 ),
-                budget=_budget(ticket.budget),
-                spent=await self._spent(ticket),
+                budget=budget,
+                spent=sum(run.cost or 0.0 for run in views) if budget is not None else 0.0,
                 kind=str(ticket.type),
                 labels=",".join(ticket.labels),
                 failures=failures,
@@ -212,13 +203,9 @@ class BoardAdapter(_Neighbour):
                 review_due=review_due,
                 fix_due=fix_due,
                 repair=repair,
-                build_gaps=tuple(gaps),
-                run_stage=due_roles[0] if due_roles else reader,
+                run_stage=due_roles[0] if due_roles else "",
             )
-            if repair is not None and ready(card):
-                hold = await runs.repair_refusal(ticket.id, repair)
-                card = card.model_copy(update={"repair_hold": hold})
-            cards.append(card)
+            cards.append(await self._prepare_card(card, ticket, views, readers))
         return cards
 
     async def active(self) -> list[ActiveRunFact]:

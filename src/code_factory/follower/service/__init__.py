@@ -93,6 +93,9 @@ class FollowerService:
     async def _start_queued(self) -> str:
         board = self._ports.board
         cards = await board.cards()
+        if not cards:
+            await self._queue.write({}, self._clock())
+            return "0 started of 0 planned"
         plan = plan_queue(
             cards,
             await board.active(),
