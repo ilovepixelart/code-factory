@@ -242,6 +242,21 @@ class FakeFlow:
     def __init__(self) -> None:
         self.calls: list[tuple[str, ...]] = []
         self.error: Exception | None = None
+        self.prepared: list[str] = []
+        self.prepare_error: Exception | None = None
+        self.verified: list[tuple[str, str]] = []
+        self.verify_error: Exception | None = None
+
+    async def prepare_build(self, ticket_id: str) -> bool:
+        self.prepared.append(ticket_id)
+        if self.prepare_error is not None:
+            raise self.prepare_error
+        return False
+
+    async def verify_build(self, ticket_id: str, head: str) -> None:
+        self.verified.append((ticket_id, head))
+        if self.verify_error is not None:
+            raise self.verify_error
 
     async def build_ended(self, ticket_id: str, head: str) -> None:
         self.calls.append(("build", ticket_id, head))

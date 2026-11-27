@@ -159,11 +159,18 @@ class Workspaces:
 
     @asynccontextmanager
     async def snapshot(
-        self, repository: str, commit: str, ticket: str, setup: Setup | None
+        self,
+        repository: str,
+        commit: str,
+        ticket: str,
+        setup: Setup | None,
+        *,
+        use_cache: bool = True,
     ) -> AsyncGenerator[Workspace]:
         """A snapshot of `commit` set up as a worktree is, removed when the block ends.
 
         The block sets `passed` when the checks passed: the build folder then stays the ticket's.
+        With `use_cache=False`, the snapshot never adopts or retains those build folders.
         Raises `SetupFailedError` (after removing the tree) when the setup does not pass.
         """
         key = cache_key(ticket)
@@ -173,6 +180,10 @@ class Workspaces:
         live = await self._in_use(tree)
         try:
             space.git_dir = await anyio.to_thread.run_sync(_admin_of, tree, limiter=_files)
+            if not use_cache:
+                await self._setup(repository, tree, self._setup_log(tree), setup, None)
+                yield space
+                return
             await self._cache(cache.adopt, self._state, key, "linux-target", tree, place)
             store = tree / cache.PNPM_STORE
             await self._cache(cache.adopt, self._state, key, "pnpm-store", tree, store)
@@ -185,7 +196,10 @@ class Workspaces:
             yield space
         finally:
             self._live.discard(live)
-            await _shielded(self._end_snapshot(repository, key, space, place))
+            if use_cache:
+                await _shielded(self._end_snapshot(repository, key, space, place))
+            else:
+                await _shielded(self._git.remove_snapshot(repository, tree))
 
     async def _end_snapshot(self, repository: str, key: str, space: Workspace, place: Path) -> None:
         tree = space.path

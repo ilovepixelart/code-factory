@@ -1,5 +1,6 @@
 """Owner-run red checks and verification of their locked test files."""
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -119,3 +120,19 @@ def test_a_malformed_manifest_is_rejected_before_running_any_case(tmp_path: Path
     assert "checks[2]" in result.stderr
     assert not (repo / "ran").exists()
     assert not receipt.exists()
+
+
+def test_prove_reports_locked_files_for_the_runner_to_publish(tmp_path: Path) -> None:
+    repo = make_repo(tmp_path)
+    head = commit(
+        repo,
+        "Define the spec check",
+        **{TEST: f"def test_contract():\n    assert False, {EXPECTED!r}\n"},
+    )
+
+    result = spec_lock(repo, "prove", "--check", NODE, EXPECTED)
+
+    assert result.returncode == 0, result.stderr
+    receipt = json.loads(result.stdout)
+    assert receipt["commit"] == head
+    assert list(receipt["files"]) == [TEST]
