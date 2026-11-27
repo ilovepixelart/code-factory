@@ -254,6 +254,9 @@ types, format, unused code and unit tests, and the web build last. A macOS verif
 roughly 8,200 Python and 1,400 web tests took 5 minutes 35 seconds. The gate reports timings for
 database setup, test execution and each web step.
 
+GitHub pull requests also require 90% coverage on changed executable lines, using the Python
+and web reports from those same test runs. Each new production file must meet that floor.
+
 ```bash
 sh scripts/gate.sh
 uv run pytest --no-cov -n 4 tests/tickets          # a subset

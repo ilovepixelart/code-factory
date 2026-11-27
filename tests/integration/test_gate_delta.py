@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +15,22 @@ def delta(repo: Path, action: str = "review") -> subprocess.CompletedProcess[str
         capture_output=True,
         text=True,
         stdin=subprocess.DEVNULL,
+        check=False,
+    )
+
+
+def coverage(repo: Path, python: Path, vue: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(  # noqa: S603  # execute the checked-in reporter against the fixture
+        [
+            sys.executable,
+            str(SCRIPT.with_name("gate_coverage.py")),
+            git(repo, "rev-parse", "HEAD"),
+            str(python),
+            str(vue),
+        ],
+        cwd=repo,
+        capture_output=True,
+        text=True,
         check=False,
     )
 
@@ -144,18 +161,32 @@ def test_delta_coverage_rejects_a_new_file_missing_from_both_reports(tmp_path: P
     python.write_text('{"files": {}}')
     vue = tmp_path / "lcov.info"
     vue.write_text("")
-    result = subprocess.run(  # noqa: S603  # execute the checked-in reporter
-        [
-            sys.executable,
-            str(SCRIPT.with_name("gate_coverage.py")),
-            git(repo, "rev-parse", "HEAD"),
-            str(python),
-            str(vue),
-        ],
-        cwd=repo,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    result = coverage(repo, python, vue)
     assert result.returncode == 1
     assert "'src/code_factory/new.py' is missing from the report" in result.stdout
+
+
+def test_a_new_file_must_meet_the_coverage_floor_even_when_the_diff_passes(tmp_path: Path) -> None:
+    repo = make_repo(tmp_path)
+    backend = "src/code_factory/covered.py"
+    web = "src/lib/new.ts"
+    write(repo, backend, "".join(f"value_{number} = {number}\n" for number in range(10)))
+    write(repo, f"web/{web}", "export const value = 42\n")
+    python = tmp_path / "python.json"
+    python.write_text(
+        json.dumps(
+            {"files": {backend: {"executed_lines": list(range(1, 11)), "missing_lines": []}}}
+        )
+    )
+    vue = tmp_path / "lcov.info"
+    vue.write_text(f"SF:{web}\nDA:1,0\nend_of_record\n")
+
+    result = coverage(repo, python, vue)
+    assert result.returncode == 1
+    assert "new file 'web/src/lib/new.ts' is below 90%" in result.stdout
+    assert "10/11 executable lines (90.9%)" in result.stdout
+
+    vue.write_text(f"SF:{web}\nDA:1,1\nend_of_record\n")
+    result = coverage(repo, python, vue)
+    assert result.returncode == 0
+    assert "11/11 executable lines (100.0%)" in result.stdout

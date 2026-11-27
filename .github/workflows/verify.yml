@@ -253,6 +253,14 @@ jobs:
           uv run --no-sync coverage combine .coverage.unit .coverage.integration-1 .coverage.integration-2 .coverage.e2e
           uv run --no-sync coverage report --skip-covered
           uv run --no-sync coverage xml -o coverage/python.xml
+      - name: Require coverage on changed lines
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          base=$(git --no-replace-objects merge-base "${PR_BASE_SHA:?}" HEAD)
+          uv run --no-sync coverage json --fail-under=0 -o coverage/python.json
+          uv run --no-sync python scripts/gate_coverage.py "$base" coverage/python.json lcov.info
       # vitest writes lcov paths relative to web/, and the scanner resolves them from the root.
       - name: Write the web coverage for SonarCloud
         run: sed 's#^SF:#SF:web/#' lcov.info > coverage/web.info
