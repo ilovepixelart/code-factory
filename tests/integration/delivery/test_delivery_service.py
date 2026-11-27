@@ -142,6 +142,19 @@ async def test_manual_landing_uses_the_recorded_owner_merge(
     assert [(e.url, e.head) for e in events if e.kind == "merged_pull_request"] == [(URL, TIP)]
 
 
+async def test_manual_landing_opens_a_pull_when_the_branch_has_none(
+    uow: UnitOfWork, ports: DeliveryPorts, gh: ScriptedGh
+) -> None:
+    gh.answer(("pr", "create"), URL + "\n")
+
+    pull = await DeliveryForge(uow, ports, gh).open_pull(
+        "sample", branch="ticket/cf-1", head=TIP, base="main", title="Fix"
+    )
+
+    assert (pull.number, pull.url) == (9, URL)
+    assert gh.calls[-1][:6] == ["pr", "create", "--head", "ticket/cf-1", "--base", "main"]
+
+
 async def test_landing_rejects_an_open_pull_to_another_base_before_adoption(
     uow: UnitOfWork, ports: DeliveryPorts, gh: ScriptedGh
 ) -> None:
