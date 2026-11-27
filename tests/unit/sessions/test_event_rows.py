@@ -103,7 +103,7 @@ def test_a_line_that_is_no_event_is_a_reject_that_names_why(line: bytes, reason:
 def test_a_reject_keeps_only_the_first_200_bytes_lossily_and_no_nul() -> None:
     found = row(b"\x00" + b"x" * 300 + b"\xff")
     assert isinstance(found, Reject)
-    assert found.head == "�" + "x" * 199
+    assert found.head == "\ufffd" + "x" * 199
 
 
 def test_a_line_over_the_limit_is_rejected_with_its_head() -> None:
