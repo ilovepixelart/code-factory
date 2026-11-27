@@ -5,6 +5,7 @@ import logging
 import os
 import socket
 import uuid
+from collections import deque
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
@@ -118,6 +119,9 @@ class CheckBase:
         self._slots = asyncio.Semaphore(self._admission_limit)
         self._wake = asyncio.Event()
         self._admitted: set[int] = set()
+        self._release_candidates: deque[str] = deque()
+        self._release_tasks: dict[str, asyncio.Task[None]] = {}
+        self._draining = False
         self._group: asyncio.TaskGroup | None = None
         self._running: dict[int, asyncio.Task[object]] = {}
         self._permits: dict[int, Permit] = {}

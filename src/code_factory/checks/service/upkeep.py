@@ -2,7 +2,6 @@
 
 import asyncio
 import logging
-from collections.abc import Coroutine
 from datetime import timedelta
 from pathlib import Path
 from typing import Any
@@ -11,7 +10,7 @@ import anyio
 import anyio.to_thread
 
 from code_factory.checks.adapters import cache, main_prefix
-from code_factory.checks.models import CacheFolder, CheckRun, PruneReport, RunState
+from code_factory.checks.models import CacheFolder, CheckRun, PruneReport, ReleaseRef, RunState
 from code_factory.checks.service.base import ACTOR
 from code_factory.checks.service.pipeline import PipelineMixin
 from code_factory.platform.errors import BadRequestError, ConflictError, NotFoundError
@@ -49,14 +48,24 @@ class UpkeepMixin(PipelineMixin):
 
     async def tick(self) -> None:
         """One pass of the keeper: reconcile, start due runs, sweep offers and declines."""
+        if self._draining:
+            return
         await self.reconcile()
         async with self._db() as store:
             await store.remote.sweep(self._now())
+        repositories = [record.name for record in await self._deps.repositories.list()]
+        for repository in repositories:
+            await self._start_due_main(repository)
+        if self._group is None:
+            for repository in repositories:
+                release = await self._due_release(repository)
+                if release is not None:
+                    await self._verify_release(repository, release)
+        elif not self._release_candidates:
+            self._release_candidates.extend(repositories)
         self._wake.set()
-        for record in await self._deps.repositories.list():
-            await self._start_due(record.name)
 
-    async def _start_due(self, repository: str) -> None:
+    async def _start_due_main(self, repository: str) -> None:
         try:
             if await self.due_main(repository) is not None:
                 await self.start_main(repository)
@@ -64,29 +73,30 @@ class UpkeepMixin(PipelineMixin):
             logger.info("main's run of %s was not started", repository)
         except Exception:  # a repository that cannot be judged never stops the others
             logger.warning("main's run of %s could not be judged", repository, exc_info=True)
-        try:
-            release = await self.due_verify(repository)
-            if release is not None:
-                await self._spawn(self.verify(repository, release))
-        except Exception:  # the same, for the release verification
-            logger.warning("the verification of %s could not be judged", repository, exc_info=True)
 
-    async def _spawn(self, work: Coroutine[Any, Any, object]) -> None:
-        """Run `work` in the supervisor's group, or here when there is none."""
-        if self._group is None:
-            await work
-        else:
-            self._group.create_task(self._quietly(work))
-
-    @staticmethod
-    async def _quietly(work: Coroutine[Any, Any, object]) -> None:
+    async def _due_release(self, repository: str) -> ReleaseRef | None:
         try:
-            await work
+            return await self.due_verify(repository)
         except Exception:
-            logger.exception("a check task failed")
+            logger.warning("the verification of %s could not be judged", repository, exc_info=True)
+            return None
+
+    async def _verify_release(self, repository: str, release: ReleaseRef) -> None:
+        try:
+            await self.verify(repository, release)
+        except Exception:
+            logger.exception("the verification of %s failed", repository)
+        finally:
+            self._release_tasks.pop(repository, None)
+            self._wake.set()
+
+    def _free_slots(self) -> int:
+        if self._draining:
+            return 0
+        return self._admission_limit - len(self._admitted) - len(self._release_tasks)
 
     async def run_supervisor(self) -> None:
-        """Admit an owner's oldest queued checks up to the process limit."""
+        """Admit queued checks first, then due release verifications within the same limit."""
         async with asyncio.TaskGroup() as group:
             self._group = group
             group.create_task(self._beat(), name="check-heartbeats")
@@ -95,11 +105,14 @@ class UpkeepMixin(PipelineMixin):
                 while True:
                     await self._wake.wait()
                     self._wake.clear()
-                    slots = self._admission_limit - len(self._admitted)
+                    slots = self._free_slots()
                     if slots > 0:
                         await self._admit(group, slots)
             finally:
                 self._group = None
+                self._admitted.clear()
+                self._release_tasks.clear()
+                self._release_candidates.clear()
 
     async def _admit(self, group: asyncio.TaskGroup, slots: int) -> None:
         try:
@@ -110,9 +123,26 @@ class UpkeepMixin(PipelineMixin):
         except Exception:
             logger.exception("queued checks could not be read")
             return  # the keeper wakes the supervisor after its next pass
-        for check_id in ready:
+        for check_id in ready[: self._free_slots()]:
             self._admitted.add(check_id)
             group.create_task(self._supervised(check_id), name=f"check-{check_id}")
+        await self._admit_releases(group)
+
+    async def _admit_releases(self, group: asyncio.TaskGroup) -> None:
+        while self._release_candidates and self._free_slots() > 0 and not self._wake.is_set():
+            repository = self._release_candidates.popleft()
+            if repository in self._release_tasks:
+                continue
+            release = await self._due_release(repository)
+            if release is None or self._draining:
+                continue
+            # A check may have been queued while the release's due state was being read.
+            if self._wake.is_set():
+                self._release_candidates.appendleft(repository)
+                break
+            self._release_tasks[repository] = group.create_task(
+                self._verify_release(repository, release), name=f"verify-release-{repository}"
+            )
 
     async def _supervised(self, check_id: int) -> None:
         try:
@@ -144,7 +174,8 @@ class UpkeepMixin(PipelineMixin):
 
     async def drain(self) -> None:
         """Wait for the running checks for `shutdown_s`, then cancel them."""
-        tasks = list(self._running.values())
+        self._draining = True
+        tasks = [*self._running.values(), *self._release_tasks.values()]
         if not tasks:
             return
         await asyncio.wait(tasks, timeout=self._opts.shutdown_s)
