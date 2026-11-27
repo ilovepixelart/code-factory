@@ -1,7 +1,6 @@
 // A ticket's page content as `GET /api/tickets/{repository}/{id}` answers it, and the fields the panel and page edit.
 
 import type { AtWork } from '../generated/AtWork'
-import { request } from './actions'
 import type { Card, Stage } from './board'
 
 /** The tab label of each document a ticket page shows. */
@@ -11,7 +10,7 @@ export const DOCUMENT_LABELS: Record<string, string> = {
   spec: 'Spec',
   uat: 'UAT',
 }
-import { readJson } from './actions'
+import { readJson, request } from './actions'
 import type { Asked } from './questions'
 
 interface Evidence {

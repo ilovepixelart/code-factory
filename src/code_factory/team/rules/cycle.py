@@ -6,8 +6,8 @@ from collections.abc import Iterable, Sequence
 from code_factory.team.models import Cycle
 
 CYCLE_SECONDS = 604_800.0
-_TICKET = re.compile(r"[A-Z]+-[0-9]+")
-_RELEASE_TAG = re.compile(r"v[0-9]")
+_TICKET = re.compile(r"[A-Z]+-\d+", re.ASCII)
+_RELEASE_TAG = re.compile(r"v\d", re.ASCII)
 _WORKTREE_NAME = re.compile(r"[A-Za-z0-9_-]+")
 
 

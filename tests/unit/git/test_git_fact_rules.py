@@ -13,6 +13,7 @@ from code_factory.git.rules.facts import (
 )
 from code_factory.git.rules.merges import (
     clash,
+    merged_from,
     pair_key,
     parse_merges,
     read_merge_tree,
@@ -155,3 +156,17 @@ def test_clash_names_the_first_glob_both_sides_touch() -> None:
         "match web/src/generated/**"
     )
     assert clash(["Cargo.lock"], ["src/a.rs"], GLOBS) is None
+
+
+def test_a_merge_subject_names_its_pull_request_and_branch() -> None:
+    assert merged_from("Merge pull request #7 from owner/ticket/cf-12") == (7, "ticket/cf-12")
+    assert merged_from("Merge pull request #x from owner/feat") == (None, "feat")
+    assert merged_from("Merge pull request #8 from solo") == (8, "solo")
+    assert merged_from("Merge pull request #1 from a from b/c") == (1, "c")
+
+
+def test_other_subjects_and_multi_line_ones_name_no_pull_request() -> None:
+    assert merged_from("Merge pull request #7") is None
+    assert merged_from("Merge pull request #7 fromage") is None
+    assert merged_from("Revert Merge pull request #7 from o/b") is None
+    assert merged_from("Merge pull request #7 from o/b\nmore") is None

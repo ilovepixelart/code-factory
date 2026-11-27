@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { GROUPS, SHORTCUTS } from '../lib/shortcuts'
 import { useOverlay } from '../lib/overlayHistory'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 
 const open = useOverlay()
@@ -15,9 +21,10 @@ defineExpose({ open: () => (open.value = true) })
 
 <template>
   <Dialog v-model:open="open">
-    <DialogContent aria-describedby="">
+    <DialogContent>
       <DialogHeader>
         <DialogTitle>Keyboard shortcuts</DialogTitle>
+        <DialogDescription class="sr-only">Each key and what it does.</DialogDescription>
       </DialogHeader>
       <div class="grid gap-5">
         <section

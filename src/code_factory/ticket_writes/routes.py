@@ -200,7 +200,7 @@ async def unlink(
 )
 async def delete_ticket(repository: str, ticket_id: str, writes: WritesDep) -> Changed:
     """Hidden from every read; the answer's undo brings it back."""
-    return await writes.delete(TicketAddress(repository=repository, id=ticket_id), OWNER)
+    return await writes.delete(TicketAddress(repository=repository, id=ticket_id))
 
 
 class LimitBody(BaseModel):
@@ -218,4 +218,4 @@ class LimitBody(BaseModel):
 )
 async def column_limit(stage: str, body: LimitBody, writes: WritesDep) -> Changed:
     """`limit` from 1, or null to clear it."""
-    return await writes.set_column_limit(stage, body.limit, OWNER)
+    return await writes.set_column_limit(stage, body.limit)

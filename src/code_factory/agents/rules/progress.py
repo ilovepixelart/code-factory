@@ -110,6 +110,32 @@ def _refused(record: dict[str, Any]) -> list[str]:
     ]
 
 
+class _Tally:
+    """The running counts of `tool_counts`."""
+
+    def __init__(self) -> None:
+        self.total = self.reads = self.changes = self.repeated = 0
+        self.last: Call | None = None
+        self.changing: set[str] = set()
+
+    def refuse(self, call_id: str) -> None:
+        """Take back the change of a write the tool refused."""
+        if call_id in self.changing:
+            self.changing.discard(call_id)
+            self.changes -= 1
+
+    def add(self, call: Call) -> None:
+        """Count `call`, a repeat when it is the call before it again."""
+        self.total += 1
+        again = self.last is not None and self.last.signature == call.signature
+        self.repeated = self.repeated + 1 if again else 1
+        self.last = call
+        self.reads += call.read
+        self.changes += call.change
+        if call.change and call.call_id:
+            self.changing.add(call.call_id)
+
+
 def tool_counts(lines: Sequence[str]) -> ToolCounts | None:
     """The tool calls of a log: `None` when no record is a runtime's or a tool record is unreadable.
 
@@ -117,14 +143,10 @@ def tool_counts(lines: Sequence[str]) -> ToolCounts | None:
     same tool with the same arguments as the call before it.
     """
     known = False
-    total = reads = changes = repeated = 0
-    last: Call | None = None
-    changing: set[str] = set()
+    tally = _Tally()
     for record in records(lines):
         for call_id in _refused(record):
-            if call_id in changing:
-                changing.discard(call_id)
-                changes -= 1
+            tally.refuse(call_id)
         if not _known(record):
             continue
         seen = _calls_of(record)
@@ -132,21 +154,15 @@ def tool_counts(lines: Sequence[str]) -> ToolCounts | None:
             return None
         known = True
         for call in seen:
-            total += 1
-            repeated = repeated + 1 if last is not None and last.signature == call.signature else 1
-            last = call
-            reads += call.read
-            changes += call.change
-            if call.change and call.call_id:
-                changing.add(call.call_id)
+            tally.add(call)
     if not known:
         return None
     return ToolCounts(
-        calls=total,
-        reads=reads,
-        changes=changes,
-        repeated=repeated,
-        last_tool=last.name if last else "",
+        calls=tally.total,
+        reads=tally.reads,
+        changes=tally.changes,
+        repeated=tally.repeated,
+        last_tool=tally.last.name if tally.last else "",
     )
 
 

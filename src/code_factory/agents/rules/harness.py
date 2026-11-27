@@ -91,6 +91,14 @@ def _fitted(text: str, limit: int) -> tuple[str, bool]:
     return (cut[0] if cut else ""), False
 
 
+def _left_out_line(left_out: list[str]) -> str:
+    named = ""
+    for name in left_out:
+        if len(named) + len(name) + 2 < LEFT_OUT_ROOM - len("Left out by the bound: \n"):
+            named += name if not named else f", {name}"
+    return f"Left out by the bound: {named}\n" if named else ""
+
+
 def _inline(files: list[InlineFile]) -> str:
     out = ""
     left_out: list[str] = []
@@ -109,11 +117,7 @@ def _inline(files: list[InlineFile]) -> str:
         text, whole = shown
         text, fitted = _fitted(text, limit)
         out += header + text + ("\n" if whole and fitted else CUT)
-    named = ""
-    for name in left_out:
-        if len(named) + len(name) + 2 < LEFT_OUT_ROOM - len("Left out by the bound: \n"):
-            named += name if not named else f", {name}"
-    out += f"Left out by the bound: {named}\n" if named else ""
+    out += _left_out_line(left_out)
     return out + f"Left out, not a path name: {unsafe}\n" if unsafe else out
 
 

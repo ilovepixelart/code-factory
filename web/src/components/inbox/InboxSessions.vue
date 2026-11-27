@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ContentCard from '../ContentCard.vue'
 import SectionCard from '../SectionCard.vue'
-import { short, trim } from '../../lib/format'
+import { short, trim, withoutTrailingSlashes } from '../../lib/format'
 import type { InboxItem } from '../../lib/metrics'
 import { rowId, useInbox, useSectionPage } from './inbox'
 import InboxAge from './InboxAge.vue'
@@ -24,7 +24,7 @@ const { paged, offset } = useSectionPage('sessions', () => items)
 const { rows } = paged
 
 const place = (cwd: string): string => {
-  const name = cwd.replace(/\/+$/, '').split('/').at(-1) ?? ''
+  const name = withoutTrailingSlashes(cwd).split('/').at(-1) ?? ''
   return name === '' ? cwd : name
 }
 </script>

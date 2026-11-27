@@ -48,6 +48,17 @@ def _held(ticket: TicketCore, field: str) -> list[str]:
     return list(ticket.blocked_by)
 
 
+def _link_value(field: str, held: list[str], linked: str, *, add: bool) -> str | None:
+    """The field text after the link is added or removed, `None` when a removal finds none."""
+    if add:
+        wanted = [linked] if field == "parent" else [*held, *([] if linked in held else [linked])]
+    elif linked not in held:
+        return None
+    else:
+        wanted = [] if field == "parent" else [t for t in held if t != linked]
+    return ", ".join(wanted)
+
+
 def link_change(
     own: TicketCore, other: TicketCore | None, kind: str, target: str, *, add: bool
 ) -> LinkChange | str:
@@ -66,10 +77,7 @@ def link_change(
     field = "parent" if kind in {"parent", "child"} else "blocked_by"
     linked = own.id if by_other else target
     held = _held(holder, field)
-    if add:
-        wanted = [linked] if field == "parent" else [*held, *([] if linked in held else [linked])]
-    elif linked not in held:
+    value = _link_value(field, held, linked, add=add)
+    if value is None:
         return f"{target} is not linked to {own.id} that way"
-    else:
-        wanted = [] if field == "parent" else [t for t in held if t != linked]
-    return LinkChange(holder=holder.id, field=field, value=", ".join(wanted))
+    return LinkChange(holder=holder.id, field=field, value=value)

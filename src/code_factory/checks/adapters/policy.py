@@ -44,5 +44,5 @@ class CheckPolicy:
             return None
 
     def places(self) -> Sequence[Path]:
-        """The folders a run may write: tracked repositories, the state folder, `/tmp`."""
+        """The folders a run may write: tracked repositories, the state folder."""
         return (*self._roots, self._state)

@@ -120,7 +120,8 @@ export function groupLanes(
 
 /** Text order by code point, not by locale. */
 function compareText(a: string, b: string): number {
-  return a < b ? -1 : a > b ? 1 : 0
+  if (a < b) return -1
+  return a > b ? 1 : 0
 }
 
 /** CF-2 before CF-10: digit runs compare by value. */

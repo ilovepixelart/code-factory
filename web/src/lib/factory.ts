@@ -175,8 +175,10 @@ export function share(part: number, total: number): string {
 }
 
 /** A number of pull requests, with the word that qualifies them: `1 PR`, `3 merged PRs`. */
-export const prs = (n: number, kind = ''): string =>
-  `${String(n)} ${kind ? `${kind} ` : ''}${n === 1 ? 'PR' : 'PRs'}`
+export const prs = (n: number, kind = ''): string => {
+  const qualifier = kind ? `${kind} ` : ''
+  return `${String(n)} ${qualifier}${n === 1 ? 'PR' : 'PRs'}`
+}
 
 const SIZE_WORDS: Record<Size, string> = {
   S: 'S, under 100 lines',

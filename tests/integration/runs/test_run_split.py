@@ -20,9 +20,7 @@ class Starts:
 
     async def start(
         self, ticket_id: str, *, stage: str | None = None, options: StartOptions | None = None,
-        by: str,
     ) -> None:  # fmt: skip
-        del by
         self.seen.append((ticket_id, stage, options))
 
 

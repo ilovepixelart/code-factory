@@ -104,7 +104,7 @@ async def test_the_card_shows_where_delivery_stands(
 
 
 async def test_the_board_carries_the_column_limits_the_owner_set(services: Services) -> None:
-    await services.get(TicketWriteService).set_column_limit("build", 3, by=OWNER)
+    await services.get(TicketWriteService).set_column_limit("build", 3)
 
     board = json.loads((await services.get(BoardService).board()).body)
 

@@ -7,7 +7,7 @@ from code_factory.sessions.models import Event
 
 KEEPALIVE = ": keepalive\n\n"
 _INT64 = 2**63
-_INTEGER = re.compile(r"[+-]?[0-9]+")
+_INTEGER = re.compile(r"[+-]?\d+", re.ASCII)
 
 
 def event_json(event: Event) -> dict[str, object]:
@@ -16,7 +16,7 @@ def event_json(event: Event) -> dict[str, object]:
         "seq": event.seq,
         "session_id": event.session_id,
         "agent_id": event.agent_id,
-        "event": event.event,
+        "event": event.name,
         "captured_at": event.captured_at,
         "payload": event.payload,
     }

@@ -7,7 +7,13 @@ import { useOverlay } from '../lib/overlayHistory'
 import { ticketHref } from '../lib/ticket'
 import TicketForm from './TicketForm.vue'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 
 // A ticket's panel: the ticket form in a right-hand sheet. It focuses its title as it opens, never
 // a field (docs/ui.md).
@@ -39,7 +45,6 @@ defineExpose({ open: show })
   <Sheet v-model:open="open">
     <SheetContent
       class="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-none data-[side=right]:xl:w-1/2"
-      aria-describedby=""
       @open-auto-focus="focusTitle($event)"
     >
       <template v-if="shown">
@@ -49,6 +54,9 @@ defineExpose({ open: show })
             ><span class="text-muted-foreground">/</span
             ><span class="font-mono text-sm">{{ shown.id }}</span>
           </SheetTitle>
+          <SheetDescription class="sr-only"
+            >The ticket's fields, work and history.</SheetDescription
+          >
           <Button
             as-child
             variant="ghost"

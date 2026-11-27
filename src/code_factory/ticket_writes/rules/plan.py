@@ -59,6 +59,19 @@ def _list(text: str) -> list[str]:
     return [part for part in text.split(", ") if part]
 
 
+def _number_refusal(values: dict[str, str]) -> str | None:
+    """Normalise budget and parallel in place; the refusal for the first one that is bad."""
+    for name, rule, refusal in (
+        ("budget", budget_text, BUDGET_REFUSED),
+        ("parallel", parallel_text, PARALLEL_REFUSED),
+    ):
+        if name in values:
+            values[name] = rule(values[name])
+            if values[name] == refusal:
+                return refusal
+    return None
+
+
 def _values(fields: Mapping[str, str], refuse_branch: BranchRefusal, held_branch: str) -> Any:  # noqa: ANN401  # the values or a refusal sentence
     kind = fields.get("type")
     if kind is not None and kind.strip() not in TYPES:
@@ -74,14 +87,9 @@ def _values(fields: Mapping[str, str], refuse_branch: BranchRefusal, held_branch
     why = refuse_branch(branch) if branch and branch != held_branch else None
     if why is not None:
         return f"bad branch {branch}: {why}"
-    for name, rule, refusal in (
-        ("budget", budget_text, BUDGET_REFUSED),
-        ("parallel", parallel_text, PARALLEL_REFUSED),
-    ):
-        if name in values:
-            values[name] = rule(values[name])
-            if values[name] == refusal:
-                return refusal
+    refusal = _number_refusal(values)
+    if refusal is not None:
+        return refusal
     for name in ("blocked_by", "caused_by"):
         if name in values:
             values[name] = ", ".join(dict.fromkeys(_list(normalised_list(values[name]))))

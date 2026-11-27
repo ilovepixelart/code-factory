@@ -8,9 +8,9 @@ from code_factory.releases.models import ReleaseState, ReleaseTicket
 
 # Three decimal numbers of up to nine digits and nothing else: git's version sort puts
 # `1.2.0-rc.1` after `1.2.0`, so the newest tag could name a pre-release, and a longer number
-# would not fit an index entry or `int()`'s digit limit. `[0-9]` and `fullmatch`: `\d` takes
-# other scripts' digits and `$` lets a newline through.
-_VERSION = re.compile(r"[0-9]{1,9}\.[0-9]{1,9}\.[0-9]{1,9}")
+# would not fit an index entry or `int()`'s digit limit. `re.ASCII` and `fullmatch`: plain `\d`
+# takes other scripts' digits and `$` lets a newline through.
+_VERSION = re.compile(r"\d{1,9}\.\d{1,9}\.\d{1,9}", re.ASCII)
 # A full SHA-1 or SHA-256 object name, as the table's `tag_commit` check holds it.
 _COMMIT = re.compile(r"[0-9a-f]{40}([0-9a-f]{24})?")
 NOTES_LIMIT = 100_000

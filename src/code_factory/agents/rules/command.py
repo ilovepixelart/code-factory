@@ -50,6 +50,20 @@ def _double(text: str, at: int) -> tuple[str, int]:
     raise BadRequestError(_QUOTE_OPEN)
 
 
+def _piece(text: str, char: str, at: int) -> tuple[str, int]:
+    """The text a non-blank `char` adds to its word, and where reading goes on at `at`."""
+    if char == "'":
+        return _single(text, at)
+    if char == '"':
+        return _double(text, at)
+    if char != "\\":
+        return char, at
+    if at >= len(text):
+        msg = "No escaped character"
+        raise BadRequestError(msg)
+    return text[at], at + 1
+
+
 def shell_words(text: str) -> list[str]:
     r"""`text` split as a POSIX shell splits it.
 
@@ -66,20 +80,9 @@ def shell_words(text: str) -> list[str]:
             if word is not None:
                 words.append(word)
                 word = None
-        elif char == "'":
-            piece, at = _single(text, at)
-            word = (word or "") + piece
-        elif char == '"':
-            piece, at = _double(text, at)
-            word = (word or "") + piece
-        elif char == "\\":
-            if at >= len(text):
-                msg = "No escaped character"
-                raise BadRequestError(msg)
-            word = (word or "") + text[at]
-            at += 1
         else:
-            word = (word or "") + char
+            piece, at = _piece(text, char, at)
+            word = (word or "") + piece
     if word is not None:
         words.append(word)
     return words

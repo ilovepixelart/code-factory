@@ -38,20 +38,24 @@ def count(value: object) -> int | None:
     return found if 0 <= found <= MOST_PER_REQUEST else None
 
 
+def _request(record: object) -> Request | None:
+    named = record.get("body") if isinstance(record, dict) else None
+    if not isinstance(named, dict) or named.get("stringValue") != REQUEST_EVENT:
+        return None
+    tokens = count(_attribute(record, "input_tokens"))
+    output = count(_attribute(record, "output_tokens"))
+    return Request(tokens, output) if tokens is not None and output is not None else None
+
+
 def requests(body: object) -> list[Request]:
     """The `claude_code.api_request` events of an OTLP JSON logs export with both counts readable.
 
     Whatever run they claim, they count for the run whose token sent them.
     """
-    found = []
-    for resource in _list(body, "resourceLogs"):
-        for scope in _list(resource, "scopeLogs"):
-            for record in _list(scope, "logRecords"):
-                named = record.get("body") if isinstance(record, dict) else None
-                if not isinstance(named, dict) or named.get("stringValue") != REQUEST_EVENT:
-                    continue
-                tokens = count(_attribute(record, "input_tokens"))
-                output = count(_attribute(record, "output_tokens"))
-                if tokens is not None and output is not None:
-                    found.append(Request(tokens, output))
-    return found
+    records = (
+        record
+        for resource in _list(body, "resourceLogs")
+        for scope in _list(resource, "scopeLogs")
+        for record in _list(scope, "logRecords")
+    )
+    return [found for record in records if (found := _request(record)) is not None]

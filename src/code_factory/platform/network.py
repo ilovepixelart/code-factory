@@ -12,12 +12,17 @@ NETWORK_WARNING = (
     "network can act as the owner"
 )
 
+# Loopback, then the private blocks listed in `listen_address`, as (first octets, prefix length).
+_V4_BLOCKS = (
+    ((127, 0, 0, 0), 8),
+    ((10, 0, 0, 0), 8),
+    ((172, 16, 0, 0), 12),
+    ((192, 168, 0, 0), 16),
+    ((100, 64, 0, 0), 10),
+)
 _V4_RANGES = tuple(
-    IPv4Network(block)
-    for block in (
-        "127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10",
-    )
-)  # fmt: skip
+    IPv4Network((IPv4Address(bytes(octets)), prefix)) for octets, prefix in _V4_BLOCKS
+)
 _V6_RANGES = (IPv6Network("::1/128"), IPv6Network("fc00::/7"))
 
 

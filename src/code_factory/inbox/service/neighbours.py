@@ -193,19 +193,8 @@ class _InboxRead:
                 if note := delivery.owner_hold(pull.ticket_id, pull.head):
                     mergeable.append(self._pull_item(pull, ref, "merge", note=note))
                     continue
-            if (
-                not pull.draft
-                and pull.updated_on_host is not None
-                and now - pull.updated_on_host >= PULL_IDLE_AFTER
-            ):
-                idle.append(
-                    Item(
-                        since=pull.updated_on_host.timestamp(),
-                        kind="idle",
-                        reason=pull.url,
-                        ticket=ref,
-                    )
-                )
+            if (since := _idle_since(pull, now)) is not None:
+                idle.append(Item(since=since, kind="idle", reason=pull.url, ticket=ref))
         return {"mergeable": mergeable, "failing": failing, "idle": idle}
 
     async def _checked(self, pull: PullView) -> bool:
@@ -243,6 +232,15 @@ class _InboxRead:
             )
             for d in found
         ]
+
+
+def _idle_since(pull: PullView, now: datetime) -> float | None:
+    """When the pull last moved, if it is a non-draft one that has waited long enough."""
+    if pull.draft or pull.updated_on_host is None:
+        return None
+    if now - pull.updated_on_host < PULL_IDLE_AFTER:
+        return None
+    return pull.updated_on_host.timestamp()
 
 
 def _green(pull: PullView) -> bool:

@@ -92,7 +92,7 @@ async def seed(tickets: TicketService, stages: StageService, writes: TicketWrite
     for golden_id, ticket in (("CF-1", one), ("CF-2", two), ("CF-3", three), ("CF-4", four)):
         replay.bind("sample", golden_id, ticket.id)
     replay.bind("second", "CF-1", elsewhere.id)
-    await writes.set_column_limit("spec", 2, "board")
+    await writes.set_column_limit("spec", 2)
     writes.bind_active_runs(RunningOn(one.id))
     return replay
 
@@ -126,14 +126,14 @@ async def run(  # noqa: PLR0911  # one branch per step kind of the recording
             OWNER,
         )
     if kind == "delete":
-        return await writes.delete(replay.address(step["ticket"]), OWNER)
+        return await writes.delete(replay.address(step["ticket"]))
     if kind == "bulk":
         keys = [f"{k.partition('/')[0]}/{replay.real_id(*k.split('/'))}" for k in body["tickets"]]
         return await writes.bulk_request({**body, "tickets": keys}, OWNER)
     if kind == "limit":
         raw = body["limit"]
         value: object = None if raw == "" else int(raw) if raw.isdigit() else raw
-        return await writes.set_column_limit(step["stage"], value, OWNER)
+        return await writes.set_column_limit(step["stage"], value)
     assert kind == "undo", kind
     assert replay.token is not None
     return await undo.undo(replay.token, OWNER)

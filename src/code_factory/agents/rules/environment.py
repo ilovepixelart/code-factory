@@ -6,7 +6,7 @@ never holds a key.
 
 from pydantic import SecretStr
 
-from code_factory.agents.models.connections import ConnectionDefinition, Kind
+from code_factory.agents.models.connections import ConnectionDefinition, ConnectionKind
 from code_factory.agents.models.constants import CODEX_LOGIN
 from code_factory.agents.rules.connections import Address, address, rules, runs_here
 from code_factory.platform.errors import BadRequestError, ConflictError
@@ -22,7 +22,7 @@ Variables = dict[str, SecretStr | None]
 
 def _parts(
     connection: ConnectionDefinition, key: SecretStr | None
-) -> tuple[Kind, SecretStr | None, Address]:
+) -> tuple[ConnectionKind, SecretStr | None, Address]:
     """The kind, key and address a run on `connection` is given, else why it may not start."""
     try:
         kind = rules(connection)

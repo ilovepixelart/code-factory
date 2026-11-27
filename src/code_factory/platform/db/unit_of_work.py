@@ -43,7 +43,8 @@ class UnitOfWork:
         except Exception as error:
             if not connection_lost(error):
                 raise
-            first = (str(error).splitlines() or [""])[0][:200]
+            lines = str(error).splitlines()
+            first = lines[0][:200] if lines else ""
             msg = f"the database is not reachable ({type(error).__name__}: {first})"
             raise DatabaseUnavailableError(msg) from error
 

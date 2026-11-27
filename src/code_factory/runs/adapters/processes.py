@@ -100,9 +100,8 @@ class ProcessRegistry:
                     start_new_session=True,
                 )
         except OSError as error:
-            msg = (
-                f"cannot start {argv[0]}: {getattr(error, 'strerror', None) or 'it did not start'}"
-            )
+            why = getattr(error, "strerror", None) or "it did not start"
+            msg = f"cannot start {argv[0]}: {why}"
             raise UnavailableError(msg) from error
         finally:
             os.close(fd)
@@ -208,7 +207,7 @@ class ProcessRegistry:
 
     def detach_all(self) -> None:
         """Let go of every held process without signalling it: runs outlive a board restart."""
-        for watcher in list(self._watchers):
+        for watcher in self._watchers:
             watcher.cancel()
         if not self._held:
             return  # no transport is let go, so none needs the collection below to finalise it

@@ -6,6 +6,7 @@ import type { Kind } from '../generated/Kind'
 import { CONTEXT_FLOOR } from '../generated/Limits'
 import type { Model } from '../generated/Model'
 import type { Status } from '../generated/Status'
+import { withoutTrailingSlashes } from './format'
 
 export type { Kind, Model }
 /** Whether a connection answers, its models, or why not. */
@@ -68,7 +69,7 @@ export function sameServer(one: string, other: string): boolean {
   const [a, b] = [new URL(one), new URL(other)]
   const host =
     a.hostname === b.hostname || (THIS_MACHINE.has(a.hostname) && THIS_MACHINE.has(b.hostname))
-  const path = (url: URL) => url.pathname.replace(/\/+$/, '')
+  const path = (url: URL) => withoutTrailingSlashes(url.pathname)
   return host && a.protocol === b.protocol && a.port === b.port && path(a) === path(b)
 }
 

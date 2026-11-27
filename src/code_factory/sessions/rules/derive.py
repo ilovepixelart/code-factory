@@ -65,7 +65,7 @@ def for_views(event: Event) -> Event:
         event.seq,
         event.session_id,
         event.agent_id,
-        event.event,
+        event.name,
         event.captured_at,
         event.spool,
         event.offset,
@@ -76,20 +76,20 @@ def for_views(event: Event) -> Event:
 def since_latest[T: Event](events: Sequence[T], name: str) -> Sequence[T] | None:
     """The events after the latest one called `name`; None when there is none."""
     for index in range(len(events) - 1, -1, -1):
-        if events[index].event == name:
+        if events[index].name == name:
             return events[index + 1 :]
     return None
 
 
 def session_state(current: Sequence[Event]) -> SessionState:
     """Ended, blocked on a permission, idle after a stop, or working."""
-    if any(event.event == "SessionEnd" for event in current):
+    if any(event.name == "SessionEnd" for event in current):
         return SessionState.ENDED
     asked = since_latest(current, "PermissionRequest")
-    if asked is not None and not any(event.event in RESOLVES_PERMISSION for event in asked):
+    if asked is not None and not any(event.name in RESOLVES_PERMISSION for event in asked):
         return SessionState.BLOCKED
     stopped = since_latest(current, "Stop")
-    if stopped is not None and not any(event.event == "UserPromptSubmit" for event in stopped):
+    if stopped is not None and not any(event.name == "UserPromptSubmit" for event in stopped):
         return SessionState.IDLE
     return SessionState.WORKING
 
@@ -123,12 +123,12 @@ def current_action(scope: Sequence[Event]) -> Action | None:
     """The newest tool call with no result yet, unless a prompt or a stop came after it."""
     answered: set[str | None] = set()
     for event in reversed(scope):
-        if event.event in CLOSES_ACTIONS:
+        if event.name in CLOSES_ACTIONS:
             return None
-        if event.event in TOOL_RESULTS:
+        if event.name in TOOL_RESULTS:
             answered.add(text_field(event.payload, "tool_use_id"))
         elif (
-            event.event == "PreToolUse" and text_field(event.payload, "tool_use_id") not in answered
+            event.name == "PreToolUse" and text_field(event.payload, "tool_use_id") not in answered
         ):
             return _action_of(event)
     return None
@@ -137,7 +137,7 @@ def current_action(scope: Sequence[Event]) -> Action | None:
 def last_call(scope: Sequence[Event]) -> Action | None:
     """The newest tool call, open or not."""
     for event in reversed(scope):
-        if event.event == "PreToolUse":
+        if event.name == "PreToolUse":
             return _action_of(event)
     return None
 
@@ -157,7 +157,7 @@ def next_plan_item(scope: Sequence[Event]) -> str | None:
         (
             e
             for e in reversed(scope)
-            if e.event == "PreToolUse" and field(e, "tool_name") == "TodoWrite"
+            if e.name == "PreToolUse" and field(e, "tool_name") == "TodoWrite"
         ),
         None,
     )
@@ -200,13 +200,13 @@ def _scopes(events: Sequence[Event]) -> dict[str, list[Event]]:
 
 def _subagent(agent_id: str, scope: list[Event]) -> AgentView:
     run = since_latest(scope, "SubagentStart")
-    running = not any(event.event == "SubagentStop" for event in (scope if run is None else run))
+    running = not any(event.name == "SubagentStop" for event in (scope if run is None else run))
     calls = [
         summary(event.payload.get("tool_input"))
         for event in reversed(scope)
-        if event.event == "PreToolUse"
+        if event.name == "PreToolUse"
     ]
-    started = next((e for e in reversed(scope) if e.event == "SubagentStart"), scope[0])
+    started = next((e for e in reversed(scope) if e.name == "SubagentStart"), scope[0])
     typed = next((e for e in scope if "agent_type" in e.payload), None)
     return AgentView(
         agent_id=agent_id,
@@ -247,7 +247,7 @@ def derive_unsettled(events: Sequence[Event], carried: Carried | None = None) ->
     current = events if after_start is None else after_start
     main = [event for event in current if event.agent_id is None]
     turn = since_latest(current, "UserPromptSubmit") or []
-    prompt = next((e for e in reversed(current) if e.event == "UserPromptSubmit"), None)
+    prompt = next((e for e in reversed(current) if e.name == "UserPromptSubmit"), None)
     cwd, transcript = carry(carried or ("", ""), events)
     return SessionView(
         session_id=events[0].session_id,
@@ -258,7 +258,7 @@ def derive_unsettled(events: Sequence[Event], carried: Carried | None = None) ->
         subagents=[_subagent(agent, scope) for agent, scope in _scopes(current).items()],
         last_prompt="" if prompt is None else field(prompt, "prompt"),
         turn_started_at=None if prompt is None else prompt.captured_at,
-        turn_tool_calls=sum(1 for event in turn if event.event == "PreToolUse"),
+        turn_tool_calls=sum(1 for event in turn if event.name == "PreToolUse"),
         transcript=transcript,
         plan=next_plan_item(main),
         last_call=last_call(main),
@@ -274,7 +274,7 @@ def extend_window(
     name is carried. `carried` is what the stored view holds: the latest folder and transcript of
     everything so far.
     """
-    starts = [at for at, event in enumerate(new) if event.event == "SessionStart"]
+    starts = [at for at, event in enumerate(new) if event.name == "SessionStart"]
     if not starts:
         return [*window, *new], carried
     first = starts[-1]

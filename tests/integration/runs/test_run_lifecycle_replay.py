@@ -22,7 +22,7 @@ from code_factory.runs.repository import RunRepository
 from code_factory.runs.rules.records import state_of
 from code_factory.runs.service import RunService
 from runs_fakes import Fakes
-from runs_values import OWNER, a_run
+from runs_values import a_run
 
 CODEX_OUT = '{"type":"turn.completed","usage":{"input_tokens":4,"output_tokens":3}}\n'
 CLAUDE_OUT = '{"type":"result","usage":{"input_tokens":4,"output_tokens":3}}\n'
@@ -82,7 +82,7 @@ async def test_replay_unavailable_model_stops_before_checkout(  # noqa: PLR0913 
         uow, replace(fakes.ports, agents=real_agents), registry, state_dir=tmp_path / "state"
     )
     try:
-        await runs.start(facts.id, by=OWNER)
+        await runs.start(facts.id)
     except CodeFactoryError as refusal:
         message = str(refusal)
     else:

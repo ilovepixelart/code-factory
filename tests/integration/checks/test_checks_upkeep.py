@@ -56,7 +56,7 @@ async def test_a_run_of_another_process_cannot_be_stopped_from_this_one(
 ) -> None:
     foreign = await insert(uow, "CF-1", clock, owner="elsewhere:1:x")
     with pytest.raises(ConflictError, match="the check runs in another process"):
-        await checks.stop(foreign, "alex")
+        await checks.stop(foreign)
     assert (await checks.get(foreign)).state is RunState.QUEUED
 
 
@@ -66,7 +66,7 @@ async def test_an_ended_run_cannot_be_stopped_again(
     write_config(root, PLAIN)
     row = await checks.run_now(await checks.start(started.id))
     with pytest.raises(ConflictError, match="the check ended already"):
-        await checks.stop(row.id, "alex")
+        await checks.stop(row.id)
 
 
 async def test_a_stopped_run_this_process_holds_without_a_task_is_lost(
@@ -74,7 +74,7 @@ async def test_a_stopped_run_this_process_holds_without_a_task_is_lost(
 ) -> None:
     write_config(root, PLAIN)
     check_id = await checks.start(started.id)
-    await checks.stop(check_id, "alex")
+    await checks.stop(check_id)
     assert (await checks.get(check_id)).state is RunState.LOST
 
 

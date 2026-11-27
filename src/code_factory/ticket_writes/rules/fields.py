@@ -8,8 +8,8 @@ from code_factory.platform.text import is_iso_date, quoted_list
 from code_factory.ticket_writes.models import PRIORITIES
 
 _LINE_BREAKS = frozenset("\n\r\v\f\x85") | {chr(0x2028), chr(0x2029)}
-_NUMBER = re.compile(r"[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?", re.ASCII)
-_DIGITS = re.compile(r"[0-9]+", re.ASCII)
+_NUMBER = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", re.ASCII)
+_DIGITS = re.compile(r"\d+", re.ASCII)
 _ARCHIVED = {"": "", "false": "", "true": "true", "on": "true"}
 BUDGET_REFUSED = "budget must be a number of dollars"
 PARALLEL_REFUSED = "parallel must be 1 to 4"

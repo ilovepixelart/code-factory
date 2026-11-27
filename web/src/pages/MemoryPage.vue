@@ -26,8 +26,7 @@ import { readAgain } from '../lib/queries'
 import { keys } from '../lib/queryKeys'
 import { LIST_SIZE, fromAddress } from '../lib/paging'
 import { type LoadGroup, type Memory, loadGroups, reviewDue, sizeOf } from '../lib/memory'
-import { announce, undone } from '../lib/notice'
-import { refusalText } from '../lib/notice'
+import { announce, refusalText, undone } from '../lib/notice'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
@@ -107,8 +106,8 @@ async function add(draft: MemoryDraft): Promise<void> {
     const into = repository.value === '' ? (memory.value?.repositories[0] ?? '') : repository.value
     announce(await act('POST', '/api/memory', { repository: into, ...draft }))
     closeAdd()
-  } catch (failure) {
-    addError.value = refusalText(failure)
+  } catch (error_) {
+    addError.value = refusalText(error_)
   }
   addBusy.value = false
   await refresh()

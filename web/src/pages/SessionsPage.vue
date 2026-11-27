@@ -133,16 +133,21 @@ const anySession = computed(() =>
   Object.values(sessions.value?.counts ?? {}).some((count) => count > 0),
 )
 // The empty state's title and the sentence under it.
-const noSessions = computed((): [string, string] =>
-  filter.value
-    ? [`No ${filter.value} sessions`, 'Choose another state or select All to see more sessions.']
-    : hiddenEnded.value
-      ? [
-          'No live sessions',
-          `${String(hiddenEnded.value)} ended session${hiddenEnded.value === 1 ? ' is' : 's are'} hidden; turn on Show ended to list them.`,
-        ]
-      : ['No sessions to show', 'Start an agent on a ticket and its session shows here.'],
-)
+const noSessions = computed((): [string, string] => {
+  if (filter.value) {
+    return [
+      `No ${filter.value} sessions`,
+      'Choose another state or select All to see more sessions.',
+    ]
+  }
+  if (hiddenEnded.value) {
+    return [
+      'No live sessions',
+      `${String(hiddenEnded.value)} ended session${hiddenEnded.value === 1 ? ' is' : 's are'} hidden; turn on Show ended to list them.`,
+    ]
+  }
+  return ['No sessions to show', 'Start an agent on a ticket and its session shows here.']
+})
 </script>
 
 <template>

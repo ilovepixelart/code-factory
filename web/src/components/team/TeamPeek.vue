@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { sentence } from '../../lib/format'
 import { Cancel01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { useMediaQuery } from '@vueuse/core'
 import { computed, onMounted, useTemplateRef, watch } from 'vue'
 import { trapTab } from '../../lib/focusTrap'
-import { clock, hourMinute, span } from '../../lib/format'
+import { clock, hourMinute, sentence, span } from '../../lib/format'
 import { ticketHref } from '../../lib/ticket'
 import {
   MILESTONE_LABELS,

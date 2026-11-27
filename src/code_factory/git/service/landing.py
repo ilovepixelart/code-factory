@@ -130,7 +130,10 @@ class LandingMixin(MovesMixin):
         if not (await self._runner.run(root, ["merge-base", "--is-ancestor", commit, pushed])).ok:
             return False
         added = await self._runner.ok(root, ["rev-list", pushed, f"^{commit}", f"^{tip}"])
-        return all([await self._merge_of_parents(root, c) for c in (added or "").splitlines()])
+        for added_commit in (added or "").splitlines():
+            if not await self._merge_of_parents(root, added_commit):
+                return False
+        return True
 
     async def _merge_of_parents(self, root: Path, commit: str) -> bool:
         listing = await self._runner.ok(root, ["rev-list", "--parents", "-n", "1", commit]) or ""

@@ -127,8 +127,8 @@ async function testModel(): Promise<void> {
   try {
     await act('POST', `${address.value}/model-check`)
     emit('changed')
-  } catch (failure) {
-    error.value = refusalText(failure)
+  } catch (error_) {
+    error.value = refusalText(error_)
   }
   testing.value = false
 }
@@ -258,7 +258,9 @@ const restore = async (at: number): Promise<boolean> => {
           Lacks:
           <template v-for="(gap, at) in lacks" :key="gap.guarantee"
             ><template v-if="at">, </template
-            ><span :title="gap.why" tabindex="0">{{ gap.guarantee }}</span></template
+            ><span :title="gap.why"
+              >{{ gap.guarantee }}<span class="sr-only"> ({{ gap.why }})</span></span
+            ></template
           >
         </p>
         <p v-if="later" class="text-muted-foreground text-sm">

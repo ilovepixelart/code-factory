@@ -4,7 +4,7 @@ import asyncio
 import logging
 import os
 import re
-from collections.abc import Sequence
+from collections.abc import Awaitable, Callable, Sequence
 
 from code_factory.board.models import ActivityRecord, PullFacts
 from code_factory.board.service import CardDelivery
@@ -184,11 +184,11 @@ def _provide(services: Services, resources: Resources) -> None:
     services.add(CardDelivery, CardDeliveryAdapter(delivery))
 
 
-async def _loop(name: str, every: float, work: object) -> None:
+async def _loop(name: str, every: float, work: Callable[[], Awaitable[object]]) -> None:
     while True:
         try:
             async with asyncio.timeout(PASS_LIMIT_S):
-                await work()  # ty: ignore[not-callable]  # a coroutine function
+                await work()
         except (CodeFactoryError, OSError) as error:
             logger.warning("delivery: %s failed: %s", name, error)
         await asyncio.sleep(max(every, 2.0))

@@ -144,6 +144,13 @@ class Reviewing(Assessing):
             return None
         return await self._hold_of(found, diff, head, (ended_review_heads, review_active), now)
 
+    @staticmethod
+    async def _any_same_code(diff: GitDiffReader, sources: Sequence[str], target: str) -> bool:
+        for source in sources:
+            if await diff.same_code(source, target):
+                return True
+        return False
+
     async def _hold_of(
         self,
         found: Ticket,
@@ -161,7 +168,7 @@ class Reviewing(Assessing):
             and latest.outcome == "passed"
             and await diff.same_code(latest.head, head)
         )
-        ended = any([await diff.same_code(done, head) for done in ended_heads])
+        ended = await self._any_same_code(diff, ended_heads, head)
         skipped = next(
             (v for v in reversed(verdicts) if v.outcome == "skipped" and v.head == head), None
         )

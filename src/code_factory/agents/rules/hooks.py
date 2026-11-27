@@ -79,6 +79,22 @@ def with_tell_hook(settings: Settings, command: str) -> Settings:
     return out
 
 
+def _with_command(entries: list[Any], matcher: str, command: str) -> list[Any]:
+    """`entries` with one that carries `command` (under `matcher`, if any), added when missing."""
+    carrying = False
+    for entry in entries:
+        if _carries(entry, command):
+            carrying = True
+            if matcher and entry.get("matcher") != matcher:
+                entry["matcher"] = matcher
+    if not carrying:
+        entry = {"hooks": [{"type": "command", "command": command}]}
+        if matcher:
+            entry["matcher"] = matcher
+        entries.append(entry)
+    return entries
+
+
 def with_capture_hooks(settings: Settings | None, capture: str, recall: str) -> Settings:
     """`settings` with the session capture hook on every event and the recall hook on start."""
     out = dict(settings or {})
@@ -87,19 +103,7 @@ def with_capture_hooks(settings: Settings | None, capture: str, recall: str) -> 
         ("SessionStart", RECALL_SOURCES, recall)
     ]
     for event, matcher, command in wanted:
-        entries = _entries(hooks, event)
-        carrying = False
-        for entry in entries:
-            if _carries(entry, command):
-                carrying = True
-                if matcher and entry.get("matcher") != matcher:
-                    entry["matcher"] = matcher
-        if not carrying:
-            entry = {"hooks": [{"type": "command", "command": command}]}
-            if matcher:
-                entry["matcher"] = matcher
-            entries.append(entry)
-        hooks[event] = entries
+        hooks[event] = _with_command(_entries(hooks, event), matcher, command)
     out["hooks"] = hooks
     return out
 

@@ -36,6 +36,13 @@ def defined_functions(text: str) -> list[str]:
     return names
 
 
+def _marks_test(attribute: str) -> bool:
+    """Whether a `#[...]` line names `test` or a path ending in `::test`."""
+    path = _ATTRIBUTE_PATH.match(attribute[2:])
+    path_text = path.group(0).strip() if path else ""
+    return path_text == "test" or path_text.endswith("::test")
+
+
 def rust_tests(text: str) -> list[str]:
     """The functions marked `#[test]` or an attribute whose path ends in `::test`.
 
@@ -49,9 +56,7 @@ def rust_tests(text: str) -> list[str]:
             open_attribute = "]" not in line
             continue
         if line.startswith("#["):
-            path = _ATTRIBUTE_PATH.match(line[2:])
-            path_text = path.group(0).strip() if path else ""
-            marked = marked or path_text == "test" or path_text.endswith("::test")
+            marked = marked or _marks_test(line)
             open_attribute = "]" not in line
             continue
         if not line or line.startswith("//"):

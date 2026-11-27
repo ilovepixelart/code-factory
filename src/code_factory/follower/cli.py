@@ -12,13 +12,18 @@ def _configure(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("action", choices=["pass", "plan"])
 
 
+async def _plan(services: Services) -> None:
+    for ticket, note in (await services.get(QueueService).plan()).items():
+        sys.stdout.write(f"{ticket}\t{note or 'next up'}\n")
+
+
+async def _pass(services: Services) -> None:
+    for step, said in (await services.get(FollowerService).run_pass()).steps.items():
+        sys.stdout.write(f"{step}: {said}\n")
+
+
 async def _run(args: argparse.Namespace, services: Services) -> int:
-    if args.action == "plan":
-        for ticket, note in (await services.get(QueueService).plan()).items():
-            sys.stdout.write(f"{ticket}\t{note or 'next up'}\n")
-    else:
-        for step, said in (await services.get(FollowerService).run_pass()).steps.items():
-            sys.stdout.write(f"{step}: {said}\n")
+    await (_plan if args.action == "plan" else _pass)(services)
     return 0
 
 

@@ -15,6 +15,17 @@ SHIP_COLUMNS = {"build", "review"}
 LIST_FIELDS = "url,headRefName,headRefOid,baseRefName,isCrossRepository"
 
 
+def _unrecorded(
+    pull: dict[str, object], by_branch: dict[str, Candidate], known: set[str]
+) -> tuple[Candidate, str] | None:
+    """The ticket and url of an open same-repository pull request not recorded yet."""
+    ticket = by_branch.get(str(pull.get("headRefName") or ""))
+    url = str(pull.get("url") or "")
+    if ticket is None or not url or url in known or pull.get("isCrossRepository"):
+        return None
+    return ticket, url
+
+
 class ShippingMixin(Collaborators):
     """Ship, ship added commits, refresh and record pull requests opened by hand."""
 
@@ -189,10 +200,10 @@ class ShippingMixin(Collaborators):
             )
             by_branch = {c.branch: c for c in candidates if c.repository == repository}
             for pull in listed if isinstance(listed, list) else []:
-                ticket = by_branch.get(str(pull.get("headRefName") or ""))
-                url = str(pull.get("url") or "")
-                if ticket is None or not url or url in known or pull.get("isCrossRepository"):
+                unrecorded = _unrecorded(pull, by_branch, known)
+                if unrecorded is None:
                     continue
+                ticket, url = unrecorded
                 if await self._pull_of(ticket.id) is None:
                     await self._read_pull(ticket.id, repository, url)
                     recorded += 1

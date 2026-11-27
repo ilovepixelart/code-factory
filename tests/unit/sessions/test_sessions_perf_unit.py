@@ -19,7 +19,7 @@ def test_a_window_of_5000_events_derives_within_the_target() -> None:
     window = [
         derive.for_views(event)
         for event in noisy(1, 2 * WINDOW_EVENTS)
-        if event.event != "SessionStart"
+        if event.name != "SessionStart"
     ][:WINDOW_EVENTS]
     assert len(window) == WINDOW_EVENTS
     took = []

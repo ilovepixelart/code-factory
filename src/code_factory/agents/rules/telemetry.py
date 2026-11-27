@@ -9,7 +9,8 @@ from pydantic import SecretBytes
 DEFAULT_ITERATIONS = 12
 LOGS_PATH = "/v1/logs"
 TOKEN_HEADER = "x-code-factory-token"  # noqa: S105  # a header name
-_FORBIDDEN = re.compile(r'[^\x21-\x7e]|[",;\\]')
+# Printable ASCII except `"`, `,`, `;` and `\`.
+_FORBIDDEN = re.compile(r"[^\x21\x23-\x2b\x2d-\x3a\x3c-\x5b\x5d-\x7e]")
 
 
 class Receiver:

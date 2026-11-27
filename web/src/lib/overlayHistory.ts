@@ -50,7 +50,8 @@ function onPop(): void {
 
 /** An overlay opened: it holds one history entry until `leave`. */
 export function enter(overlay: Overlay): Held {
-  const entry = { ...overlay, id: (last += 1) }
+  last += 1
+  const entry = { ...overlay, id: last }
   if (!listening) {
     listening = true
     addEventListener('popstate', onPop)

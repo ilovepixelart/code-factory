@@ -72,7 +72,7 @@ class Event:
     seq: int
     session_id: str
     agent_id: str | None
-    event: str
+    name: str
     captured_at: float
     spool: str
     offset: int

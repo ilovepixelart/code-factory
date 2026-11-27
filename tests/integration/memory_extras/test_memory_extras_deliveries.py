@@ -97,11 +97,13 @@ async def test_purging_an_entry_removes_its_deliveries(
         assert [r.entry_id for r in await store.receipts(REPO)] == [two]
 
 
+async def _record_in(uow: UnitOfWork, given: list[Delivery]) -> None:
+    async with uow() as session:
+        await DeliveryRepository(session).record("run-1", "CF-1", REPO, given, NOW)
+
+
 async def test_a_delivery_of_an_entry_that_is_not_there_is_refused_by_the_database(
     uow: UnitOfWork,
 ) -> None:
-    unit = uow()
-    given = [Delivery(entry_id="2026-01-01-none")]
     with pytest.raises(IntegrityError, match=r"fk_memory_deliveries"):
-        async with unit as session:
-            await DeliveryRepository(session).record("run-1", "CF-1", REPO, given, NOW)
+        await _record_in(uow, [Delivery(entry_id="2026-01-01-none")])

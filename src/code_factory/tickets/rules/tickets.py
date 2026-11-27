@@ -123,9 +123,9 @@ def check_branch(name: str) -> str:
     return branch
 
 
-_DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
-_AMOUNT = re.compile(r"[0-9]+(\.[0-9]+)?")
-_WHOLE = re.compile(r"[0-9]+")
+_DATE = re.compile(r"\d{4}-\d{2}-\d{2}", re.ASCII)
+_AMOUNT = re.compile(r"\d+(\.\d+)?", re.ASCII)
+_WHOLE = re.compile(r"\d+", re.ASCII)
 
 
 def _title(value: str) -> str:

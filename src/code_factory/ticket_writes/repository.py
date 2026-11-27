@@ -18,7 +18,7 @@ class ColumnLimitRepository:
     async def all(self) -> dict[str, int]:
         """Each limited column and its limit."""
         rows = await self._session.execute(select(ColumnLimitRow.stage, ColumnLimitRow.max_open))
-        return {stage: limit for stage, limit in rows.all()}  # noqa: C416  # a Row is not a pair
+        return dict(rows.all())
 
     async def put(self, stage: str, limit: int, now: datetime) -> None:
         """Set the column's limit, replacing the one it had."""

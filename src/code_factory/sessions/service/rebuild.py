@@ -15,7 +15,7 @@ from code_factory.sessions.service.ingest import LOCK_BUSY, LOCK_WAIT_MS, Ingest
 
 
 def _window_start(events: list[Event]) -> int:
-    starts = [event.seq for event in events if event.event == "SessionStart"]
+    starts = [event.seq for event in events if event.name == "SessionStart"]
     return starts[-1] if starts else events[0].seq
 
 

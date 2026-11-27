@@ -12,6 +12,13 @@ ISSUE_FIELDS = "number,title,body,url,labels,author"
 WRITERS = {"admin", "maintain", "write"}
 
 
+def _issue_list(switches: Switches) -> list[str]:
+    argv = ["issue", "list", "--state", "open", "--limit", "100", "--json", ISSUE_FIELDS]
+    if switches.github_label_required and switches.github_label:
+        argv += ["--label", switches.github_label]
+    return argv
+
+
 class IntakeMixin(Collaborators):
     """Issue intake."""
 
@@ -76,10 +83,7 @@ class IntakeMixin(Collaborators):
             if not await repo.claim_poll(f"github:{repository}", self._clock()):
                 return []
             imported = await repo.imported(repository)
-        argv = ["issue", "list", "--state", "open", "--limit", "100", "--json", ISSUE_FIELDS]
-        if switches.github_label_required and switches.github_label:
-            argv += ["--label", switches.github_label]
-        listed = await self._gh_json(repository, argv)
+        listed = await self._gh_json(repository, _issue_list(switches))
         origin = (await self._ports.git.remote_url(repository) or "").removesuffix(".git")
         writers: dict[str, bool] = {}
         made: list[str] = []

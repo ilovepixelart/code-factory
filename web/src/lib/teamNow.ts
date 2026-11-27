@@ -193,7 +193,8 @@ const ALSO_WORDS: Record<RowState, string> = {
 export function alsoLine(also: Also, now: number): string {
   const who = also.actor.kind === 'owner' || also.state === 'merged' ? '' : also.actor.name
   const what = [who, rowLine(also)].filter(Boolean).join(', ')
-  return `also ${ALSO_WORDS[also.state]} ${age(also, now)}${what ? `: ${what}` : ''}`
+  const detail = what ? `: ${what}` : ''
+  return `also ${ALSO_WORDS[also.state]} ${age(also, now)}${detail}`
 }
 
 /** Whether no ticket reached any stage today or this cycle: the strip has nothing to show. */

@@ -22,8 +22,8 @@ async function toggle(opened: boolean): Promise<void> {
     call.value = await ask<ToolCall>(
       `/api/sessions/${encodeURIComponent(props.sessionId)}/calls/${String(props.seq)}`,
     )
-  } catch (failure) {
-    error.value = refusalText(failure)
+  } catch (error_) {
+    error.value = refusalText(error_)
   }
 }
 </script>

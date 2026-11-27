@@ -693,7 +693,7 @@ test('the_page_announces_only_changes', async () => {
     url === '/api/agent-definitions' ? answer(list([writer], doing)) : served(url, []),
   )
   const wrapper = await shown()
-  const region = wrapper.get('[role="status"]')
+  const region = wrapper.get('output[aria-live="polite"]')
   const first = region.text()
   const edit = button(agent(wrapper, 'writer'), 'Edit writer')
   ;(edit.element as HTMLButtonElement).focus()
@@ -1487,7 +1487,7 @@ test('a_meter_crossing_a_threshold_is_announced', async () => {
     url === '/api/agent-definitions' ? answer(list([writer], doing)) : served(url, []),
   )
   const wrapper = await shown()
-  const region = wrapper.get('[role="status"]')
+  const region = wrapper.get('output[aria-live="polite"]')
   const next = async (now: Doing): Promise<string> => {
     doing = { writer: now }
     await vi.advanceTimersByTimeAsync(3000)
@@ -1777,7 +1777,7 @@ test('pausing_and_resuming_are_announced', async () => {
   let current: AgentDefinition = writer
   stubFetch((url) => (url === '/api/agent-definitions' ? answer(list([current])) : served(url, [])))
   const wrapper = await shown()
-  const region = wrapper.get('[role="status"]')
+  const region = wrapper.get('output[aria-live="polite"]')
 
   current = { ...writer, paused_at: 1_790_000_000 }
   await vi.advanceTimersByTimeAsync(3000)

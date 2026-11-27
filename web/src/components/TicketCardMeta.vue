@@ -54,25 +54,18 @@ const showMeta = computed(
     card.pull !== null ||
     queueLabel.value !== '',
 )
-const spentTitle = computed(() =>
-  spendTitle(
-    card.budget !== null
-      ? "Agent spend against the ticket's budget"
-      : card.spent_estimated
-        ? 'Cost of the agent runs on this ticket'
-        : 'Cost reported by the agent runs on this ticket',
-    card.spent_estimated,
-  ),
-)
-const spendLevel = computed(() =>
-  card.budget === null
-    ? 'normal'
-    : card.spent >= card.budget
-      ? 'over'
-      : card.spent >= card.budget * 0.8
-        ? 'watch'
-        : 'normal',
-)
+function spendWhat(): string {
+  if (card.budget !== null) return "Agent spend against the ticket's budget"
+  return card.spent_estimated
+    ? 'Cost of the agent runs on this ticket'
+    : 'Cost reported by the agent runs on this ticket'
+}
+const spentTitle = computed(() => spendTitle(spendWhat(), card.spent_estimated))
+const spendLevel = computed(() => {
+  if (card.budget === null) return 'normal'
+  if (card.spent >= card.budget) return 'over'
+  return card.spent >= card.budget * 0.8 ? 'watch' : 'normal'
+})
 const SPEND_TEXT = {
   over: 'text-destructive',
   watch: 'text-foreground',

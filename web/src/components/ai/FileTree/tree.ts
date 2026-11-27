@@ -31,7 +31,8 @@ export function fileTree(paths: string[], removed: string): FileNode[] {
 function sorted(nodes: FileNode[]): FileNode[] {
   return nodes
     .map((node) => (node.type === 'folder' ? { ...node, children: sorted(node.children) } : node))
-    .sort((a, b) =>
-      a.type === b.type ? a.name.localeCompare(b.name, 'en') : a.type === 'folder' ? -1 : 1,
-    )
+    .sort((a, b) => {
+      if (a.type === b.type) return a.name.localeCompare(b.name, 'en')
+      return a.type === 'folder' ? -1 : 1
+    })
 }

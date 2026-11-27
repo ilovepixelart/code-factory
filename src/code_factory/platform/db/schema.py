@@ -82,6 +82,15 @@ def verify_schema(state: SchemaState) -> None:
         raise SchemaMismatchError(msg)
 
 
+def _check_timed_out(settings: Settings) -> DatabaseBusyError:
+    msg = (
+        f"the database did not answer the schema check within "
+        f"{settings.schema_check_timeout_s:g} s: it is busy, for example while a migration "
+        "runs; retry in a moment"
+    )
+    return DatabaseBusyError(msg)
+
+
 async def check_engine(engine: AsyncEngine, settings: Settings) -> SchemaState:
     """Read the state through `engine` and verify it.
 
@@ -93,12 +102,7 @@ async def check_engine(engine: AsyncEngine, settings: Settings) -> SchemaState:
         async with asyncio.timeout(settings.schema_check_timeout_s):
             state = await _read_state(engine, settings)
     except TimeoutError:
-        msg = (
-            f"the database did not answer the schema check within "
-            f"{settings.schema_check_timeout_s:g} s: it is busy, for example while a migration "
-            "runs; retry in a moment"
-        )
-        raise DatabaseBusyError(msg) from None
+        raise _check_timed_out(settings) from None
     verify_schema(state)
     return state
 

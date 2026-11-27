@@ -37,7 +37,7 @@ def test_the_sample_sessions_derived_in_batches_equal_deriving_them_whole() -> N
 
 def test_a_new_window_starts_at_its_latest_session_start_and_carries_what_came_before() -> None:
     events = noisy(3, 40)
-    starts = [e.seq for e in events if e.event == "SessionStart"]
+    starts = [e.seq for e in events if e.name == "SessionStart"]
     window, carried = derive.extend_window([], ("", ""), events)
     assert window[0].seq == starts[-1]
     before = events[: starts[-1] - 1]
@@ -46,6 +46,6 @@ def test_a_new_window_starts_at_its_latest_session_start_and_carries_what_came_b
 
 
 def test_with_no_session_start_the_window_grows_and_nothing_is_dropped() -> None:
-    events = [e for e in noisy(5, 30) if e.event != "SessionStart"]
+    events = [e for e in noisy(5, 30) if e.name != "SessionStart"]
     window, _ = derive.extend_window(events[:10], ("/a", "/t"), events[10:])
     assert [e.seq for e in window] == [e.seq for e in events]

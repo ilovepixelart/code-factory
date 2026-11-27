@@ -6,7 +6,7 @@ from fastmcp import FastMCP
 from pydantic import Field
 
 from code_factory.platform.errors import BadRequestError, ForbiddenError
-from code_factory.platform.identity import Role
+from code_factory.platform.identity import Actor, Role
 from code_factory.platform.mcp import current_actor, policy
 from code_factory.platform.mcp.hints import APPENDS, READ_ONLY, SETS
 from code_factory.platform.mcp.quota import quota_lock
@@ -53,6 +53,44 @@ def _row(ticket: Ticket) -> TicketRow:
         archived=ticket.archived,
         updated_at=ticket.updated_at,
     )
+
+
+def _lineage(actor: Actor, parent: str | None) -> tuple[str | None, list[str]]:
+    """The parent a new ticket gets and the tickets that caused it, by who files it."""
+    if actor.role is not Role.RUN:
+        return parent, []
+    if actor.stage == "split":
+        return actor.ticket_id, []
+    if parent is not None:
+        msg = "forbidden: only a split run, a coordinator or the owner may set parent."
+        raise ForbiddenError(msg)
+    return parent, [] if actor.ticket_id is None else [actor.ticket_id]
+
+
+async def _set_branch(
+    tickets: TicketService, ticket_id: str, held: str | None, branch: str | None, actor: Actor
+) -> bool:
+    """Set the branch, or clear it when empty; whether it changed."""
+    if branch is None or branch == held:
+        return False
+    if branch:
+        await tickets.set_branch(ticket_id, branch, by=actor.subject)
+    else:
+        await tickets.clear_branch(ticket_id, by=actor.subject)
+    return True
+
+
+async def _set_archived(
+    tickets: TicketService, ticket_id: str, held: bool, archived: bool | None, actor: Actor
+) -> bool:
+    """Archive or unarchive; whether it changed."""
+    if archived is None or archived == held:
+        return False
+    if archived:
+        await tickets.archive(ticket_id, by=actor.subject)
+    else:
+        await tickets.unarchive(ticket_id, by=actor.subject)
+    return True
 
 
 def register(mcp: FastMCP, services: Services) -> None:
@@ -123,14 +161,7 @@ def _register_writes(mcp: FastMCP, tickets: TicketService, activity: ActivitySer
         if repository is None:
             msg = "repository is required: name the tracked repository the ticket belongs to"
             raise BadRequestError(msg)
-        caused_by: list[str] = []
-        if actor.role is Role.RUN and actor.stage == "split":
-            parent = actor.ticket_id
-        elif actor.role is Role.RUN:
-            if parent is not None:
-                msg = "forbidden: only a split run, a coordinator or the owner may set parent."
-                raise ForbiddenError(msg)
-            caused_by = [] if actor.ticket_id is None else [actor.ticket_id]
+        parent, caused_by = _lineage(actor, parent)
         new = NewTicket(
             repository=repository,
             title=title,
@@ -166,16 +197,8 @@ def _register_writes(mcp: FastMCP, tickets: TicketService, activity: ActivitySer
             check_branch(branch)  # before anything is written: the edit is all or nothing
         edited = await tickets.update(ticket_id, fields or TicketFields(), by=actor.subject)
         changed = list(edited.changed)
-        if branch is not None and branch != edited.ticket.branch:
-            if branch:
-                await tickets.set_branch(ticket_id, branch, by=actor.subject)
-            else:
-                await tickets.clear_branch(ticket_id, by=actor.subject)
+        if await _set_branch(tickets, ticket_id, edited.ticket.branch, branch, actor):
             changed.append("branch")
-        if archived is not None and archived != edited.ticket.archived:
-            if archived:
-                await tickets.archive(ticket_id, by=actor.subject)
-            else:
-                await tickets.unarchive(ticket_id, by=actor.subject)
+        if await _set_archived(tickets, ticket_id, edited.ticket.archived, archived, actor):
             changed.append("archived")
         return Updated(id=edited.ticket.id, changed=changed)

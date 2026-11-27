@@ -26,7 +26,7 @@ HOUSEKEEPING_S = 30.0
 class Collecting(Protocol):
     """The run service as the keeper uses it."""
 
-    async def collect(self, now: datetime | None = None) -> list[Ended]:
+    async def collect(self) -> list[Ended]:
         """One collection pass."""
         ...
 

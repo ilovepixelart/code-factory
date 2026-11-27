@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ContentCard from './ContentCard.vue'
-import { sentence } from '../lib/format'
+import { day, sentence } from '../lib/format'
 import { ArrowDown01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import StatusBadge from './StatusBadge.vue'
@@ -8,11 +8,9 @@ import { Badge } from '@/components/ui/badge'
 import { createReusableTemplate } from '@vueuse/core'
 import { computed, inject, nextTick, ref, useTemplateRef } from 'vue'
 import { act } from '../lib/actions'
-import { day } from '../lib/format'
 import { BOARD } from '../lib/live'
 import { dateOf, loadsElsewhere, statementOf, type MemoryRecord } from '../lib/memory'
-import { announce } from '../lib/notice'
-import { refusalText } from '../lib/notice'
+import { announce, refusalText } from '../lib/notice'
 import MemoryForm, { type MemoryDraft } from './MemoryForm.vue'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
@@ -118,8 +116,8 @@ async function send(method: 'PATCH' | 'POST', path: string, body: object): Promi
     announce(await act(method, path, body))
     emit('changed')
     void close()
-  } catch (failure) {
-    error.value = refusalText(failure)
+  } catch (error_) {
+    error.value = refusalText(error_)
   }
   busy.value = false
 }

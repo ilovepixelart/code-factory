@@ -117,6 +117,19 @@ def _ours(hook: object, entries: Sequence[HookEntry]) -> bool:
     return any(owns(str(hook.get("command", "")), e.command) for e in entries)
 
 
+def _without_ours(items: list[Any], entries: Sequence[HookEntry]) -> tuple[list[Any], bool]:
+    """`items` minus the board's hooks and the groups left empty, and whether any hook went."""
+    kept = []
+    changed = False
+    for item in items:
+        inner = item.get("hooks", []) if isinstance(item, dict) else []
+        left = [h for h in inner if not _ours(h, entries)]
+        changed = changed or len(left) != len(inner)
+        if left or not inner:
+            kept.append({**item, "hooks": left} if inner else item)
+    return kept, changed
+
+
 def remove_hooks(settings: object, entries: Sequence[HookEntry]) -> dict[str, Any] | None:
     """The settings without the board's hooks, or `None` when none was there."""
     if not isinstance(settings, dict):
@@ -126,21 +139,17 @@ def remove_hooks(settings: object, entries: Sequence[HookEntry]) -> dict[str, An
     if not isinstance(hooks, dict):
         return None
     changed = False
-    for event in list(hooks):
-        items = hooks[event]
+    remaining: dict[str, Any] = {}
+    for event, items in hooks.items():
         if not isinstance(items, list):
+            remaining[event] = items
             continue
-        kept = []
-        for item in items:
-            inner = item.get("hooks", []) if isinstance(item, dict) else []
-            left = [h for h in inner if not _ours(h, entries)]
-            changed = changed or len(left) != len(inner)
-            if left or not inner:
-                kept.append({**item, "hooks": left} if inner else item)
+        kept, event_changed = _without_ours(items, entries)
+        changed = changed or event_changed
         if kept:
-            hooks[event] = kept
-        else:
-            del hooks[event]
-    if not hooks:
+            remaining[event] = kept
+    if remaining:
+        result["hooks"] = remaining
+    else:
         del result["hooks"]
     return result if changed else None

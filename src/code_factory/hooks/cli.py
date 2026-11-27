@@ -82,9 +82,7 @@ async def _folder_repository(services: Services) -> str | None:
 
 
 async def _recall(args: argparse.Namespace, services: Services) -> int:  # noqa: ARG001
-    text = await _recalled(services)
-    if text is not None:
-        sys.stdout.write(text)
+    sys.stdout.write(await _recalled(services) or "")
     return 0
 
 

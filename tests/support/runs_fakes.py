@@ -170,7 +170,7 @@ class FakeAgents:
         self.during_launch: Callable[[], Awaitable[None]] | None = None
         self.refusal: str | None = None
 
-    async def given(self, agent: str, stage: str, repository: str) -> Given:  # noqa: ARG002
+    async def given(self, agent: str, stage: str) -> Given:  # noqa: ARG002
         if self._probed and self.changed_after_probe is not None:
             return self.changed_after_probe
         return self.given_value

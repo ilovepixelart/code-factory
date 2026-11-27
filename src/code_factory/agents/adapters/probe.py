@@ -205,9 +205,8 @@ class ModelProbe:
             (kind, next(k.base_url for k in KINDS if k.kind == kind), path)
             for kind, path in LOCAL_PROBES
         ]
-        async with asyncio.TaskGroup() as group:
-            asked = [group.create_task(self._find(*target)) for target in wanted]
-        return [found for task in asked if (found := task.result()) is not None]
+        asked = await asyncio.gather(*(self._find(*target) for target in wanted))
+        return [found for found in asked if found is not None]
 
     async def _find(self, kind: str, base: str, path: str) -> Found | None:
         answer = await self.get(f"{base}{path}", {})

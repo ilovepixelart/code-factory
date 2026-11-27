@@ -65,9 +65,8 @@ def walk_realpath(
         if refuse(candidate):
             raise AutomountReached(errno.EACCES, "an automount root", str(candidate))
         resolved = candidate
-        try:
-            mode = lstat(str(candidate)).st_mode
-        except FileNotFoundError:
+        mode = _mode_of(candidate, lstat)
+        if mode is None:
             missing = True
             continue
         if not stat.S_ISLNK(mode):
@@ -80,6 +79,14 @@ def walk_realpath(
         resolved = _ROOT if target.startswith("/") else candidate.parent
         pending.extendleft(reversed(target.split("/")))
     return str(resolved)
+
+
+def _mode_of(path: PurePosixPath, lstat: Callable[[str], os.stat_result]) -> int | None:
+    """The file mode of `path` itself, or None when the name does not exist."""
+    try:
+        return lstat(str(path)).st_mode
+    except FileNotFoundError:
+        return None
 
 
 class LocalResolver:

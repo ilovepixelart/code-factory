@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Folder01Icon, PlugSocketIcon, Rocket01Icon } from '@hugeicons/core-free-icons'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, useId } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -14,6 +14,8 @@ import { ask, post } from '../lib/actions'
 import type { ConnectionList } from '../lib/connections'
 import { NEW_TICKET } from '../lib/openTicket'
 import { keys } from '../lib/queryKeys'
+
+const uid = useId()
 
 // An empty board's way to a working one: track a repository, connect a model, file the first
 // ticket. Each step reads whether it is done from the board, so it ticks however it was done.
@@ -31,7 +33,10 @@ const tracked = computed(() => (repositories.data.value ?? []).length > 0)
 const connected = computed(() => (connections.data.value?.connections ?? []).length > 0)
 // Filing the first ticket ends the first run, so only the first two can be done while it shows.
 const stepsDone = computed(() => Number(tracked.value) + Number(connected.value))
-const next = computed(() => (!tracked.value ? 'track' : !connected.value ? 'connect' : 'file'))
+const next = computed(() => {
+  if (!tracked.value) return 'track'
+  return connected.value ? 'file' : 'connect'
+})
 
 const path = ref('')
 const refusal = ref('')
@@ -69,17 +74,17 @@ async function track(): Promise<void> {
         <ItemDescription v-if="tracked">{{ repositories.data.value?.join(', ') }}</ItemDescription>
         <form v-else class="mt-2 grid max-w-lg gap-4" @submit.prevent="track()">
           <Field :data-invalid="refusal ? true : undefined">
-            <FieldLabel for="first-repository">Repository folder</FieldLabel>
+            <FieldLabel :for="`${uid}-repository`">Repository folder</FieldLabel>
             <Input
-              id="first-repository"
+              :id="`${uid}-repository`"
               :model-value="path"
               placeholder="/Users/you/src/app"
               autocomplete="off"
               :aria-invalid="refusal ? true : undefined"
-              :aria-describedby="refusal ? 'first-repository-error' : undefined"
+              :aria-describedby="refusal ? `${uid}-repository-error` : undefined"
               @update:model-value="path = String($event)"
             />
-            <FieldError v-if="refusal" id="first-repository-error">{{ refusal }}</FieldError>
+            <FieldError v-if="refusal" :id="`${uid}-repository-error`">{{ refusal }}</FieldError>
           </Field>
           <Button class="justify-self-start" type="submit" :disabled="sending || !path.trim()">
             <Spinner v-if="sending" data-icon="inline-start" />Track

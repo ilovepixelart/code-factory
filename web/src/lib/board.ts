@@ -158,9 +158,16 @@ export interface Board {
 /** How many merged cards the board shows before it is asked for the rest (CF-1077). */
 export const MERGED_SHOWN = 10
 
+/** The run of digits that ends `text`, or an empty string. */
+export function trailingDigits(text: string): string {
+  let start = text.length
+  while (start > 0 && text.charAt(start - 1) >= '0' && text.charAt(start - 1) <= '9') start -= 1
+  return text.slice(start)
+}
+
 /** Cards newest first: by repository, then the number in the id, highest first (CF-1077). */
 export function newestFirst(cards: Card[]): Card[] {
-  const number = (id: string) => Number(/(\d+)$/.exec(id)?.[1] ?? 0)
+  const number = (id: string) => Number(trailingDigits(id))
   return [...cards].sort(
     (a, b) => a.repository.localeCompare(b.repository) || number(b.id) - number(a.id),
   )
