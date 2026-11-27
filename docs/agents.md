@@ -37,6 +37,68 @@ the correction and add a fixture that exercises the behavior. Use the scenario a
 to group repeat failures. Have QA review changes to acceptance expectations. Ticket-specific
 held-back cases can use the existing private QA files.
 
+## Fix-round cap trial
+
+Use the pipeline evaluation runner to compare two and three CI or conflict repair rounds on the
+same cases. The runner checks out the same commit twice, disables shipping, and sets each arm's
+repository `[agents] fix_rounds`. The review round cap and all selected pipeline steps stay the same.
+The stage service enforces this cap when a caller requests a repair round. The follower does not
+yet request CI or conflict repair rounds through that service. An isolated driver must exercise
+that admission path explicitly until the follower does.
+Save the following as a TOML manifest:
+
+```toml
+[fix_round_trial]
+cases = ["intermittent-ci", "merge-conflict"]
+
+[[setup]]
+name = "cap-two"
+fix_rounds = 2
+
+[[setup]]
+name = "cap-three"
+fix_rounds = 3
+```
+
+Run the manifest from the project checkout. The driver path is absolute because the runner starts
+it from the temporary checkout:
+
+```sh
+uv run --no-sync python scripts/eval_pipeline.py \
+  /owner/fix-round-trial.toml /owner/fix-round-results.json \
+  /owner/run-isolated-factory-cases
+```
+
+The driver uses `CODE_FACTORY_EVAL_CASES`, a JSON array of case IDs. Give each arm a fresh board
+state and disposable database, replay the same initial history and inputs, and stop each case at
+the same observation deadline. Use local or simulated delivery so the trial cannot ship live
+changes. The driver writes one outcome per case to the path in `CODE_FACTORY_EVAL_OUTCOMES`.
+For example, one row in the JSON array can be:
+
+```json
+{
+  "case_id": "intermittent-ci",
+  "state": "merged",
+  "fix_rounds": 2,
+  "agent_cost_cents": 120,
+  "owner_cost_cents": 2500
+}
+```
+
+The state is `merged`, `closed` (closed unmerged) or `open` at the deadline. Count the recorded
+CI or conflict rounds, which use `fix_rounds`. Record actual run costs and price measured active
+owner time at the same USD hourly rate in both arms. Use `null` for a missing cost and `0` for a
+known zero. An unsuccessful driver or an incomplete or invalid report leaves the comparison
+empty and makes the runner exit nonzero.
+
+Use the same denominator of all cases in each arm. Check which cases merged under only one cap and
+how many stayed open, then compare the total cost difference for cases with complete costs in
+both arms. A positive `three_minus_two_cents` means three rounds cost more on those pairs.
+Repeat with representative CI and conflict cases, consistent models and acceptance criteria,
+and reversed arm order where provider timing may matter. Synthetic cases verify the reporting
+and isolation only. Changing the default needs real runs with measurable outcomes and costs
+under both caps. The current default is three.
+
 ## State
 
 | Table | Holds |
