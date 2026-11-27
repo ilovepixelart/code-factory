@@ -9,6 +9,7 @@ import pytest
 from code_factory.platform.programs import (
     REPOSITORY_VARIABLES,
     _holds_safely,
+    _shared,
     absolute_path,
     child_environment,
     find_program,
@@ -299,6 +300,10 @@ def test_a_sticky_folder_others_can_write_holds_safely_only_for_root_or_the_user
 ) -> None:
     monkeypatch.setattr(Path, "stat", lambda _self, **_kw: stat_of(uid, 0o1777))
     assert _holds_safely(Path("/tmp")) is expected  # noqa: S108  # never read: stat is replaced
+
+
+def test_a_folder_that_cannot_be_read_is_not_taken_for_a_shared_one(tmp_path: Path) -> None:
+    assert _shared(tmp_path / "missing") is False
 
 
 def test_a_program_below_a_folder_everyone_may_write_is_never_trusted(tmp_path: Path) -> None:

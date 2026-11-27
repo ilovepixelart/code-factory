@@ -228,3 +228,42 @@ async def test_an_exit_file_the_board_would_not_name_is_refused_before_anything_
         f"the exit file must be an absolute path ending in <12 hex digits>.exit, not {named}\n",
     )
     assert _entries(tmp_path) == []  # nothing started, no exit file written
+
+
+@pytest.mark.parametrize(
+    ("text", "named"),
+    [
+        ("/runs/ab12cd34ef56.exit", True),
+        ("/a/b/0123456789ab.exit", True),
+        ("ab12cd34ef56.exit", False),
+        ("/runs/ab12cd34ef56.log", False),
+        ("/runs/ab12cd34ef56.exit.tmp", False),
+        ("/runs/../ab12cd34ef56.exit", False),
+    ],
+)
+def test_the_exit_file_is_one_the_board_would_name(text: str, *, named: bool) -> None:
+    assert (wrapper.exit_file(text) == Path(text)) is named
+    assert (wrapper.exit_file(text) is None) is not named
+
+
+def test_main_refuses_an_exit_file_the_board_would_not_name_in_process(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert wrapper.main(["notes.txt", "--", "/bin/true"]) == wrapper.USAGE_STATUS
+    assert capsys.readouterr().err == (
+        "the exit file must be an absolute path ending in <12 hex digits>.exit, not notes.txt\n"
+    )
+
+
+def test_main_runs_the_command_and_records_its_exit_in_process(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    handlers: list[int] = []
+    # The test process keeps its own SIGTERM handling; the wrapper's handler is only recorded.
+    monkeypatch.setattr(wrapper.signal, "signal", lambda number, _handler: handlers.append(number))
+    exit_path = tmp_path / "ab12cd34ef56.exit"
+
+    assert wrapper.main([str(exit_path), "--", "/bin/sh", "-c", "exit 3"]) == 3
+
+    assert exit_path.read_text() == "3\n"
+    assert handlers[0] == signal.SIGTERM  # asyncio.run adds its own SIGINT handler after it
