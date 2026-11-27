@@ -159,7 +159,7 @@ class DemoLoader:
         await self._d.tickets.archive(archived, by=AUTHOR)
         await self._d.board.save_view("High priority", "priority=high")
         await self._d.board.save_view("Storefront", "repository=web")
-        await self._d.writes.set_column_limit("build", 4, AUTHOR)
+        await self._d.writes.set_column_limit("build", 4)
         await self._d.stages.observe()
         await self._d.metrics.refresh()
         # Keep the served demo from launching agents.

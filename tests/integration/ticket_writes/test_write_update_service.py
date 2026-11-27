@@ -129,7 +129,7 @@ async def test_an_old_link_to_a_deleted_ticket_does_not_freeze_the_card(
 ) -> None:
     gone = await file(tickets, "Gone")
     held = await file(tickets, "Held", blocked_by=[gone.id])
-    await writes.delete(address(gone), OWNER)
+    await writes.delete(address(gone))
 
     await writes.update(address(held), {"title": "Still editable", "blocked_by": gone.id}, OWNER)
 

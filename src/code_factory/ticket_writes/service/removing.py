@@ -14,7 +14,7 @@ RUNNING = "an agent is running on this ticket; stop it first"
 class Removing(WriteBase):
     """Delete a ticket (soft, undoable) and set the columns' limits."""
 
-    async def delete(self, ref: TicketAddress, by: str) -> Changed:  # noqa: ARG002  # the actor of a record the delete does not write
+    async def delete(self, ref: TicketAddress) -> Changed:
         """Hide the ticket from every read; refused while an agent runs on it."""
         found = await self._core(ref)
         if self._active_runs is not None and await self._active_runs(ref):
@@ -25,7 +25,7 @@ class Removing(WriteBase):
         back = {"op": "restore", "repository": ref.repository, "id": found.id}
         return await self._offer([back], f"Deleted {found.id}")
 
-    async def set_column_limit(self, stage: str, raw: object, by: str) -> Changed:  # noqa: ARG002
+    async def set_column_limit(self, stage: str, raw: object) -> Changed:
         """Limit the open tickets of a column; `None` clears the limit."""
         if stage not in STAGES:
             raise BadRequestError(f"unknown stage {stage}")

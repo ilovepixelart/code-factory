@@ -43,17 +43,17 @@ async def test_a_limit_is_set_replaced_and_cleared_without_touching_the_other_co
     writes: TicketWriteService,
 ) -> None:
     for stage, raw in (("spec", 2), ("build", 3), ("build", 5)):
-        answer = await writes.set_column_limit(stage, raw, OWNER)
+        answer = await writes.set_column_limit(stage, raw)
         assert (answer.notice, answer.undo) == ("", None)
     assert await writes.column_limits() == {"spec": 2, "build": 5}
 
-    await writes.set_column_limit("spec", None, OWNER)
+    await writes.set_column_limit("spec", None)
 
     assert await writes.column_limits() == {"build": 5}
 
 
 async def test_clearing_a_column_that_has_no_limit_is_fine(writes: TicketWriteService) -> None:
-    await writes.set_column_limit("review", None, OWNER)
+    await writes.set_column_limit("review", None)
 
     assert await writes.column_limits() == {}
 
@@ -62,10 +62,10 @@ async def test_clearing_a_column_that_has_no_limit_is_fine(writes: TicketWriteSe
 async def test_a_limit_that_is_not_a_positive_whole_number_is_refused_and_nothing_changes(
     writes: TicketWriteService, raw: object
 ) -> None:
-    await writes.set_column_limit("build", 3, OWNER)
+    await writes.set_column_limit("build", 3)
 
     with pytest.raises(BadRequestError) as refused:
-        await writes.set_column_limit("build", raw, OWNER)
+        await writes.set_column_limit("build", raw)
 
     assert str(refused.value) == WHOLE
     assert await writes.column_limits() == {"build": 3}
@@ -76,7 +76,7 @@ async def test_a_name_that_is_no_column_is_refused_before_its_value_is_read(
 ) -> None:
     for raw in (2, "many"):
         with pytest.raises(BadRequestError, match=exactly("unknown stage later")):
-            await writes.set_column_limit("later", raw, OWNER)
+            await writes.set_column_limit("later", raw)
     assert await writes.column_limits() == {}
 
 
@@ -85,7 +85,7 @@ async def test_a_delete_hides_the_ticket_and_offers_an_undo_that_brings_back_its
 ) -> None:
     one = await file(tickets, "One")
 
-    answer = await writes.delete(address(one), OWNER)
+    answer = await writes.delete(address(one))
 
     assert answer.notice == f"Deleted {one.id}"
     assert await tickets.list(TicketFilter(archived=None)) == []
@@ -100,7 +100,7 @@ async def test_a_deleted_ticket_s_number_is_never_given_again(
     writes: TicketWriteService, tickets: TicketService
 ) -> None:
     one = await file(tickets, "One")
-    await writes.delete(address(one), OWNER)
+    await writes.delete(address(one))
 
     made = await writes.create("sample", {"title": "Next"}, OWNER)
 
@@ -116,8 +116,8 @@ async def test_a_ticket_an_agent_runs_on_is_not_deleted(
     writes.bind_active_runs(check)
 
     with pytest.raises(ConflictError) as refused:
-        await writes.delete(address(busy), OWNER)
-    await writes.delete(address(idle), OWNER)
+        await writes.delete(address(busy))
+    await writes.delete(address(idle))
 
     assert str(refused.value) == "an agent is running on this ticket; stop it first"
     assert (await tickets.get(busy.id)).title == "Busy"
@@ -129,7 +129,7 @@ async def test_with_no_run_check_bound_a_delete_is_allowed(
 ) -> None:
     one = await file(tickets, "One")
 
-    await writes.delete(address(one), OWNER)
+    await writes.delete(address(one))
 
     assert await tickets.list(TicketFilter(archived=None)) == []
 
@@ -138,7 +138,7 @@ async def test_deleting_a_missing_ticket_is_not_found(writes: TicketWriteService
     from code_factory.tickets.models import TicketAddress  # noqa: PLC0415
 
     with pytest.raises(NotFoundError, match=exactly("no such ticket")):
-        await writes.delete(TicketAddress(repository="sample", id="CF-999999"), OWNER)
+        await writes.delete(TicketAddress(repository="sample", id="CF-999999"))
 
 
 async def test_a_duplicate_copies_the_card_and_leaves_state_and_links_behind(

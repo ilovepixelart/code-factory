@@ -141,7 +141,7 @@ async def test_an_undone_delete_cannot_be_restored_twice(
     writes: TicketWriteService, tickets: TicketService, undo: UndoService
 ) -> None:
     one = await file(tickets, "One")
-    answer = await writes.delete(address(one), OWNER)
+    answer = await writes.delete(address(one))
     assert answer.undo is not None
     async with tickets.unit(["sample"], wait=1.0) as unit:
         await unit.restore(address(one))
@@ -154,7 +154,7 @@ async def test_an_undo_of_a_ticket_deleted_since_is_not_found(
     writes: TicketWriteService, tickets: TicketService, undo: UndoService
 ) -> None:
     ticket, token = await archived(writes, tickets)
-    await writes.delete(address(await tickets.get(ticket)), OWNER)
+    await writes.delete(address(await tickets.get(ticket)))
 
     with pytest.raises(NotFoundError, match=exactly("no such ticket")):
         await undo.undo(token, OWNER)
