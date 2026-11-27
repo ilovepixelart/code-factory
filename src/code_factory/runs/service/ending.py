@@ -7,7 +7,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from code_factory.agents.service import StartKit
-from code_factory.platform.errors import CodeFactoryError, NotFoundError
+from code_factory.platform.errors import CodeFactoryError, NotFoundError, UnavailableError
+from code_factory.platform.text import masked
 from code_factory.runs.adapters import files
 from code_factory.runs.adapters.processes import Target
 from code_factory.runs.models import (
@@ -149,23 +150,27 @@ class Ending(Reading):
         """
         async with self._pass:
             async with self._uow() as session:
-                active = await RunRepository(session).active()
+                store = RunRepository(session)
+                active = await store.active()
+                pending = await store.unsettled()
             ended: list[Ended] = []
             for run in active:
                 result = await self._collect_one(run)
                 if result is not None:
                     ended.append(result)
-            await self._settle_pending()
+            for run in pending:
+                await self._try_settle(run)
             return ended
 
-    async def _settle_pending(self) -> None:
-        async with self._uow() as session:
-            pending = await RunRepository(session).unsettled()
-        for run in pending:
-            try:
-                await self._settle(run)
-            except CodeFactoryError, OSError:
-                logger.exception("the end of run %s could not be settled; it is retried", run.id)
+    async def _try_settle(self, run: Run) -> None:
+        try:
+            await self._settle(run)
+        except (CodeFactoryError, OSError) as error:
+            logger.warning(
+                "the end of run %s could not be settled; it will be retried: %s",
+                run.id,
+                masked(str(error)),
+            )
 
     async def _exit_of(self, run: Run) -> int | None:
         """The code a run ended with, or `None` while it still runs."""
@@ -192,7 +197,7 @@ class Ending(Reading):
         ended = await self._end(run, facts)
         if ended is None:
             return None
-        await self._settle(ended)
+        await self._try_settle(ended)
         return Ended(
             run=await self.get(run.id),
             limit_until=facts.limit,
@@ -349,7 +354,7 @@ class Ending(Reading):
     async def _next_step(self, run: Run, *, fetched: bool) -> None:
         """Hand a build's fetched commits to their checks and a review to its verdict.
 
-        A step its owner refuses is logged: the run still settles.
+        Temporary failures leave the run unsettled. A refusal is recorded before settling.
         """
         flow, commits = self._ports.flow, run.commits or []
         try:
@@ -363,8 +368,18 @@ class Ending(Reading):
                 await flow.build_ended(run.ticket_key, commits[-1])
             elif run.stage == "review":
                 await flow.review_ended(run.ticket_key, run.id, run.head)
+        except UnavailableError:
+            raise
         except CodeFactoryError as refused:
-            logger.warning("the end of run %s set nothing off: %s", run.id, refused)
+            reason = masked(str(refused))
+            await self._ports.tickets.record_event(
+                run.ticket_key,
+                "run.handoff_refused",
+                run.id,
+                {"run": run.id, "stage": run.stage, "reason": reason},
+                self._clock(),
+            )
+            logger.warning("the end of run %s set nothing off: %s", run.id, reason)
 
     async def _snapshot(self, run: Run) -> None:
         try:

@@ -68,12 +68,19 @@ class Collaborators:
         async with self._uow() as session:
             return (await DeliveryRepository(session).events([ticket_id])).get(ticket_id, [])
 
-    async def _read_pull(self, ticket_id: str, repository: str, url: str) -> PullView | None:
+    async def _read_pull(
+        self, ticket_id: str, repository: str, url: str, *, shipped_head: str = ""
+    ) -> PullView | None:
         """Ask GitHub for the pull request and store what it says."""
         answer = await self._gh_json(repository, ["pr", "view", url, "--json", PULL_FIELDS])
         if not isinstance(answer, dict):
             return None
-        return await self.record_reading(ticket_id, repository, url, reduce_pull(answer))
+        reading = reduce_pull(answer)
+        if shipped_head and (reading.head != shipped_head or answer.get("url") != url):
+            return None
+        return await self.record_reading(
+            ticket_id, repository, url, reading, shipped_head=shipped_head
+        )
 
     async def record_reading(
         self,
