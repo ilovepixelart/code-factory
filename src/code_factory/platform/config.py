@@ -27,7 +27,7 @@ _URL_HINT = (
 
 # `load_settings(database=False)` only: nothing reads it, and the unit of work it leads to refuses
 # every use, so a command that never opens the database cannot reach it by accident.
-NO_DATABASE_URL = "postgresql+asyncpg://unused:unused@127.0.0.1:1/unused"
+NO_DATABASE_URL = "postgresql+asyncpg://127.0.0.1:1/unused"  # no user: no keychain lookup
 
 
 def _env_files() -> tuple[str, ...]:
