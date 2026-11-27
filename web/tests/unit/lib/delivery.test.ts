@@ -56,6 +56,13 @@ describe('deliveryStatus', () => {
     })
   })
 
+  test('a_run_names_its_stage_even_when_it_is_outside_the_board_columns', () => {
+    expect(deliveryStatus(card({ runs: [{ ...run, stage: 'split' }] }))?.label).toBe(
+      'Agent · Split',
+    )
+    expect(deliveryStatus(card({ runs: [{ ...run, stage: 'qa' }] }))?.label).toBe('Agent · qa')
+  })
+
   test('a_run_without_an_agent_falls_back_to_the_holder_then_to_agent', () => {
     expect(deliveryStatus(card({ holder: 'alex', runs: [{ ...run, agent: '' }] }))?.label).toBe(
       'alex · Build',
