@@ -105,9 +105,18 @@ test('the_agent_section_says_when_the_month_budget_runs_out', async () => {
   ])
 })
 
-const running = (progress: object) => ({
+const running = (progress?: object, stage = 'build') => ({
   ...(view as object),
-  runs: [{ id: 'r1', stage: 'build', iteration: 1, loop: false, started_at: 0, progress }],
+  runs: [{ id: 'r1', stage, iteration: 1, loop: false, started_at: 0, progress }],
+})
+
+test('a split without reported progress still shows its status and stop control', async () => {
+  const { page } = await form(running(undefined, 'split'))
+
+  expect(page.text()).toContain('Iteration 1 on Split')
+  expect(page.text()).toContain('tool calls not known')
+  expect(page.findAll('button').map((button) => button.text())).toContain('Stop agent')
+  page.unmount()
 })
 
 // CF-1036-R12: hand-worked from the measured CF-918 run: 59 calls less 13 read and 0 changed is

@@ -22,6 +22,13 @@ export const STAGE_LABELS: Record<Stage, string> = {
   released: 'Released',
 }
 
+const RUN_STAGE_LABELS: Partial<Record<string, string>> = { ...STAGE_LABELS, split: 'Split' }
+
+/** Runs may do work outside the board columns, such as splitting a ticket. */
+export function runStageLabel(stage: string): string {
+  return RUN_STAGE_LABELS[stage] ?? stage
+}
+
 /** Each column's dot colour, a hue of its own from the theme's chart colours: Spec violet, Build
  *  blue, Review yellow, Merged green; a released ticket, off the board, is muted. */
 export const STAGE_DOT: Record<Stage, string> = {
@@ -56,7 +63,7 @@ interface Run {
   id: string
   agent?: string
   started_at?: number
-  stage: Stage
+  stage: string
   iteration: number
   loop: boolean
   max_iterations: number
