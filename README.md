@@ -276,6 +276,9 @@ runs a local rules file and reports findings as warnings.
 after the full gate. It runs the affected package suites in a disposable copy of the committed
 candidate. Surviving mutations and inconclusive runs produce warnings.
 
+GitHub's dependency audit checks only the lockfiles changed by a pull request. Pushes to
+`main` and manually dispatched runs check all lockfiles.
+
 The [container runner example](.code-factory/config.container.example.toml) uses a checks container.
 Build its image on the Docker runner from the checkout root, and rebuild it when the toolchain
 or a lockfile changes:
