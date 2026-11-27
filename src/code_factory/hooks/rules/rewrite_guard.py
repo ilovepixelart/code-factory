@@ -144,14 +144,7 @@ def _git_rewrite(words: list[str], directory: str) -> Rewrite | None:
     while at < len(words) and words[at].startswith("-"):
         word = words[at]
         following = words[at + 1] if at + 1 < len(words) else None
-        if word in ("-c", "--config-env"):
-            config_rebases |= following is not None and git_words.rebase_setting(
-                following, literal=word == "-c"
-            )
-        elif word.startswith("--config-env="):
-            config_rebases |= git_words.rebase_setting(
-                word.removeprefix("--config-env="), literal=False
-            )
+        config_rebases |= _config_rebases(word, following)
         if word == "-C":
             if following is None:
                 return None
@@ -165,3 +158,12 @@ def _git_rewrite(words: list[str], directory: str) -> Rewrite | None:
     rest = words[at + 1 :]
     action = git_words.git_action(words[at], rest, config_rebases=config_rebases)
     return None if action is None else Rewrite(directory, action, " ".join(words))
+
+
+def _config_rebases(word: str, following: str | None) -> bool:
+    """Whether the git option `word` (with the word after it) sets a rebasing config value."""
+    if word in ("-c", "--config-env"):
+        return following is not None and git_words.rebase_setting(following, literal=word == "-c")
+    if word.startswith("--config-env="):
+        return git_words.rebase_setting(word.removeprefix("--config-env="), literal=False)
+    return False
