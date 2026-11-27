@@ -257,7 +257,13 @@ class TalkRepository:
         )
 
     async def entries(
-        self, number: int, kind: str, *, limit: int, cursor: tuple[datetime, int, int] | None
+        self,
+        number: int,
+        kind: str,
+        *,
+        limit: int,
+        cursor: tuple[datetime, int, int] | None,
+        newest_first: bool,
     ) -> list[Any]:
         """Rows of one kind of the ticket's talk after the cursor `(at, kind rank, id)`."""
         rank = ENTRY_RANK[kind]
@@ -276,13 +282,16 @@ class TalkRepository:
             at, key = PostRow.created_at, PostRow.id
         if cursor is not None:
             when, cursor_rank, last = cursor
-            if rank > cursor_rank:
-                query = query.where(at >= when)
-            elif rank == cursor_rank:
-                query = query.where((at > when) | ((at == when) & (key > last)))
-            else:
-                query = query.where(at > when)
-        result = await self._session.execute(query.order_by(at, key).limit(limit))
+            later = at < when if newest_first else at > when
+            rank_follows = rank < cursor_rank if newest_first else rank > cursor_rank
+            if rank == cursor_rank:
+                key_follows = key < last if newest_first else key > last
+                later |= (at == when) & key_follows
+            elif rank_follows:
+                later |= at == when
+            query = query.where(later)
+        order = (at.desc(), key.desc()) if newest_first else (at.asc(), key.asc())
+        result = await self._session.execute(query.order_by(*order).limit(limit))
         return list(result.all()) if kind == "answer" else list(result.scalars())
 
 

@@ -141,6 +141,7 @@ class MovesMixin(TreesMixin):
             msg = f"{ticket_id} is not a ticket id"
             raise BadRequestError(msg)
         folders = await self._folders(repository, tree or ticket_id)
+        await self._ports.tickets.ticket(repository, ticket_id)
         path = Path(folders.worktree)
         commit = await self._snapshot(path, folders, ticket_id)
         try:

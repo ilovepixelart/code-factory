@@ -57,6 +57,22 @@ test('e2e_a_missing_ticket_says_so', async ({ served, writesBoard }) => {
   await expect(writesBoard.getByText('No ticket CF-99')).toBeVisible()
 })
 
+test('e2e_the_ticket_activity_shows_the_newest_comment_first', async ({ served, writesBoard }) => {
+  const path = '/api/tickets/sample/CF-2/comments'
+  await send(served, 'POST', path, { text: 'Earlier comment for the activity test' })
+  await send(served, 'POST', path, { text: 'Latest comment for the activity test' })
+  await writesBoard.goto(`${served.url}/tickets/sample/CF-2`)
+
+  const comments = writesBoard
+    .getByRole('list', { name: 'Activity' })
+    .getByRole('listitem')
+    .filter({ hasText: 'comment for the activity test' })
+  await expect(comments).toHaveText([
+    /Latest comment for the activity test/,
+    /Earlier comment for the activity test/,
+  ])
+})
+
 // A title cleared and left is refused on the field and restored; the ticket stays readable.
 test('e2e_a_cleared_title_is_refused_and_the_ticket_keeps_it', async ({ served, writesBoard }) => {
   await writesBoard.goto(`${served.url}/tickets/sample/CF-2`)

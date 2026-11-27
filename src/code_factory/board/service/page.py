@@ -29,8 +29,6 @@ from code_factory.tickets.service import merge_entries
 
 FEED_SIZE = 100
 LOG_LINES = 40
-TALK_PAGE = 100
-TALK_READ_MAX = 1000
 _RENDERS = CapacityLimiter(2)
 _PAGE_DOCUMENTS = (
     DocumentName.REQUIREMENTS,
@@ -191,23 +189,13 @@ class PageReader:
             shown.append(item)
         return shown, texts.get(DocumentName.REQUIREMENTS, "")
 
-    async def _talk(self, ticket_id: str) -> list[ActivityEntry]:
-        lines: list[ActivityEntry] = []
-        cursor = None
-        while len(lines) < TALK_READ_MAX:
-            page = await self._sources.talk.activity_entries(
-                ticket_id, limit=TALK_PAGE, cursor=cursor
-            )
-            lines += [talk_line(record) for record in page.items]
-            cursor = page.next_cursor
-            if cursor is None:
-                break
-        return lines
-
     async def _activity(self, ticket_id: str) -> list[dict[str, Any]]:
         """The newest `FEED_SIZE` lines of the history and the talk, folded, newest first."""
         history = await self._sources.activity.feed_entries(ticket_id, FEED_SIZE)
-        merged = merge_entries([history, await self._talk(ticket_id)])
+        talk = await self._sources.talk.activity_entries(
+            ticket_id, limit=FEED_SIZE, newest_first=True
+        )
+        merged = merge_entries([history, [talk_line(record) for record in reversed(talk.items)]])
         folded = fold_activity(merged)[:FEED_SIZE]
         records = await self._sources.runs.run_records(
             [e["run"] for e in folded if e["kind"] == "run"]

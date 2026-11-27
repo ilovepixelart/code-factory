@@ -137,14 +137,14 @@ class _Directory(RepositoryDirectory):
 
 
 class _GitTickets(TicketPort):
-    """Git's view of tickets; a ticket is read by id, so the repository only scopes the call."""
+    """Git's view of tickets in the checkout's repository."""
 
     def __init__(self, services: Services) -> None:
         self._services = services
 
     @override
     async def ticket(self, repository: str, ticket_id: str) -> TicketRef:
-        ticket = await self._services.get(TicketService).get(ticket_id)
+        ticket = await self._services.get(TicketService).get_in_repository(repository, ticket_id)
         return TicketRef(
             id=ticket.id, title=ticket.title, kind=ticket.type, labels=ticket.labels,
             branch=ticket.branch, blocker_ids=ticket.blocked_by,
@@ -152,17 +152,22 @@ class _GitTickets(TicketPort):
 
     @override
     async def record_branch(self, repository: str, ticket_id: str, branch: str) -> None:
-        await self._services.get(TicketService).set_branch(ticket_id, branch, by="board")
+        tickets = self._services.get(TicketService)
+        await tickets.locate(repository, ticket_id)
+        await tickets.set_branch(ticket_id, branch, by="board")
 
     @override
     async def stack_parent(self, repository: str, ticket_id: str) -> str | None:
         """The one unmerged blocker in Build or Review with a branch that waits on nothing."""
         tickets = self._services.get(TicketService)
-        blockers = [await tickets.get(b) for b in (await tickets.get(ticket_id)).blocked_by]
+        ticket = await tickets.get_in_repository(repository, ticket_id)
+        blockers = [await tickets.get(b) for b in ticket.blocked_by]
         open_ones = [b for b in blockers if b.column is not Column.MERGED]
         if len(open_ones) != 1:
             return None
         parent = open_ones[0]
+        if parent.repository != repository:
+            return None
         parent_blockers = [await tickets.get(b) for b in parent.blocked_by]
         waiting = any(b.column is not Column.MERGED for b in parent_blockers)
         in_flight = parent.column in {Column.BUILD, Column.REVIEW}

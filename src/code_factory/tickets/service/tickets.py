@@ -75,7 +75,11 @@ class TicketService(TicketLookups):
 
     async def locate(self, repository: str, ticket: str) -> TicketRef:
         """The reference of the ticket when it belongs to `repository`, else `NotFoundError`."""
-        found = await self.ref_of(ticket)
+        return to_ref(await self.get_in_repository(repository, ticket))
+
+    async def get_in_repository(self, repository: str, ticket: str) -> Ticket:
+        """Read the ticket only if it belongs to the named repository."""
+        found = await self.get(ticket)
         if found.repository != repository:
             raise NotFoundError("no such ticket")
         return found
