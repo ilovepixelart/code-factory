@@ -13,10 +13,10 @@ import asyncio
 import contextlib
 import os
 import signal
-from collections.abc import Mapping, Sequence
+from collections.abc import Coroutine, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import IO
+from typing import IO, Any
 
 import anyio
 import anyio.to_thread
@@ -162,13 +162,7 @@ async def run_process(  # noqa: PLR0913  # the limits of one run, all optional
     except TimeoutError:
         timed_out = True
     finally:
-        await _finish(process, grace_s)
-        capped.cancel()
-        # The group is dead, so the pipes reach their end; a reader still waiting is cancelled.
-        await asyncio.wait({done, *readers}, timeout=grace_s)
-        for task in (done, *readers):
-            task.cancel()
-        await asyncio.gather(done, capped, *readers, return_exceptions=True)
+        await _finish(_finish_capture(process, grace_s, [done, *readers], capped))
     truncated = out.cut or err.cut
     code = None if truncated or timed_out else process.returncode
     return ProcessResult(
@@ -176,13 +170,36 @@ async def run_process(  # noqa: PLR0913  # the limits of one run, all optional
     )
 
 
-async def _finish(process: asyncio.subprocess.Process, grace_s: float) -> None:
-    """End the child's group and reap it, even while the caller is being cancelled.
+async def _finish_capture(
+    process: asyncio.subprocess.Process,
+    grace_s: float,
+    readers: Sequence[asyncio.Task[None]],
+    capped: asyncio.Task[bool],
+) -> None:
+    """Reap the child, then join the tasks that captured its output."""
+    try:
+        await stop_group(process, grace_s)
+    finally:
+        capped.cancel()
+        await asyncio.wait(readers, timeout=grace_s)
+        for task in readers:
+            task.cancel()
+        await asyncio.gather(*readers, capped, return_exceptions=True)
 
-    Always signalled: a leader that exited on its own may have left workers running.
-    """
+
+async def _finish(cleanup: Coroutine[Any, Any, None]) -> None:
+    """Wait for bounded cleanup even if the caller is cancelled again during it."""
     with anyio.CancelScope(shield=True):
-        await asyncio.shield(stop_group(process, grace_s))
+        task = asyncio.create_task(cleanup)
+        try:
+            await asyncio.shield(task)
+        except asyncio.CancelledError:
+            # Keep the first cancellation and wait through any further stop requests.
+            while not task.done():
+                with contextlib.suppress(asyncio.CancelledError):
+                    await asyncio.shield(task)
+            task.result()
+            raise
 
 
 def _open_log(log: Path) -> IO[bytes]:
@@ -229,7 +246,7 @@ async def run_logged(
         except TimeoutError:
             return None
         finally:
-            await _finish(process, DEFAULT_GRACE_S)
+            await _finish(stop_group(process, DEFAULT_GRACE_S))
         return _code(process.returncode)
     finally:
         sink.close()

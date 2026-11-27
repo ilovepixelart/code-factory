@@ -2,13 +2,16 @@
 
 import asyncio
 import os
+import shlex
+import sys
 import time
 from pathlib import Path
 
+import anyio
 import pytest
 
 from code_factory.platform.errors import UnavailableError
-from code_factory.platform.process import ProcessResult, checked_group, run_process
+from code_factory.platform.process import ProcessResult, checked_group, run_logged, run_process
 
 SH = "/bin/sh"
 
@@ -93,6 +96,48 @@ async def test_cancelling_the_caller_stops_the_child_and_still_raises_cancelled(
     with pytest.raises(asyncio.CancelledError):
         await task
     assert not await alive(pid)
+
+
+@pytest.mark.parametrize("logged", [False, True])
+async def test_cancelling_again_still_waits_until_the_child_exits(
+    tmp_path: Path, *, logged: bool
+) -> None:
+    ready, term, release = (tmp_path / name for name in ("pid", "term", "release"))
+    child = rf"""
+import os
+import signal
+import time
+from pathlib import Path
+
+signal.signal(signal.SIGTERM, lambda *_: Path({str(term)!r}).touch())
+Path({str(ready)!r}).write_text(str(os.getpid()) + "\n")
+while not Path({str(release)!r}).exists():
+    time.sleep(0.01)
+"""
+    argv = [sys.executable, "-c", child]
+    running = (
+        run_logged(f"exec {shlex.join(argv)}", cwd=tmp_path, log=tmp_path / "run.log", env={})
+        if logged
+        else run_process(argv)
+    )
+    task = asyncio.create_task(running)
+    try:
+        async with asyncio.timeout(5):
+            while (pid := written_pid(ready)) is None:  # noqa: ASYNC110  # subprocess file
+                await asyncio.sleep(0.01)
+            task.cancel()
+            while not await anyio.Path(term).exists():  # noqa: ASYNC110  # subprocess file
+                await asyncio.sleep(0.01)
+            for _ in range(2):
+                task.cancel()
+                await asyncio.sleep(0)
+            waiting_for_child = not task.done()
+    finally:
+        await anyio.Path(release).touch()
+        [outcome] = await asyncio.gather(task, return_exceptions=True)
+    assert isinstance(outcome, asyncio.CancelledError)
+    assert not await alive(pid)
+    assert waiting_for_child
 
 
 async def test_a_program_that_cannot_start_is_one_sentence() -> None:
