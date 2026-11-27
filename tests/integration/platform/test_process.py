@@ -128,8 +128,9 @@ while not Path({str(release)!r}).exists():
             task.cancel()
             while not await anyio.Path(term).exists():  # noqa: ASYNC110  # subprocess file
                 await asyncio.sleep(0.01)
-            task.cancel()
-            await asyncio.sleep(0)
+            for _ in range(2):
+                task.cancel()
+                await asyncio.sleep(0)
             waiting_for_child = not task.done()
     finally:
         await anyio.Path(release).touch()

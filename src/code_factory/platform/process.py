@@ -189,17 +189,17 @@ async def _finish_capture(
 
 async def _finish(cleanup: Coroutine[Any, Any, None]) -> None:
     """Wait for bounded cleanup even if the caller is cancelled again during it."""
-    pending_cancel: asyncio.CancelledError | None = None
     with anyio.CancelScope(shield=True):
         task = asyncio.create_task(cleanup)
-        while not task.done():
-            try:
-                await asyncio.shield(task)
-            except asyncio.CancelledError as error:
-                pending_cancel = error
-        task.result()
-    if pending_cancel is not None:
-        raise pending_cancel
+        try:
+            await asyncio.shield(task)
+        except asyncio.CancelledError:
+            # Keep the first cancellation and wait through any further stop requests.
+            while not task.done():
+                with contextlib.suppress(asyncio.CancelledError):
+                    await asyncio.shield(task)
+            task.result()
+            raise
 
 
 def _open_log(log: Path) -> IO[bytes]:
