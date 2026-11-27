@@ -7,8 +7,8 @@ from code_factory.git.models import LogEntry, Merge
 
 FILING = "tickets/"
 WALK_LIMIT = 10_000
-_TICKET = re.compile(r"([A-Za-z]+)-([0-9]+)")
-_PULL = re.compile(r"Merge pull request #(.*?) from (.*)")
+_TICKET = re.compile(r"([A-Za-z]+)-(\d+)", re.ASCII)
+_PULL_PREFIX = "Merge pull request #"
 
 
 def merged_from(subject: str) -> tuple[int | None, str] | None:
@@ -16,10 +16,11 @@ def merged_from(subject: str) -> tuple[int | None, str] | None:
 
     `Merge pull request #7 from owner/ticket/cf-12` is `(7, "ticket/cf-12")`.
     """
-    found = _PULL.fullmatch(subject)
-    if found is None:
+    if not subject.startswith(_PULL_PREFIX) or "\n" in subject:
         return None
-    number, source = str(found.group(1)), str(found.group(2))
+    number, separator, source = subject.removeprefix(_PULL_PREFIX).partition(" from ")
+    if not separator:
+        return None
     branch = source.partition("/")[2] if "/" in source else source
     pull: int | None = int(number) if number.isdigit() else None
     return pull, branch.strip()
