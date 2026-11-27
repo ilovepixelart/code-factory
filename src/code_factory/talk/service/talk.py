@@ -363,8 +363,10 @@ class TalkService:
         kinds: builtins.list[EntryKind] | None = None,
         limit: int | None = None,
         cursor: str | None = None,
+        *,
+        newest_first: bool = False,
     ) -> TalkEntryPage:
-        """The ticket's talk oldest first, for its timeline; `kinds` narrows it."""
+        """The ticket's talk in the requested order; `kinds` narrows it."""
         number = ticket_number(ticket)
         size = min(max(limit or PAGE_DEFAULT, 1), PAGE_MAX)
         after = entry_cursor(cursor)
@@ -375,9 +377,11 @@ class TalkService:
         async with self._uow() as session:
             repository = TalkRepository(session)
             for kind in wanted:
-                rows = await repository.entries(number, kind, limit=size + 1, cursor=after)
+                rows = await repository.entries(
+                    number, kind, limit=size + 1, cursor=after, newest_first=newest_first
+                )
                 entries += entries_of(ticket, kind, rows)
-        entries.sort(key=lambda item: item[0])
+        entries.sort(key=lambda item: item[0], reverse=newest_first)
         page = [entry for _, entry in entries[:size]]
         last = entries[size - 1][0] if len(entries) > size else None
         return TalkEntryPage(items=page, next_cursor=entry_cursor_text(last))

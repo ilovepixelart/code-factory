@@ -7,7 +7,14 @@ from pathlib import Path
 from code_factory.platform.errors import ConflictError, NotFoundError
 from code_factory.stages import rules
 from code_factory.stages.adapters import GitDiffReader, TestFiles
-from code_factory.stages.models import BlockingFinding, Hold, Record, ReviewOutcome, ReviewVerdict
+from code_factory.stages.models import (
+    BlockingFinding,
+    Hold,
+    Record,
+    ReviewOutcome,
+    ReviewVerdict,
+    StageMove,
+)
 from code_factory.stages.repository import StageRepository
 from code_factory.stages.service.assess import Assessing, acted_on
 from code_factory.stages.service.base import ACTOR
@@ -71,24 +78,31 @@ class Reviewing(Assessing):
             decision=decision, returned=returned + (decision == "changes"), sentence=sentence
         )
 
-    async def review_fix_due(self, ticket: str) -> bool:
-        """Whether a review returned this ticket to Build."""
-        verdicts = await self.review_verdicts(ticket)
-        latest = next((v for v in reversed(verdicts) if v.outcome != "skipped"), None)
-        return (
-            latest is not None
-            and latest.outcome == "returned"
-            and (await self.assess(ticket)).declared == "build"
-        )
+    async def review_return_at(self, ticket: str) -> datetime | None:
+        """When a review returned the ticket to Build, while the review's pin still holds."""
+        number = await self._number(ticket)
+        async with self._uow() as session:
+            return await StageRepository(session).review_return_at(number, ACTOR)
 
-    async def fix_committed(self, ticket: str) -> None:
+    async def fix_committed(self, ticket: str, *, returned_at: datetime | None = None) -> None:
         """A ticket returned to Build by review follows its evidence after a fix commits."""
-        if not await self.review_fix_due(ticket):
+        at = returned_at if returned_at is not None else await self.review_return_at(ticket)
+        if at is None:
             return
-        try:
-            await self.declare(ticket, "", ACTOR, expect="build")
-        except ConflictError:
-            return
+        assessed = await self.assess(ticket)
+        async with self._uow() as session:
+            cleared = await StageRepository(session).clear_review_return(assessed.number, ACTOR, at)
+        if cleared:
+            move = StageMove(
+                ticket_id=ticket,
+                number=assessed.number,
+                from_stage="build",
+                to_stage=assessed.derived,
+                declared_before="build",
+                declared_after="",
+                changed=True,
+            )
+            await self._record_stage(move, ACTOR)
 
     async def record_review_skipped(self, ticket: str, head: str, reason: str, note: str) -> None:
         """Record that the review of `head` was skipped; `note` carries why, as a sentence."""

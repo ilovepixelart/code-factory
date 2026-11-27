@@ -155,6 +155,23 @@ async def test_news_over_the_limit_leaves_the_rest_unread(
     assert second.text.endswith("b" * 6000)
 
 
+async def test_the_timeline_pages_newest_first_across_equal_timestamps(
+    talk: TalkService, ticket: Ticket, clock: Clock
+) -> None:
+    await talk.add_comment(ticket.id, "Older", OWNER)
+    clock.advance(seconds=1)
+    await talk.add_comment(ticket.id, "First comment", OWNER)
+    await talk.post_message(ticket.id, "Message", OWNER, "run")
+    await talk.add_comment(ticket.id, "Second comment", OWNER)
+
+    cursor = None
+    for expected in ("Message", "Second comment", "First comment", "Older"):
+        page = await talk.activity_entries(ticket.id, limit=1, cursor=cursor, newest_first=True)
+        assert [entry.text for entry in page.items] == [expected]
+        cursor = page.next_cursor
+    assert cursor is None
+
+
 async def test_a_message_kept_for_the_next_run_is_no_news_for_this_one(
     talk: TalkService, ticket: Ticket
 ) -> None:
