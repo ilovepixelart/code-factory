@@ -1,7 +1,9 @@
 """The flow port over the checks and stages services: what a run's end sets off."""
 
 from code_factory.checks.service import CheckService
+from code_factory.platform.errors import ConflictError
 from code_factory.platform.services import Services
+from code_factory.runs.models import Repair
 from code_factory.stages.service import StageService
 
 
@@ -18,6 +20,22 @@ class FlowAdapter:
     async def verify_build(self, ticket_id: str, head: str) -> None:
         """Recheck the receipt against the commit the Build agent will receive."""
         await self._services.get(CheckService).verify_build(ticket_id, head)
+
+    async def admit_repair(self, ticket_id: str, repair: Repair, run_id: str = "") -> None:
+        """Refuse a duplicate or an exhausted round, reserving only an actual run."""
+        decision = await self._services.get(StageService).begin_fix_round(
+            ticket_id, repair.head, repair.reason, run_id=run_id, can_start=bool(run_id)
+        )
+        if decision.outcome == "halted":
+            msg = f"Fix rounds exhausted ({decision.rounds}) on {repair.head[:12]}"
+            raise ConflictError(msg)
+        if decision.outcome == "given":
+            msg = f"A {repair.reason} repair already ran on {repair.head[:12]}"
+            raise ConflictError(msg)
+
+    async def release_repair(self, ticket_id: str, run_id: str) -> None:
+        """Give back a reservation for which no process could launch."""
+        await self._services.get(StageService).release_fix_round(ticket_id, run_id)
 
     async def build_ended(self, ticket_id: str, head: str) -> None:
         """Queue the head's checks; a ticket the review returned goes back to its evidence."""

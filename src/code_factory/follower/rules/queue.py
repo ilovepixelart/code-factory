@@ -187,7 +187,7 @@ def plan_queue(  # noqa: PLR0913  # the board's facts, all named
     ]
     planned: list[Planned] = []
     for card in sorted(candidates, key=_order):
-        reason = spec_hold(card) or ("" if now is None else waiting(card, now))
+        reason = card.repair_hold or spec_hold(card) or ("" if now is None else waiting(card, now))
         reason = reason or _hold(
             card,
             used=used,

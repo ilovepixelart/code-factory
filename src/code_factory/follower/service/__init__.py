@@ -5,7 +5,7 @@ import logging
 from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 
-from code_factory.follower.models import PassReport, Planned
+from code_factory.follower.models import Card, PassReport, Planned
 from code_factory.follower.ports import FollowerPorts
 from code_factory.follower.repository import Leader, QueueRepository
 from code_factory.follower.rules import NOT_STARTED, plan_queue, recurring_due
@@ -102,20 +102,20 @@ class FollowerService:
             rule=await board.rule([c.id for c in cards]),
             now=self._clock(),
         )
-        stage = {card.id: card.run_stage or card.stage for card in cards}
+        by_id = {card.id: card for card in cards}
         notes: dict[str, str] = {}
         started = 0
         for planned in plan:
-            notes[planned.id] = await self._start(planned, stage[planned.id])
+            notes[planned.id] = await self._start(planned, by_id[planned.id])
             started += 0 if notes[planned.id] else 1
         await self._queue.write(notes, self._clock())
         return f"{started} started of {len(plan)} planned"
 
-    async def _start(self, planned: Planned, stage: str) -> str:
+    async def _start(self, planned: Planned, card: Card) -> str:
         if planned.reason:
             return planned.reason
         try:
-            await self._ports.work.start(planned.id, stage)
+            await self._ports.work.start(planned.id, card.run_stage or card.stage, card.repair)
         except CodeFactoryError as refused:
             return f"{NOT_STARTED}{refused}"
         return ""

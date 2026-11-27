@@ -7,7 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from code_factory.platform.errors import BadRequestError, NotFoundError
+from code_factory.platform.errors import BadRequestError, ConflictError, NotFoundError
+from code_factory.platform.services import Services
+from code_factory.runs.models import Repair
+from code_factory.runs.service.flow import FlowAdapter
 from code_factory.stages.models import PullView
 from code_factory.stages.service import StageService
 from code_factory.tickets.models import NewActivity, Ticket
@@ -280,3 +283,48 @@ async def test_there_is_no_task_for_a_head_whose_checks_passed_or_never_ran(
 
     assert await stages.checks_task(started.id, "h1") is None
     assert await stages.checks_task(started.id, "h2") is None
+
+
+@pytest.mark.parametrize("code", [-1, 137])
+async def test_an_interrupted_check_does_not_give_the_agent_a_repair_task(
+    stages: StageService, activity: ActivityService, started: Ticket, code: int
+) -> None:
+    logs = Logs("the runner stopped")
+    stages.bind_log_reader(logs)
+    await record(activity, started, "checks", commit="h1", exit_code=code, log="x.log")
+
+    assert await stages.checks_task(started.id, "h1") is None
+    assert logs.asked == []
+
+
+async def test_ci_and_conflict_repairs_share_the_cap_and_a_failed_launch_gives_it_back(
+    stages: StageService, started: Ticket, checkout: Path
+) -> None:
+    configure(checkout, "[agents]\nfix_rounds = 2\n")
+    services = Services()
+    services.add(StageService, stages)
+    flow = FlowAdapter(services)
+    failed_ci = Repair(head="head-ci", reason="ci", task="Fix CI.")
+    conflict = Repair(head="head-conflict", reason="conflict", task="Fix the conflict.")
+    next_ci = Repair(head="head-next", reason="ci", task="Fix CI.")
+
+    await flow.admit_repair(started.id, failed_ci)
+    assert (await stages.ledger(started.id)).rounds == []
+    await flow.admit_repair(started.id, failed_ci, "run-1")
+    with pytest.raises(ConflictError, match="already ran"):
+        await flow.admit_repair(started.id, failed_ci)
+    await flow.release_repair(started.id, "different-run")
+    await flow.admit_repair(started.id, conflict, "failed-launch")
+    await flow.release_repair(started.id, "failed-launch")
+    await flow.admit_repair(started.id, conflict, "run-2")
+
+    for _ in range(2):
+        with pytest.raises(ConflictError, match=r"Fix rounds exhausted \(2\) on head-next"):
+            await flow.admit_repair(started.id, next_ci)
+
+    ledger = await stages.ledger(started.id)
+    assert [(r.reason, r.run_id) for r in ledger.rounds] == [
+        ("ci", "run-1"),
+        ("conflict", "run-2"),
+    ]
+    assert [(h.head, h.reason, h.rounds) for h in ledger.halts] == [("head-next", "ci", 2)]

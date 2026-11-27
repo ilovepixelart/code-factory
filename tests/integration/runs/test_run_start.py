@@ -6,7 +6,7 @@ import pytest
 from code_factory.platform.db import UnitOfWork
 from code_factory.platform.errors import BadRequestError, ConflictError, UnavailableError
 from code_factory.runs.adapters.processes import ProcessRegistry
-from code_factory.runs.models import StartOptions
+from code_factory.runs.models import Repair, StartOptions
 from code_factory.runs.ports import Given, Settings, TicketFacts
 from code_factory.runs.repository import HaltRepository, RunEnd, RunRepository
 from code_factory.runs.service import RunService
@@ -577,3 +577,41 @@ async def test_asking_for_a_refusal_claims_and_starts_nothing(
     await runs.start_refusal(facts.id)
     assert fakes.calls.log == []
     assert await run_repo.active() == []
+
+
+async def test_a_repair_refuses_to_run_on_a_different_head(
+    runs: RunService, fakes: Fakes, facts: TicketFacts
+) -> None:
+    repair = Repair(head="older", reason="ci", task="Fix the failed check.")
+    with pytest.raises(ConflictError, match="head changed"):
+        await runs.start(facts.id, options=StartOptions(repair=repair))
+
+    assert not fakes.flow.reservations
+    assert "event:run.started" not in fakes.calls.log
+
+
+async def test_a_failed_spawn_releases_its_repair_round(
+    runs: RunService, fakes: Fakes, facts: TicketFacts, run_repo: RunRepository
+) -> None:
+    fakes.agents.argv = ("/no/such/program",)
+    repair = Repair(head="head0", reason="ci", task="Fix the failed check.")
+    with pytest.raises(UnavailableError, match="cannot start /no/such/program"):
+        await runs.start(facts.id, options=StartOptions(repair=repair))
+
+    (ended,) = await run_repo.for_ticket(facts.number)
+    assert fakes.flow.reservations == [(facts.id, repair, ended.id)]
+    assert fakes.flow.released == [(facts.id, ended.id)]
+
+
+async def test_a_repair_uses_one_build_run_and_passes_the_task_as_a_nudge(
+    runs: RunService, fakes: Fakes, facts: TicketFacts
+) -> None:
+    fakes.tickets.facts_by_id[facts.id] = facts.model_copy(update={"parallel": "3"})
+    repair = Repair(head="head0", reason="conflict", task="Resolve the merge conflict.")
+
+    (run,) = (await runs.start(facts.id, options=StartOptions(repair=repair))).runs
+
+    assert run.attempt == 0
+    assert fakes.flow.reservations == [(facts.id, repair, run.id)]
+    assert fakes.flow.released == []
+    assert fakes.agents.plans[0].nudge == repair.task

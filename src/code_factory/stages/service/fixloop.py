@@ -97,6 +97,16 @@ class FixLoop(StageBase):
                 )
         return RoundDecision(outcome=outcome, rounds=len(rounds) + (outcome == "started"))
 
+    async def release_fix_round(self, ticket: str, run_id: str) -> None:
+        """Return the round belonging to this run if the repair process never launched."""
+        if not run_id:
+            raise BadRequestError("a fix round release needs a run ID")
+        number = await self._number(ticket)
+        async with self._uow() as session:
+            store = StageRepository(session)
+            await store.lock(number)
+            await store.remove_unlaunched_round(number, run_id)
+
     async def round_given(self, ticket: str, pull: PullView, reason: str) -> bool:
         """Whether a fix round for `reason` was given for what sends `pull` back."""
         number = await self._number(ticket)
@@ -136,10 +146,10 @@ class FixLoop(StageBase):
         """What the ticket's agent is told when the board's checks failed on `head`.
 
         From the latest `checks` record of the head: its failed steps and the failing lines of its
-        log, masked. `None` when the head has no record or its checks passed.
+        log, masked. Only a failed verdict gives the agent a repair task.
         """
-        found = rules.own_checks(await self._records(ticket), head)
-        if found is None or found[1] == 0:
+        found = rules.own_checks(await self._records(ticket), head, include_fast=True)
+        if found is None or found[1] == 0 or rules.no_verdict(found[1]):
             return None
         check, code = found
         lines: list[str] = []

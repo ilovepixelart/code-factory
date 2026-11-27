@@ -16,13 +16,17 @@ def exit_code_of(record: Record) -> int | None:
     return code if isinstance(code, int) and not isinstance(code, bool) else None
 
 
-def own_checks(records: Sequence[Record], head: str) -> tuple[Record, int] | None:
+def own_checks(
+    records: Sequence[Record], head: str, *, include_fast: bool = False
+) -> tuple[Record, int] | None:
     """The board's latest checks on `head` and their exit code; `None` with none."""
     latest = next(
         (
             r
             for r in reversed(records)
-            if r.kind == "checks" and r.text("commit") == head and r.text("scope") != "fast"
+            if r.kind == "checks"
+            and r.text("commit") == head
+            and (include_fast or r.text("scope") != "fast")
         ),
         None,
     )

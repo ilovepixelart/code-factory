@@ -96,6 +96,14 @@ class RunView(_Frozen):
     uncommitted: bool = False
 
 
+class Repair(_Frozen):
+    """A scheduler repair bound to the branch head that needs it."""
+
+    head: str
+    reason: Literal["ci", "conflict"]
+    task: str
+
+
 class StartOptions(_Frozen):
     """How a start differs from the plain one.
 
@@ -109,6 +117,7 @@ class StartOptions(_Frozen):
     prompt: str | None = None
     nudge: str | None = None
     tree: str | None = None
+    repair: Repair | None = None
 
 
 class Started(_Frozen):

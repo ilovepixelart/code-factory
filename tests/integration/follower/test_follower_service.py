@@ -16,6 +16,7 @@ from code_factory.follower.service import FollowerService, QueueService
 from code_factory.platform.config import Settings
 from code_factory.platform.db import UnitOfWork, create_engine
 from code_factory.platform.errors import ConflictError
+from code_factory.runs.models import Repair
 from code_factory.tickets.models import NewTicket
 from code_factory.tickets.service import TicketService
 
@@ -70,7 +71,12 @@ class Fakes:
     async def observe(self) -> int:
         return 0
 
-    async def start(self, ticket_id: str, stage: str) -> None:
+    async def start(
+        self,
+        ticket_id: str,
+        stage: str,
+        repair: Repair | None = None,  # noqa: ARG002
+    ) -> None:
         if ticket_id in self.refuse:
             raise ConflictError(self.refuse[ticket_id])
         self.started.append((ticket_id, stage))

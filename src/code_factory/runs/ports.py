@@ -12,7 +12,7 @@ from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict
 
-from code_factory.runs.models import RunHooks
+from code_factory.runs.models import Repair, RunHooks
 
 
 class _Frozen(BaseModel):
@@ -295,6 +295,14 @@ class Flow(Protocol):
 
     async def verify_build(self, ticket_id: str, head: str) -> None:
         """Recheck the sealed files against the actual Build candidate under the claim."""
+        ...
+
+    async def admit_repair(self, ticket_id: str, repair: Repair, run_id: str = "") -> None:
+        """Check admission, reserving the round when called with a run ID."""
+        ...
+
+    async def release_repair(self, ticket_id: str, run_id: str) -> None:
+        """Release the reservation when the process could not start."""
         ...
 
     async def build_ended(self, ticket_id: str, head: str) -> None:

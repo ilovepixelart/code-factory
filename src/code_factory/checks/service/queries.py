@@ -201,6 +201,18 @@ class QueryMixin(ConcludeMixin):
         found = await self._deps.activity.latest_checks(heads, NO_VERDICT_CODES)
         return {t: [_record(t, item.at, item.data)] for t, item in found.items()}
 
+    async def repair_failures(self, heads: Mapping[str, str]) -> set[str]:
+        """Tickets whose latest attempt on the observed head produced a failed verdict."""
+        found = await self._deps.activity.latest_checks(heads, frozenset())
+        return {
+            ticket
+            for ticket, item in found.items()
+            if (code := _code(item.data)) is not None
+            and code != 0
+            and code not in NO_VERDICT_CODES
+            and item.data.get("outcome") != "killed"
+        }
+
     async def latest_attempt(self, ticket: str) -> CheckRecord | None:
         """The last check attempt, including an attempt that produced no verdict."""
         items = await self._newest_records(ticket, 1)
