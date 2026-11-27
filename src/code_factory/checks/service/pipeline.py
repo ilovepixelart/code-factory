@@ -120,6 +120,13 @@ class PipelineMixin(ReleasingMixin):
             await self._post_started(row, head)
 
         try:
+            refusal = await self._spec_refusal(row.repository, row.subject, row.commit)
+            if refusal is not None:
+                await self._logs.write(
+                    log, f"gate: spec-lock starts\n{refusal}\ngate: spec-lock failed (exit 1)\n"
+                )
+                judged = Judged(head=row.commit, tree="", tree_id=row.tree_id)
+                return await self._attempt_of(judged, 1, log, slept=False)
             async with self._workspaces.snapshot(
                 row.repository, row.commit, row.subject, config.setup
             ) as space:

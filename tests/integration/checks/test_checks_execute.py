@@ -1,5 +1,7 @@
 """Running a check on a real repository with a real shell: rows, records, statuses, logs."""
 
+import hashlib
+import json
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +12,7 @@ from code_factory.checks.models import PullHead, RunState, Scope, Verdict
 from code_factory.checks.service import CheckService
 from code_factory.tickets.models import NewActivity, NewTicket, Ticket
 from code_factory.tickets.service import ActivityService, TicketService
+from git_support import commit as make_commit
 from git_support import git
 from ticket_values import OWNER
 
@@ -78,6 +81,54 @@ async def test_a_failing_command_is_a_failed_row_and_a_failure_status(
     assert record["exit_code"] == 3
     assert "boom" in Path(record["log"]).read_text()
     assert forge.posts[-1][2:] == ("failure", CONTEXT, "The board's checks failed: exited 3")
+
+
+async def test_sealed_files_are_checked_on_the_candidate_and_at_merge(
+    checks: CheckService, started: Ticket, root: Path, state: Path
+) -> None:
+    path = "acceptance.t"
+    source = "original contract\n"
+    git(root, "checkout", started.branch)
+    sealed = make_commit(root, "Write the acceptance check", **{path: source})
+    candidate = make_commit(root, "Build the feature", feature="implementation\n")
+    modified = make_commit(root, "Weaken the acceptance check", **{path: "changed\n"})
+    git(root, "checkout", "main")
+    write_config(root, plain("echo ran-command"))
+
+    earlier = await checks.start(started.id, head=modified)
+    await checks.run_now(earlier)
+    assert await checks.verdict(REPO, started.id, modified) == "passed"
+
+    receipts = state / "spec-locks"
+    receipts.mkdir(parents=True)
+    receipt = receipts / f"{started.id}.json"
+    receipt.write_text(
+        json.dumps({"commit": sealed, "files": {path: hashlib.sha256(source.encode()).hexdigest()}})
+    )
+    assert await checks.verdict(REPO, started.id, modified) == "failed"
+
+    good = await checks.start(started.id, head=candidate)
+    assert (await checks.run_now(good)).verdict is Verdict.PASSED
+    assert await checks.verdict(REPO, started.id, candidate) == "passed"
+
+    bad = await checks.start(started.id, head=modified)
+    row = await checks.run_now(bad)
+    assert row.verdict is Verdict.FAILED
+    log = Path(row.log_path).read_text()
+    assert f"Spec lock refused {path!r}" in log
+    assert "ran-command" not in log
+
+    digest = hashlib.sha256(source.encode()).hexdigest()
+    for invalid in (
+        [],
+        {},
+        {"commit": sealed, "files": {}},
+        {"commit": sealed, "files": {"../other": digest}},
+        {"commit": sealed, "files": {path: ""}},
+        {"commit": "7" * 40, "files": {path: digest}},
+    ):
+        receipt.write_text(json.dumps(invalid))
+        assert await checks.verdict(REPO, started.id, candidate) == "failed"
 
 
 async def test_card_checks_keep_only_the_newest_usable_verdict_for_each_head(

@@ -29,11 +29,12 @@ from code_factory.checks.models import CheckRun, ChecksView
 from code_factory.checks.ports import ForgePort
 from code_factory.checks.repository import CheckStore
 from code_factory.checks.rules import LOCK_FILE
+from code_factory.checks.rules.spec import receipt_files
 from code_factory.checks.service.permit import Permit
 from code_factory.git.service import GitService
 from code_factory.platform.contained import ContainedRunner, SandboxSettings
 from code_factory.platform.db import UnitOfWork
-from code_factory.platform.errors import NotFoundError
+from code_factory.platform.errors import BadRequestError, NotFoundError, UnavailableError
 from code_factory.releases.service import ReleaseService
 from code_factory.repositories.service import RepositoryService
 from code_factory.settings.service import SettingsService
@@ -43,6 +44,7 @@ from code_factory.tickets.service import ActivityService, TicketService
 logger = logging.getLogger(__name__)
 ACTOR = "board"
 CLEANUP_S = 10.0
+SPEC_RECEIPT_BYTES = 64 * 1024
 Clock = Callable[[], datetime]
 
 
@@ -99,6 +101,7 @@ class CheckBase:
         self._clock = clock
         self._owner = process_token()
         state = options.state_dir
+        self._spec_state = state.resolve()
         self._logs = LogFiles(state)
         self._policy = CheckPolicy(deps.settings, deps.repositories, deps.git, state)
         self._runner = ContainedRunner(
@@ -140,6 +143,27 @@ class CheckBase:
 
     async def _root(self, repository: str) -> Path:
         return await self._deps.repositories.get(repository)
+
+    async def _spec_refusal(self, repository: str, ticket: str, head: str) -> str | None:
+        """Read only the owner's receipt, then compare its locked files by Git object."""
+        git = self._deps.git
+        try:
+            text = await git.read_text_below(
+                self._spec_state, f"spec-locks/{ticket}.json", SPEC_RECEIPT_BYTES
+            )
+            if text is None:
+                return None
+            sealed, paths = receipt_files(text)
+        except BadRequestError, TypeError, ValueError:
+            return f"Spec lock could not read the owner receipt for {ticket}."
+        try:
+            changed = await git.changed_files(repository, sealed, head, paths)
+        except UnavailableError as error:
+            return f"Spec lock could not compare the sealed files. {error}."
+        if changed:
+            named = ", ".join(repr(path) for path in changed)
+            return f"Spec lock refused {named}. Restore the sealed files."
+        return None
 
     async def _row(self, check_id: int) -> CheckRun:
         async with self._db() as store:
