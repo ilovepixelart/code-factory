@@ -55,7 +55,8 @@ class Reverting(WriteBase):
                 op["id"], op["to"] or "", by, expect=op["expect"]["stage"]
             )
         except ConflictError as lost:
-            held = (await self._ports.stages.assess(op["id"])).declared
+            assessed = await self._ports.stages.assess(op["id"])
+            held = assessed.declared
             raise ConflictError(revert_conflict(op, {"stage": held}) or str(lost)) from None
 
     async def _check_stage(self, op: dict[str, Any]) -> None:
