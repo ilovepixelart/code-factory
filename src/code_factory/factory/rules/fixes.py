@@ -16,7 +16,8 @@ def fix_outcomes(
         if pull.ticket_id is None or pull.ticket_id not in repairs:
             continue
         state = state_at(pull, now)
-        until = pull.merged_at if state is PullState.MERGED and pull.merged_at is not None else now
+        ended = pull.merged_at if state is PullState.MERGED else pull.closed_at
+        until = min(ended, now) if ended is not None else now
         count = sum(at <= until for at in repairs[pull.ticket_id])
         groups.setdefault(count, Counter())[state] += 1
     output = []

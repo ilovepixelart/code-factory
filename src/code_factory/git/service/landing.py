@@ -193,16 +193,13 @@ class LandingMixin(MovesMixin):
                 return NotMerged(why=f"the board's checks failed on {head}")
             if verdict != "passed":
                 return NotMerged(why=f"waits for the board's checks on {head}")
-        state = await ports.forge.pull_state(pull)
         await transport.fetch_origin(self._runner, await self._root(repository))
-        if not ports.forge.is_clean(state):
-            return NotMerged(why=state)
         if pinned is not None and job.kind is TreeKind.WORKTREE:
             current = await self._runner.ok(path, ["rev-parse", "HEAD"]) or ""
             if current != pinned:
                 return NotMerged(why=moved(pinned, current))
         try:
-            await ports.forge.merge(pull, head)
+            await ports.forge.merge(job.ticket_id, pull, head)
         except CodeFactoryError as error:
             return NotMerged(why=str(error))
         return Merged(url=pull.url + await self._after_merge(repository, job.ticket_id))

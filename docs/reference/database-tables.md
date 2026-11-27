@@ -939,6 +939,22 @@ A ticket's pull request as last read, and the commit the board shipped to it.
 | `read_at` | `TIMESTAMP WITH TIME ZONE` | no |  |  |
 | `since` | `TIMESTAMP WITH TIME ZONE` | no |  |  |
 
+### delivery_pull_history
+
+Delivery facts retained for each distinct pull request.
+
+| Column | Type | Null | Default | Key |
+|---|---|---|---|---|
+| `url` | `TEXT` | no |  | primary key |
+| `ticket_number` | `BIGINT` | no |  | `tickets.number` |
+| `repository` | `TEXT` | no |  |  |
+| `state` | `TEXT` | no |  |  |
+| `opened_at` | `TIMESTAMP WITH TIME ZONE` | no |  |  |
+| `merged_at` | `TIMESTAMP WITH TIME ZONE` | yes |  |  |
+| `closed_at` | `TIMESTAMP WITH TIME ZONE` | yes |  |  |
+| `first_review_at` | `TIMESTAMP WITH TIME ZONE` | yes |  |  |
+| `changed_lines` | `INTEGER` | yes |  |  |
+
 ### delivery_events
 
 What delivery did, append only; the partial unique indexes make each record once-only.

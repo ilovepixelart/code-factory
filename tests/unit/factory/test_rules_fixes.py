@@ -33,3 +33,11 @@ def test_merged_and_closed_pulls_share_a_denominator_and_open_pulls_are_reported
     assert (without_repairs.rounds, without_repairs.merged, without_repairs.merge_rate) == (0, 1, 1)
     assert (after_one.rounds, after_one.merged, after_one.closed, after_one.open) == (1, 1, 1, 1)
     assert after_one.merge_rate == 0.5
+
+
+def test_closed_pull_does_not_accumulate_repairs_for_its_replacement() -> None:
+    pull = _pull(1, PullState.CLOSED).model_copy(update={"closed_at": 27})
+
+    [outcome] = fix_outcomes([pull], {"CF-1": [25, 30]}, 40)
+
+    assert (outcome.closed, outcome.rounds) == (1, 1)

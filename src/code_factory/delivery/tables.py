@@ -82,6 +82,32 @@ class PullRow(Base):
     since: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class PullHistoryRow(Base):
+    """Delivery facts retained for each distinct pull request."""
+
+    __tablename__ = "delivery_pull_history"
+    __table_args__ = (
+        CheckConstraint("state IN ('', 'open', 'merged', 'closed')", name="known_state"),
+        Index("ix_delivery_pull_history_ticket", "ticket_number"),
+        Index("ix_delivery_pull_history_opened", "opened_at"),
+        Index(
+            "ix_delivery_pull_history_merged",
+            "merged_at",
+            postgresql_where=text("merged_at IS NOT NULL"),
+        ),
+    )
+
+    url: Mapped[str] = mapped_column(Text, primary_key=True)
+    ticket_number: Mapped[int] = mapped_column(ForeignKey(_FK, ondelete="CASCADE"))
+    repository: Mapped[str] = mapped_column(Text)
+    state: Mapped[str] = mapped_column(Text)
+    opened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    merged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    first_review_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    changed_lines: Mapped[int | None] = mapped_column(Integer)
+
+
 class EventRow(Base):
     """What delivery did, append only; the partial unique indexes make each record once-only."""
 

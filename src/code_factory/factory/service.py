@@ -110,8 +110,11 @@ class FactoryService:
         span = period(from_, to, self._now())
         ports = self._ports
         runs = await ports.runs.runs(span.from_, span.to)
-        opened = await ports.pulls.opened(span.from_, span.to)
-        merged = await ports.pulls.merged(span.from_, span.to)
+        pulls = await ports.pulls.in_range(span.from_, span.to)
+        opened = [p for p in pulls if span.from_ <= p.opened_at < span.to]
+        merged = [
+            p for p in pulls if p.merged_at is not None and span.from_ <= p.merged_at < span.to
+        ]
         scorers = await ports.scorers.cards(span.from_, span.to)
         improvements = await ports.improvements.newest(IMPROVEMENTS_DEFAULT)
         group = cohort(opened, merged, span.from_, span.to, span.now)
@@ -193,7 +196,7 @@ class FactoryService:
         """The most expensive pull requests of the range's cohort."""
         span = period(from_, to, self._now())
         count = limit_of(limit, default=EXPENSIVE_DEFAULT)
-        opened = await self._ports.pulls.opened(span.from_, span.to)
+        opened = await self._ports.pulls.in_range(span.from_, span.to)
         members = cohort(opened, [], span.from_, span.to, span.now).members
         ledger = await self._ledger(members, [])
         costed = [

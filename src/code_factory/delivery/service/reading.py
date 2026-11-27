@@ -1,5 +1,7 @@
 """What delivery shows: pull requests, events and why a merge waits."""
 
+from datetime import datetime
+
 from code_factory.delivery.models import DeliveryEvent, PullHistory, PullView
 from code_factory.delivery.repository import DeliveryRepository
 from code_factory.delivery.service.base import Collaborators
@@ -32,19 +34,12 @@ class ReadingMixin(Collaborators):
         async with self._uow() as session:
             return await DeliveryRepository(session).open_pulls()
 
-    async def history(self) -> list[PullHistory]:
-        """Every recorded pull request, opened at its first record, merged at its merge record."""
+    async def history(self, since: datetime, until: datetime) -> list[PullHistory]:
+        """The pull requests that opened or merged in the window."""
         async with self._uow() as session:
-            repo = DeliveryRepository(session)
-            pulls = await repo.all_pulls()
-            opened = await repo.first_at(("pull_request",))
-            merged = await repo.first_at(("merged_pull_request",))
-        return [
-            PullHistory(
-                pull=p,
-                opened_at=p.created_on_host or opened.get((p.ticket_id, p.url), p.since),
-                merged_at=p.merged_on_host or merged.get((p.ticket_id, p.url)),
-            )
-            for p in pulls
-            if p.url
-        ]
+            return await DeliveryRepository(session).history(since, until)
+
+    async def known_merge(self, ticket: str, url: str) -> bool:
+        """Whether delivery recorded this exact pull as merged for the ticket."""
+        async with self._uow() as session:
+            return await DeliveryRepository(session).known_merge(ticket, url)

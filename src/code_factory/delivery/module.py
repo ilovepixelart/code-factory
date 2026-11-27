@@ -5,6 +5,7 @@ import logging
 import os
 import re
 from collections.abc import Awaitable, Callable, Sequence
+from datetime import UTC, datetime
 
 from code_factory.board.models import ActivityRecord, PullFacts
 from code_factory.board.service import CardDelivery
@@ -53,17 +54,9 @@ class GitForge:
             repository, branch=branch, head=head, base=base, title=title
         )
 
-    async def pull_state(self, ref: PullRef) -> str:
-        """GitHub's merge state of the pull request."""
-        return await self._forge().pull_state(ref)
-
-    def is_clean(self, state: str) -> bool:
-        """Whether the state merges."""
-        return self._forge().is_clean(state)
-
-    async def merge(self, ref: PullRef, head: str) -> None:
-        """Merge at exactly `head`."""
-        await self._forge().merge(ref, head)
+    async def merge(self, ticket_id: str, ref: PullRef, head: str) -> None:
+        """Record the pinned landing and use the board's owner merge."""
+        await self._services.get(DeliveryService).land(ticket_id, ref.url, head)
 
     async def held(self, repository: str, branch: str, base: str, new: str) -> str | None:
         """Why the push is held by the screen, or `None`."""
@@ -101,58 +94,38 @@ class DeliveredPulls:
     def __init__(self, services: Services) -> None:
         self._services = services
 
-    async def _facts(self) -> list[PullFact]:
-        history = await self._services.get(DeliveryService).history()
-        per_ticket: dict[str, int] = {}
-        for h in history:
-            per_ticket[h.pull.ticket_id] = per_ticket.get(h.pull.ticket_id, 0) + 1
-        tickets = self._services.get(TicketService)
+    async def in_range(self, since: float, until: float) -> list[PullFact]:
+        """Pull requests opened or merged in `[since, until)`."""
+        history = await self._services.get(DeliveryService).history(
+            datetime.fromtimestamp(since, UTC), datetime.fromtimestamp(until, UTC)
+        )
+        titles = await self._services.get(TicketService).titles(
+            sorted({h.ticket_id for h in history})
+        )
         facts = []
         for h in history:
-            number = _NUMBER.search(h.pull.url)
-            title = (await tickets.get(h.pull.ticket_id)).title
+            number = _NUMBER.search(h.url)
             facts.append(
                 PullFact(
-                    url=h.pull.url,
-                    repository=h.pull.repository,
+                    url=h.url,
+                    repository=h.repository,
                     number=int(number.group(1)) if number else 0,
-                    ticket_id=h.pull.ticket_id,
-                    title=title,
+                    ticket_id=h.ticket_id,
+                    title=titles.get(h.ticket_id, h.ticket_id),
                     opened_at=h.opened_at.timestamp(),
-                    state=PullState(h.pull.state or "open"),
+                    state=PullState(h.state or "open"),
                     merged_at=h.merged_at.timestamp() if h.merged_at else None,
-                    first_review_at=(
-                        h.pull.first_review_at.timestamp() if h.pull.first_review_at else None
-                    ),
-                    changed_lines=(
-                        h.pull.additions + h.pull.deletions
-                        if h.pull.additions is not None and h.pull.deletions is not None
-                        else None
-                    ),
-                    ticket_pulls=per_ticket[h.pull.ticket_id],
+                    closed_at=h.closed_at.timestamp() if h.closed_at else None,
+                    first_review_at=h.first_review_at.timestamp() if h.first_review_at else None,
+                    changed_lines=h.changed_lines,
+                    ticket_pulls=h.ticket_pulls,
                 )
             )
         return facts
 
-    async def opened(self, since: float, until: float) -> list[PullFact]:
-        """Pull requests first recorded in `[since, until)`."""
-        return [p for p in await self._facts() if since <= p.opened_at < until]
-
-    async def merged(self, since: float, until: float) -> list[PullFact]:
-        """Pull requests merged in `[since, until)`."""
-        return [
-            p
-            for p in await self._facts()
-            if p.merged_at is not None and since <= p.merged_at < until
-        ]
-
     async def known_merge(self, ticket: str, url: str) -> bool:
         """Whether delivery recorded this exact pull as merged for the ticket."""
-        history = await self._services.get(DeliveryService).history()
-        return any(
-            row.pull.ticket_id == ticket and row.pull.url == url and row.merged_at is not None
-            for row in history
-        )
+        return await self._services.get(DeliveryService).known_merge(ticket, url)
 
 
 def _event(event: DeliveryEvent) -> ActivityRecord:

@@ -37,12 +37,8 @@ class RunsPort(Protocol):
 class PullsPort(Protocol):
     """Pull requests with their delivery facts."""
 
-    async def opened(self, since: float, until: float) -> list[PullFact]:
-        """Pull requests first observed in `[since, until)`."""
-        ...
-
-    async def merged(self, since: float, until: float) -> list[PullFact]:
-        """Pull requests merged in `[since, until)`, opened in it or before."""
+    async def in_range(self, since: float, until: float) -> list[PullFact]:
+        """Pull requests opened or merged in `[since, until)`."""
         ...
 
     async def known_merge(self, ticket: str, url: str) -> bool:
