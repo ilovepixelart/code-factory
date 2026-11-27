@@ -105,5 +105,6 @@ async def _record_in(uow: UnitOfWork, given: list[Delivery]) -> None:
 async def test_a_delivery_of_an_entry_that_is_not_there_is_refused_by_the_database(
     uow: UnitOfWork,
 ) -> None:
+    given = [Delivery(entry_id="2026-01-01-none")]
     with pytest.raises(IntegrityError, match=r"fk_memory_deliveries"):
-        await _record_in(uow, [Delivery(entry_id="2026-01-01-none")])
+        await _record_in(uow, given)
