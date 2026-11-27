@@ -145,16 +145,32 @@ class DeliveryRepository:
         last = (row.state, row.ci, row.head, row.since) if row and row.url == url else None
         since = entered_since(last, reading, now)  # ty: ignore[invalid-argument-type]
         values = reading.model_dump() | {"url": url, "read_at": now, "since": since}
+        if row is None or row.url != url or not row.shipped_head:
+            values["shipped_head"] = await self._recorded_ship(number, url, reading.head)
         if row is None:
             self._session.add(PullRow(ticket_number=number, repository=repository, **values))
         else:
-            if row.url != url:
-                values["shipped_head"] = ""
             for name, value in values.items():
                 setattr(row, name, value)
         await self._session.flush()
         if url:
             await self._remember_pull(number, repository, url, reading, now)
+
+    async def _recorded_ship(self, number: int, url: str, head: str) -> str:
+        """Recover a shipped head when the host reading arrived after its delivery event."""
+        if not url or not head:
+            return ""
+        recorded = await self._session.scalar(
+            select(EventRow.head)
+            .where(
+                EventRow.ticket_number == number,
+                EventRow.url == url,
+                EventRow.head == head,
+                EventRow.kind.in_(("pull_request", "branch_pushed")),
+            )
+            .limit(1)
+        )
+        return recorded or ""
 
     async def _remember_pull(
         self, number: int, repository: str, url: str, reading: PullReading, now: datetime

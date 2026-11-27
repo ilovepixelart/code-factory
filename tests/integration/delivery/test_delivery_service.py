@@ -9,6 +9,7 @@ from code_factory.checks.models import PullHead
 from code_factory.delivery.models import MergeRefusedError, NotReadyError, Tracker, TrackerItem
 from code_factory.delivery.module import ChecksForge, GitForge
 from code_factory.delivery.ports import Candidate, DeliveryPorts, Switches
+from code_factory.delivery.repository import DeliveryRepository
 from code_factory.delivery.service import DeliveryForge, DeliveryService
 from code_factory.platform.db import UnitOfWork
 from code_factory.platform.errors import ConflictError
@@ -485,3 +486,53 @@ async def test_the_checks_forge_reads_the_open_pull_requests_delivery_recorded(
         PullHead(repository="sample", ticket_id=fakes.ticket.id, head=TIP)
     ]
     assert await forge.open_pull_heads("other") == []
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    [(URL, TIP, TIP), (URL, "b" * 40, ""), (URL + "0", TIP, "")],
+    ids=["same-pull-and-head", "new-head", "different-pull"],
+)
+async def test_a_later_poll_recovers_only_the_recorded_shipped_pull_and_head(
+    delivery: DeliveryService,
+    fakes: Fakes,
+    gh: ScriptedGh,
+    scenario: tuple[str, str, str],
+) -> None:
+    live_url, live_head, shipped_head = scenario
+    ticket = fakes.ticket
+    gh.answer(("pr", "list"), [])
+    gh.answer(("pr", "create"), URL + "\n")
+    gh.answer(("pr", "view"), "temporarily unavailable", ok=False)
+
+    assert (await delivery.ship(ticket.id)).shipped
+    assert await delivery.pull(ticket.id) is None
+    assert fakes.queued == [(ticket.id, TIP)]
+
+    gh.answer(("pr", "list"), [{"headRefName": ticket.branch, "url": live_url}])
+    gh.answer(("pr", "view"), pull_answer(head=live_head) | {"url": live_url})
+    gh.answer(("pr", "merge"), "")
+    report = await delivery.run_pass()
+
+    pull = await delivery.pull(ticket.id)
+    assert pull is not None
+    assert (pull.url, pull.head, pull.shipped_head) == (live_url, live_head, shipped_head)
+    merged = "1 merged" if shipped_head else "0 merged"
+    assert report.steps["merge_finished"] == merged
+
+
+async def test_refresh_recovers_an_existing_open_pull_without_a_saved_shipped_head(
+    delivery: DeliveryService, fakes: Fakes, gh: ScriptedGh, clock: Clock, uow: UnitOfWork
+) -> None:
+    _ready_to_ship(gh)
+    ticket = fakes.ticket.id
+    assert (await delivery.ship(ticket)).shipped
+    async with uow() as session:
+        await DeliveryRepository(session).set_shipped(ticket, "")
+    clock.now += timedelta(minutes=1)
+
+    assert await delivery.refresh_pulls() == 1
+
+    pull = await delivery.pull(ticket)
+    assert pull is not None
+    assert pull.shipped_head == TIP
