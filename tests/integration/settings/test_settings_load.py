@@ -1,5 +1,5 @@
 """`SettingsService.load` and the readers over the repository's own files: lenient, cached by
-`stat`, raising only when a read or the scan runs out of time. Expected values are the previous
+contents, raising only when a read or the scan runs out of time. Expected values are the previous
 implementation's reader behaviour (an invalid key reads unset, a refused entry is skipped) and
 hand-worked file cases."""
 
@@ -12,7 +12,7 @@ import pytest
 from code_factory.platform.db import UnitOfWork
 from code_factory.platform.errors import BadRequestError
 from code_factory.settings import service as service_module
-from code_factory.settings.adapters import FileKey, Files, FileTimedOut
+from code_factory.settings.adapters import Files, FileTimedOut
 from code_factory.settings.models.errors import ConfigUnjudgedError
 from code_factory.settings.service import SettingsService
 from settings_support import write
@@ -35,10 +35,6 @@ class CountingFiles(Files):
         if relative == CONFIG:
             self.reads += 1
         return await super().read_below(root, relative, limit, strict=strict)
-
-    @override
-    async def stat(self, root: Path, relative: str, *, strict: bool = False) -> FileKey | None:
-        return await super().stat(root, relative, strict=strict)
 
 
 @pytest.fixture
@@ -103,11 +99,12 @@ async def test_an_invalid_key_reads_unset_while_its_neighbours_read(
 async def test_a_second_load_does_not_read_the_file_again(
     service: SettingsService, files: CountingFiles, tmp_path: Path
 ) -> None:
+    """Reuse the cached parse after one bounded content read per load."""
     config_text(tmp_path, '[checks]\ncommand = "x"\n')
     first = await service.load(tmp_path)
     second = await service.load(tmp_path)
     assert first is second
-    assert files.reads == 1
+    assert files.reads == 2
 
 
 async def test_a_change_of_size_mtime_or_file_is_read_again(
@@ -143,17 +140,17 @@ async def test_a_file_that_is_removed_reads_as_empty_again(
 
 
 async def test_the_cache_keeps_the_sixty_four_newest_roots(
-    service: SettingsService, files: CountingFiles, tmp_path: Path
+    service: SettingsService, tmp_path: Path
 ) -> None:
     roots = [tmp_path / f"r{n}" for n in range(65)]
+    original = []
     for root in roots:
         config_text(root, '[checks]\ncommand = "x"\n')
-        await service.load(root)
-    assert files.reads == 65
-    await service.load(roots[-1])
-    assert files.reads == 65
-    await service.load(roots[0])
-    assert files.reads == 66
+        original.append(await service.load(root))
+    assert await service.load(roots[-1]) is original[-1]
+    evicted = await service.load(roots[0])
+    assert evicted == original[0]
+    assert evicted is not original[0]
 
 
 async def test_the_ticket_prefix_is_the_valid_setting_or_cf(
@@ -161,9 +158,11 @@ async def test_the_ticket_prefix_is_the_valid_setting_or_cf(
 ) -> None:
     assert await service.ticket_prefix(tmp_path) == "CF"
     config_text(tmp_path, '[tickets]\nprefix = "ENG"\n')
+    time_ns = 10**18
+    os.utime(tmp_path / CONFIG, ns=(time_ns, time_ns))
     assert await service.ticket_prefix(tmp_path) == "ENG"
-    os.utime(tmp_path / CONFIG, ns=(1, 1))
     config_text(tmp_path, '[tickets]\nprefix = "eng"\n')
+    os.utime(tmp_path / CONFIG, ns=(time_ns, time_ns))
     assert await service.ticket_prefix(tmp_path) == "CF"
 
 
@@ -297,17 +296,15 @@ async def test_a_parse_that_timed_out_is_not_remembered_as_an_empty_config(
 
 
 async def test_a_root_read_again_is_kept_while_older_untouched_ones_go(
-    service: SettingsService, files: CountingFiles, tmp_path: Path
+    service: SettingsService, tmp_path: Path
 ) -> None:
     roots = [tmp_path / f"r{n}" for n in range(65)]
+    original = []
     for root in roots[:64]:
         config_text(root, '[checks]\ncommand = "x"\n')
-        await service.load(root)
+        original.append(await service.load(root))
     await service.load(roots[0])  # the oldest is now the most recently used
     config_text(roots[64], '[checks]\ncommand = "x"\n')
     await service.load(roots[64])  # evicts roots[1], not roots[0]
-    reads = files.reads
-    await service.load(roots[0])
-    assert files.reads == reads
-    await service.load(roots[1])
-    assert files.reads == reads + 1
+    assert await service.load(roots[0]) is original[0]
+    assert await service.load(roots[1]) is not original[1]

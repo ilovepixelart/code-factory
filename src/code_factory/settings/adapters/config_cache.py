@@ -4,14 +4,13 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import NamedTuple
 
-from code_factory.settings.adapters.files import FileKey
 from code_factory.settings.models.config import RepositoryConfig
 
 CACHE_ROOTS = 64
 
 
 class _Cached(NamedTuple):
-    key: FileKey
+    text: str
     config: RepositoryConfig
 
 
@@ -21,17 +20,17 @@ class ConfigCache:
     def __init__(self) -> None:
         self._items: OrderedDict[Path, _Cached] = OrderedDict()
 
-    def get(self, root: Path, key: FileKey) -> RepositoryConfig | None:
-        """The config remembered for `root` while its file still has `key`."""
+    def get(self, root: Path, text: str) -> RepositoryConfig | None:
+        """The config remembered for `root` while its contents are unchanged."""
         cached = self._items.get(root)
-        if cached is None or cached.key != key:
+        if cached is None or cached.text != text:
             return None
         self._items.move_to_end(root)
         return cached.config
 
-    def put(self, root: Path, key: FileKey, config: RepositoryConfig) -> None:
+    def put(self, root: Path, text: str, config: RepositoryConfig) -> None:
         """Remember `config` for `root`, dropping the oldest roots past the limit."""
-        self._items[root] = _Cached(key, config)
+        self._items[root] = _Cached(text, config)
         self._items.move_to_end(root)
         while len(self._items) > CACHE_ROOTS:
             self._items.popitem(last=False)
