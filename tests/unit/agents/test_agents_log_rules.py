@@ -28,7 +28,8 @@ LOGS = {
 @pytest.mark.parametrize("case", sorted(LOGS))
 def test_the_cost_and_model_are_those_of_the_golden(case: str) -> None:
     usage = log_usage(LOGS[case].splitlines())
-    assert {"cost": usage.cost, "model": usage.model} == GOLDEN[case]
+    read = {"cost": usage.cost, "model": usage.model}
+    assert read == GOLDEN[case]
 
 
 def test_the_last_result_record_gives_the_tokens_and_a_log_of_no_known_shape_gives_none() -> None:

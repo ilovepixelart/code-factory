@@ -123,7 +123,8 @@ def test_a_failure_runs_once_more_on_its_tree_before_the_head_is_settled(
 ) -> None:
     history = [ran(code) for code in codes]
 
-    assert (settled(history, "h1"), rerun_pending(history, "h1")) == expected
+    verdict = (settled(history, "h1"), rerun_pending(history, "h1"))
+    assert verdict == expected
 
 
 def test_a_record_without_a_tree_id_says_nothing_of_the_commit() -> None:

@@ -76,7 +76,8 @@ def test_a_matching_remote_tip_cannot_hide_new_commits_on_the_local_branch() -> 
 def test_a_ticket_with_no_branch_is_not_started() -> None:
     found = facts("CF-10", "")
 
-    assert (found.local, found.pushed, found.merged, found.has_commits) == (False,) * 4
+    flags = (found.local, found.pushed, found.merged, found.has_commits)
+    assert flags == (False,) * 4
     assert found.untraced == ""
 
 
