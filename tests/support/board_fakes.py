@@ -53,7 +53,11 @@ class FakeChecks:
         self.is_running = running
         self.log_asked: list[tuple[str, int]] = []
 
-    async def latest_checks(self, ticket_ids: Sequence[str]) -> dict[str, list[CheckRecord]]:
+    async def latest_checks(
+        self, ticket_ids: Sequence[str], *, heads: dict[str, str] | None = None
+    ) -> dict[str, list[CheckRecord]]:
+        if heads is not None:
+            ticket_ids = list(heads)
         return {i: self.records[i] for i in ticket_ids if i in self.records}
 
     async def running(self, ticket_ids: Sequence[str]) -> set[str]:

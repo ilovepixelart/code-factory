@@ -1,6 +1,6 @@
 """A ticket's history: append-only records, read in the order they were written."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from datetime import datetime
 
 from code_factory.platform.db import UnitOfWork
@@ -138,6 +138,17 @@ class ActivityService:
         for row in rows:
             found.setdefault(ticket_id(row.ticket_number), []).append(to_activity(row))
         return found
+
+    async def latest_checks(
+        self, heads: Mapping[str, str], excluded_codes: frozenset[int]
+    ) -> dict[str, Activity]:
+        """One matching check per ticket, with an empty head matching any commit."""
+        if not heads:
+            return {}
+        numbers = {ticket_number(ticket): head for ticket, head in heads.items()}
+        async with self._uow() as session:
+            rows = await TicketRepository(session).latest_checks(numbers, excluded_codes)
+        return {ticket_id(row.ticket_number): to_activity(row) for row in rows}
 
     async def latest_marks(self, tickets: list[str]) -> dict[str, ActivityMarks]:
         """When each ticket last moved, was archived and was touched, in one read.

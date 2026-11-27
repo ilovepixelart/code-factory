@@ -3,9 +3,10 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import func, select
-from sqlalchemy.dialects.postgresql import distinct_on
+from sqlalchemy import BigInteger, Text, cast, column, func, or_, select, true
+from sqlalchemy.dialects.postgresql import ARRAY, distinct_on
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from code_factory.tickets.rules import FINDING_KINDS
 from code_factory.tickets.tables import VISIBLE, TicketActivityRow, TicketRow
@@ -76,6 +77,36 @@ class ActivityQueries:
             .order_by(TicketActivityRow.id)
         )
         return list(rows)
+
+    async def latest_checks(
+        self, heads: dict[int, str], excluded_codes: frozenset[int]
+    ) -> list[TicketActivityRow]:
+        """Read at most one check that judged each requested head, in one database call."""
+        numbers, commits = zip(*heads.items(), strict=True)
+        wanted = (
+            func.unnest(cast(list(numbers), ARRAY(BigInteger)), cast(list(commits), ARRAY(Text)))
+            .table_valued(column("number", BigInteger), column("head", Text))
+            .render_derived(name="wanted")
+        )
+        row = TicketActivityRow
+        code = row.data["exit_code"].astext
+        newest = (
+            select(row)
+            .where(
+                row.ticket_number == wanted.c.number,
+                row.kind == "checks",
+                or_(wanted.c.head == "", row.data["commit"].astext == wanted.c.head),
+                func.jsonb_typeof(row.data["exit_code"]) == "number",
+                code.op("~")(r"^-?[0-9]+$"),
+                code.not_in(sorted(map(str, excluded_codes))),
+            )
+            .order_by(row.id.desc())
+            .limit(1)
+            .correlate(wanted)
+            .lateral()
+        )
+        query = select(aliased(row, newest)).select_from(wanted.join(newest, true()))
+        return list(await self._session.scalars(query))
 
     async def activity_of(
         self, number: int, kinds: list[str] | None, page: tuple[int, int | None, bool]
