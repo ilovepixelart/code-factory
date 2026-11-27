@@ -22,6 +22,7 @@ from code_factory.factory.models import (
     RunCost,
     RunFact,
     Scorers,
+    Series,
 )
 from code_factory.factory.ports import (
     CostPort,
@@ -157,6 +158,12 @@ class FactoryService:
                 for role, (total, fixed) in notes.items()
             ],
         )
+
+    async def pull_series(self, from_: Instant, to: Instant) -> Series:
+        """Opening-cohort chart from Delivery, without loading the dashboard providers."""
+        span = period(from_, to, self._now())
+        opened = await self._ports.pulls.in_range(span.from_, span.to)
+        return series(opened, span.from_, span.to, span.now)
 
     async def record_owner_time(self, ticket: str, entry: OwnerTime) -> None:
         """Replace the owner's active time for one merged pull request."""

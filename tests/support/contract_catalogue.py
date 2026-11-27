@@ -185,18 +185,20 @@ _FACTORY_IMPROVEMENTS = {
         }
     ],
 }  # fmt: skip
+_FACTORY_SERIES = {"bucket": str, "points": [{"start": float, "opened": int, "merged": int}]}
 _FACTORY_DASHBOARD = {
     "from": float, "to": float, "now": float,
     "runs": _FACTORY_RUNS,
     "prs": {"opened": int, "merged": int, "merged_in_period": int, "open": int, "closed": int},
-    "series": {"bucket": str, "points": [{"start": float, "opened": int, "merged": int}]},
+    "series": _FACTORY_SERIES,
     "autonomy": {"share": float | None, "autonomous": int, "assisted": int, "unknown": int},
     "cycle": {
         "total": _SPREAD,
         "stages": [{"stage": str, "median": float | None, "count": int}],
     },
     "cost": {
-        "median": float | None, "priced": int, "of": int, "estimated": bool, "measurement": float,
+        "median": float | None, "priced": int, "of": int, "estimated": bool,
+        "measurement": float | None,
         "by_component": [{"component": str, "median": float | None, "total": float}],
         "by_size": [{"size": str, "median": float | None, "priced": int, "of": int}],
     },
@@ -435,6 +437,13 @@ ROUTES: tuple[Route, ...] = (
         "factory",
         _hand(_FACTORY_RUNS),
         f"/api/factory/runs?{_FACTORY_RANGE}",
+    ),
+    Route(
+        "GET",
+        "/api/factory/prs/series",
+        "factory",
+        _hand(_FACTORY_SERIES),
+        f"/api/factory/prs/series?{_FACTORY_RANGE}",
     ),
     Route(
         "GET",

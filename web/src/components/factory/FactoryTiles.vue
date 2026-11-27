@@ -64,10 +64,18 @@ const NONE_OPENED = 'no pull requests opened in this range'
     <Card class="@container/card" size="sm" role="group" aria-label="Measurement spend">
       <CardHeader>
         <CardDescription>Measurement spend</CardDescription>
-        <TileFigure :value="cost(dashboard.cost.measurement)" />
+        <TileFigure
+          :value="dashboard.cost.measurement == null ? null : cost(dashboard.cost.measurement)"
+        />
       </CardHeader>
       <CardFooter class="text-muted-foreground">
-        <p>judges and evals, not in PR cost</p>
+        <p>
+          {{
+            dashboard.cost.measurement == null
+              ? 'No measurement costs recorded'
+              : 'Recorded judge, eval and benchmark costs'
+          }}
+        </p>
       </CardFooter>
     </Card>
   </section>

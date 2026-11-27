@@ -225,7 +225,7 @@ export function emptyDashboard(): Dashboard {
       priced: 0,
       of: 0,
       estimated: false,
-      measurement: 0,
+      measurement: null,
       by_component: [
         { component: 'spec', median: null, total: 0 },
         { component: 'build', median: null, total: 0 },

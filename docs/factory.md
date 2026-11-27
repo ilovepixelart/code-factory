@@ -12,7 +12,9 @@ Routes are in `factory/routes.py` (`/api/factory/*`); the figures are pure funct
 The factory reads runs and costs from Runs, pull requests from Delivery, and scorer answers from
 Evals. The self-improvement provider reports unavailable because there is no source of
 self-improvement pull requests. The composition root wires these providers to the factory's ports.
-A provider failure returns HTTP 503 with the reason.
+Flow reads its pull request chart from `/api/factory/prs/series`, using the same rolling UTC
+range duration as the rest of Analytics. The chart groups outcomes by the date each pull request
+opened. A provider failure returns HTTP 503 with the reason.
 
 ## Definitions that decide the numbers
 
@@ -27,7 +29,8 @@ A provider failure returns HTTP 503 with the reason.
 - A pull request's cost is its ticket's priced runs started before it ended, divided by the
   ticket's number of recorded pull requests. A closed pull request stops accumulating cost and
   repair requests at its first observed closure. A run with no recorded cost is unpriced.
-  An explicit 0.0 is priced.
+  An explicit 0.0 is priced. Measurement spend covers recorded judge, eval and benchmark
+  runs with a recorded cost. If no such cost is available, the answer is null.
 - A negative duration is dropped, never clamped to zero.
 - Medians, not means; stage medians do not add up to the total median.
 

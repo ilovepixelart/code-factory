@@ -6,6 +6,8 @@ import AnalyticsFrame from '../components/AnalyticsFrame.vue'
 import { FLOW, rangeOf } from '../lib/analytics'
 import { computed, nextTick, shallowRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { Alert, AlertAction, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import DataTable from '../components/data-table/DataTable.vue'
 import type { DataTableColumn } from '../components/data-table/features'
@@ -18,7 +20,7 @@ import MergedTable from '../components/flow/MergedTable.vue'
 import PullsChart from '../components/flow/PullsChart.vue'
 import { ask } from '../lib/actions'
 import { STAGE_LABELS } from '../lib/board'
-import { chartPoints, type Dashboard } from '../lib/factory'
+import { chartPoints, type Series } from '../lib/factory'
 import { useFactoryRead } from '../lib/factoryRead'
 import { span } from '../lib/format'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
@@ -58,11 +60,9 @@ const failed = computed(() => (flowRead.error.value ? refusalText(flowRead.error
 const refresh = () => readAgain(client, flowKey.value, flowRead)
 
 const merged = computed(() => flow.value?.merged ?? [])
-// The chart's opened and merged pull requests per bucket are the factory series of the range.
-const series = useFactoryRead<Dashboard>(
-  ({ from, to }) => `/api/factory/dashboard?from=${from}&to=${to}`,
-)
-const points = computed(() => (series.data.value ? chartPoints(series.data.value.series) : []))
+const series = useFactoryRead<Series>('/api/factory/prs/series')
+const chart = computed(() => (series.shown.value === flow.value?.range ? series.data.value : null))
+const points = computed(() => (chart.value ? chartPoints(chart.value) : []))
 function retry(): void {
   void refresh()
   void series.refresh()
@@ -135,6 +135,7 @@ const counted = (shown: number | null, all: number): number | string =>
     ranged
     :ready="flow !== null"
     :failed="failed"
+    :busy="flowRead.isFetching.value"
     :shown="flow?.range ?? null"
     @retry="retry()"
   >
@@ -149,11 +150,15 @@ const counted = (shown: number | null, all: number): number | string =>
 
       <GateTimings />
 
-      <PullsChart
-        v-if="series.data.value"
-        :points="points"
-        :weekly="series.data.value.series.bucket === 'week'"
-      />
+      <Alert v-if="series.failed.value" role="alert">
+        <AlertTitle>Could not read the pull request chart. {{ series.failed.value }}</AlertTitle>
+        <AlertAction>
+          <Button variant="outline" size="sm" @click="void series.refresh()"
+            >Read chart again</Button
+          >
+        </AlertAction>
+      </Alert>
+      <PullsChart v-if="chart" :points="points" :weekly="chart.bucket === 'week'" />
 
       <SectionCard
         heading="stuck-heading"

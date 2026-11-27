@@ -23,22 +23,21 @@ export interface FactoryRead<T> {
   refresh: () => Promise<void>
 }
 
-/** The range of the address and the answer `path` reads for it (`ask` of the dates), read now and on every change of range. */
-export function useFactoryRead<T>(
-  path: (range: { from: string; to: string }) => string,
-): FactoryRead<T> {
+/** Read a Factory endpoint for the selected range. Each request captures its own timestamp. */
+export function useFactoryRead<T>(path: string, ranged = true): FactoryRead<T> {
   const route = useRoute()
   const range = computed(() => rangeOf(route.query.range))
   const query = useQuery({
-    queryKey: computed(() => keys.factory(path(bounds(range.value, new Date())))),
-    queryFn: async ({ signal }) => {
-      const asked = range.value
-      return { asked, answer: await ask<T>(path(bounds(asked, new Date())), signal) }
+    queryKey: computed(() => keys.factory(path, ranged ? range.value : null)),
+    queryFn: async ({ queryKey: [, endpoint, asked], signal }) => {
+      const dateRange = asked === null ? null : bounds(asked, new Date())
+      const url = dateRange ? `${endpoint}?from=${dateRange.from}&to=${dateRange.to}` : endpoint
+      return { asked, answer: await ask<T>(url, signal) }
     },
     placeholderData: keepPreviousData,
   })
   // The last answer of any range: Query drops a placeholder once the new range's read fails.
-  const last = shallowRef<{ asked: RangeKey; answer: T } | null>(null)
+  const last = shallowRef<{ asked: RangeKey | null; answer: T } | null>(null)
   watch(
     query.data,
     (answered) => {
