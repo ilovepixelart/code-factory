@@ -111,7 +111,7 @@ class PreviewService:
             idle_seconds=settings.preview_idle_s,
         )
 
-    async def start(self, ticket_id: str, by: str) -> PreviewStatus:  # noqa: ARG002  # callers record who asked
+    async def start(self, ticket_id: str) -> PreviewStatus:
         """Run the repository's preview command in the ticket's worktree, replacing a running one.
 
         `ConflictError` with the sentence when there is no command or no worktree;

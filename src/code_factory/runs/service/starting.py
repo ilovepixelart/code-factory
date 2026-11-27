@@ -88,13 +88,13 @@ class Starting(Reading):
         if (why := blocked_refusal(facts.blockers)) is not None:
             raise ConflictError(why)
 
-    async def _settled_given(self, claimed_agent: str, stage: str, facts: TicketFacts) -> Given:
+    async def _settled_given(self, claimed_agent: str, stage: str) -> Given:
         agents = self._ports.agents
-        given = await agents.given(claimed_agent, stage, facts.repository)
+        given = await agents.given(claimed_agent, stage)
         if given.refusal is not None:
             raise ConflictError(given.refusal)
         await agents.probe(given)  # no lock and no transaction is held while the server answers
-        again = await agents.given(claimed_agent, stage, facts.repository)
+        again = await agents.given(claimed_agent, stage)
         if again.fingerprint != given.fingerprint:
             raise ConflictError(SETTINGS_CHANGED)
         return given
@@ -118,7 +118,6 @@ class Starting(Reading):
         stage: str | None = None,
         agent: str | None = None,  # noqa: ARG002  # the claim picks the agent
         options: StartOptions | None = None,
-        by: str,  # noqa: ARG002  # the callers record who asked in their own events
     ) -> Started:
         """Start a run of the ticket; the refusal is a sentence (`ConflictError`).
 
@@ -145,7 +144,7 @@ class Starting(Reading):
         attempts = range(1, first.count + 1) if parallel else [options.attempt]
         runs: list[Run] = []
         for attempt in attempts:
-            begin = replace(first, options=options.model_copy(update={"attempt": attempt}))
+            begin: _Start = replace(first, options=options.model_copy(update={"attempt": attempt}))
             try:
                 await self._begin(begin, agent)
                 runs.append(await self._launch(begin))
@@ -157,7 +156,7 @@ class Starting(Reading):
 
     async def _begin(self, begin: _Start, agent: str) -> None:
         facts, options = begin.facts, begin.options
-        given = begin.given = begin.given or await self._settled_given(agent, begin.stage, facts)
+        given = begin.given = begin.given or await self._settled_given(agent, begin.stage)
         remaining = budget_rules.remaining_budget(
             await self.scopes(facts, begin.settings), options.attempt, begin.count
         )

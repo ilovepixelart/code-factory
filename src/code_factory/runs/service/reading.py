@@ -209,7 +209,7 @@ class Reading(ServiceBase):
 
     async def _given(self, run: Run) -> Given | None:
         try:
-            return await self._ports.agents.given(run.agent, run.stage, run.repository)
+            return await self._ports.agents.given(run.agent, run.stage)
         except CodeFactoryError:
             return None  # the agent was removed: its price is unknown
 

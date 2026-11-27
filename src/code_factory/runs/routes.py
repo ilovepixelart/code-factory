@@ -79,7 +79,7 @@ async def stop_all(runs: RunsDep) -> Changed:
 @router.post("/agents/resume", summary="Let agents start again")
 async def resume(runs: RunsDep) -> Changed:
     """A second call changes nothing."""
-    await runs.resume(OWNER)
+    await runs.resume()
     return Changed(notice="Agents may start again", undo=None)
 
 
@@ -88,7 +88,7 @@ async def resume(runs: RunsDep) -> Changed:
 )
 async def stop(run_id: str, runs: RunsDep) -> Changed:
     """Its process group is ended; the stop is recorded."""
-    await runs.stop(run_id, OWNER)
+    await runs.stop(run_id)
     return NOTHING
 
 
@@ -131,7 +131,7 @@ async def start_run(
 ) -> Changed:
     """A refusal (held, claimed, no agent, over budget) is a 409 with its sentence."""
     options = (body or StartBody()).options()
-    await runs.start(await _ticket(tickets, repository, ticket_id), options=options, by=OWNER)
+    await runs.start(await _ticket(tickets, repository, ticket_id), options=options)
     return NOTHING
 
 
@@ -156,7 +156,7 @@ async def split(
         raise BadRequestError("a split needs a brief")
     found = await tickets.get(await _ticket(tickets, repository, ticket_id))
     prompt = split_prompt(found.id, found.title, found.description, body.brief)
-    await runs.start(str(found.id), stage=STAGE, options=StartOptions(prompt=prompt), by=OWNER)
+    await runs.start(str(found.id), stage=STAGE, options=StartOptions(prompt=prompt))
     notice = f"Started a split of {found.id}; its tickets appear under it as the run files them"
     return Changed(notice=notice, undo=None)
 
@@ -171,7 +171,7 @@ async def start_review(
     repository: str, ticket_id: str, runs: RunsDep, tickets: TicketsDep
 ) -> Changed:
     """A review run reads the change and records its findings."""
-    await runs.start(await _ticket(tickets, repository, ticket_id), stage="review", by=OWNER)
+    await runs.start(await _ticket(tickets, repository, ticket_id), stage="review")
     return NOTHING
 
 
@@ -197,7 +197,7 @@ async def start_preview(
     repository: str, ticket_id: str, previews: PreviewsDep, tickets: TicketsDep
 ) -> Changed:
     """The repository's preview command runs in the ticket's worktree."""
-    await previews.start(await _ticket(tickets, repository, ticket_id), OWNER)
+    await previews.start(await _ticket(tickets, repository, ticket_id))
     return NOTHING
 
 

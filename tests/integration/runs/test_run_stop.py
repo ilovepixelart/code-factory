@@ -19,7 +19,7 @@ from runs_values import NOW, OWNER, a_run
 
 async def started(runs: RunService, facts: TicketFacts, *, looping: bool = False) -> Run:
     options = StartOptions(looping=looping)
-    return (await runs.start(facts.id, by=OWNER, options=options)).runs[0]
+    return (await runs.start(facts.id, options=options)).runs[0]
 
 
 async def alive(registry: ProcessRegistry, run: Run) -> bool:
@@ -38,7 +38,7 @@ async def test_stopping_a_run_ends_its_group_and_records_a_stop(
         if registry.returncode(run.pid or 0) is None and runs.log_path(run.id).exists():
             break
     await asyncio.sleep(0.5)
-    stopped = await runs.stop(run.id, OWNER)
+    stopped = await runs.stop(run.id)
     assert stopped.exit_code == -signal.SIGTERM
     assert stopped.looping is False
     assert not await alive(registry, run)
@@ -60,14 +60,14 @@ async def test_stopping_an_ended_run_returns_it_unchanged(
             break
         await asyncio.sleep(0.05)
     (ended,) = await runs.collect()
-    again = await runs.stop(run.id, OWNER)
+    again = await runs.stop(run.id)
     assert again == ended.run
     assert fakes.calls.log.count("revoke") == 1
 
 
 async def test_stopping_an_unknown_run_says_so(runs: RunService) -> None:
     with pytest.raises(NotFoundError, match="no such run"):
-        await runs.stop("000000000000", OWNER)
+        await runs.stop("000000000000")
 
 
 async def test_a_redirected_tree_is_the_reason_a_stopped_run_records(
@@ -76,7 +76,7 @@ async def test_a_redirected_tree_is_the_reason_a_stopped_run_records(
     fakes.agents.script = "sleep 30"
     fakes.trees.redirected = "the tree's git folder is not the one the board made"
     run = await started(runs, facts)
-    stopped = await runs.stop(run.id, OWNER)
+    stopped = await runs.stop(run.id)
     assert stopped.halted == "the tree's git folder is not the one the board made"
 
 
@@ -121,12 +121,12 @@ async def test_stopping_every_agent_holds_them_first_and_ends_every_run(
     fakes.tickets.facts_by_id[other.id] = facts.model_copy(
         update={"id": other.id, "number": other.number}
     )
-    second = (await runs.start(other.id, by=OWNER)).runs[0]
+    second = (await runs.start(other.id)).runs[0]
     stopped = await runs.stop_all("cli")
     assert sorted(stopped) == sorted([first.id, second.id])
     assert await runs.halted_at() is not None
     with pytest.raises(ConflictError, match="agents are stopped"):
-        await runs.start(facts.id, by=OWNER)
+        await runs.start(facts.id)
     assert not await alive(registry, first)
     assert not await alive(registry, second)
 
@@ -136,10 +136,10 @@ async def test_resume_lets_agents_start_and_is_idempotent(
 ) -> None:
     fakes.agents.script = "sleep 30"
     await runs.stop_all("cli")
-    await runs.resume("cli")
-    await runs.resume("cli")
+    await runs.resume()
+    await runs.resume()
     assert await runs.halted_at() is None
-    assert (await runs.start(facts.id, by=OWNER)).runs
+    assert (await runs.start(facts.id)).runs
 
 
 async def test_stopping_every_agent_with_none_running_still_holds_them(runs: RunService) -> None:
@@ -151,7 +151,7 @@ async def test_stopping_a_run_that_has_no_process_ends_it_at_once(
     runs: RunService, facts: TicketFacts, run_repo: RunRepository
 ) -> None:
     await run_repo.insert(a_run(facts.number, "aaaaaaaaaaaa", started_at=NOW))
-    stopped = await runs.stop("aaaaaaaaaaaa", OWNER)
+    stopped = await runs.stop("aaaaaaaaaaaa")
     assert stopped.exit_code == -signal.SIGTERM
 
 
@@ -182,7 +182,7 @@ async def test_a_stop_whose_checkout_cannot_be_read_still_ends_the_run_with_the_
     fakes.trees.redirected = redirected
     run = await started(runs, facts)
     fakes.trees.head_error = ConflictError(redirected)
-    stopped = await runs.stop(run.id, OWNER)
+    stopped = await runs.stop(run.id)
     assert stopped.exit_code == -signal.SIGTERM
     assert stopped.halted == redirected
     assert stopped.settled_at is not None
@@ -195,7 +195,7 @@ async def test_commits_the_main_checkout_cannot_read_yet_are_recorded_as_unknown
     run = await started(runs, facts)
     fakes.trees.heads = ["head9"]
     fakes.trees.commits_error = ConflictError("bad object head9")
-    stopped = await runs.stop(run.id, OWNER)
+    stopped = await runs.stop(run.id)
     assert stopped.exit_code == -signal.SIGTERM
     assert stopped.commits is None
 
@@ -209,7 +209,7 @@ async def test_a_halt_stops_every_active_run_at_the_same_time(
 ) -> None:
     fakes.agents.script = "sleep 30"
     first = await started(runs, facts)
-    other = await runs.start(facts.id, by=OWNER, options=StartOptions(attempt=1))
+    other = await runs.start(facts.id, options=StartOptions(attempt=1))
     in_flight = peak = 0
     real_stop = registry.stop
 
@@ -233,7 +233,7 @@ async def test_a_stop_whose_tree_record_is_gone_still_ends_the_run(
     fakes.agents.script = "sleep 30"
     run = await started(runs, facts)
     fakes.trees.redirection_error = NotFoundError("no tree cf-1 is recorded for sample")
-    stopped = await runs.stop(run.id, OWNER)
+    stopped = await runs.stop(run.id)
     assert stopped.exit_code == -signal.SIGTERM
     assert stopped.settled_at is not None
     assert not await alive(registry, run)

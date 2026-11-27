@@ -16,7 +16,7 @@ from code_factory.runs.service.neighbours import TreesAdapter
 from git_support import Fakes as GitFakes
 from git_support import git, make_repo, make_service, ticket_ref
 from runs_fakes import Fakes
-from runs_values import OWNER, FakeClock
+from runs_values import FakeClock
 
 COMMIT = "git -c user.name=t -c user.email=t@example.com commit -q --allow-empty -m 'Run work'"
 
@@ -48,7 +48,7 @@ async def test_the_commits_a_run_made_in_its_clone_are_recorded(
     real_runs: RunService, fakes: Fakes, facts: TicketFacts, root: Path
 ) -> None:
     fakes.agents.script = COMMIT
-    run = (await real_runs.start(facts.id, by=OWNER)).runs[0]
+    run = (await real_runs.start(facts.id)).runs[0]
     for _ in range(200):
         if real_runs.exit_path(run.id).exists():
             break

@@ -22,7 +22,7 @@ class Recorder:
         self.collect_failures = 0
         self.withdrawn_before: list[datetime] = []
 
-    async def collect(self, now: datetime | None = None) -> list[Ended]:  # noqa: ARG002
+    async def collect(self) -> list[Ended]:
         self.calls.append("collect")
         if self.collect_failures:
             self.collect_failures -= 1

@@ -10,11 +10,10 @@ from code_factory.runs.ports import TicketFacts
 from code_factory.runs.rules.records import state_of
 from code_factory.runs.service import RunService
 from runs_fakes import Fakes
-from runs_values import OWNER
 
 
 async def _ended(runs: RunService, facts: TicketFacts, stage: str = "build") -> Run:
-    (run,) = (await runs.start(facts.id, stage=stage, by=OWNER)).runs
+    (run,) = (await runs.start(facts.id, stage=stage)).runs
     for _ in range(200):
         if runs.exit_path(run.id).exists():
             break
@@ -97,8 +96,8 @@ async def test_a_stopped_review_run_decides_nothing(
     runs: RunService, fakes: Fakes, facts: TicketFacts
 ) -> None:
     fakes.agents.argv = ("/bin/sleep", "30")
-    (run,) = (await runs.start(facts.id, stage="review", options=StartOptions(), by=OWNER)).runs
+    (run,) = (await runs.start(facts.id, stage="review", options=StartOptions())).runs
 
-    await runs.stop(run.id, by=OWNER)
+    await runs.stop(run.id)
 
     assert fakes.flow.calls == []

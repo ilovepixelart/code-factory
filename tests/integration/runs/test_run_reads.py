@@ -180,7 +180,7 @@ async def test_active_runs_say_whether_their_process_lives(
     runs: RunService, fakes: Fakes, facts: TicketFacts
 ) -> None:
     fakes.agents.script = "sleep 30"
-    (run,) = (await runs.start(facts.id, by="owner")).runs
+    (run,) = (await runs.start(facts.id)).runs
     (active,) = await runs.active_runs()
     assert (active.run.id, active.alive) == (run.id, True)
 

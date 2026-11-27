@@ -54,7 +54,7 @@ def _target(run: Run, exit_file: Path) -> Target | None:
 class Ending(Reading):
     """Stopping, halting and collecting."""
 
-    async def stop(self, run_id: str, by: str) -> Run:  # noqa: ARG002  # the event names the run
+    async def stop(self, run_id: str) -> Run:
         """End a run: SIGTERM its group, SIGKILL after the grace, record the stop.
 
         An ended run is returned unchanged. Concurrent stops of one run are one.
@@ -131,7 +131,7 @@ class Ending(Reading):
                 if (target := _target(run, self.exit_file_of(run))) is not None:
                     group.create_task(self._registry.stop(target))
 
-    async def resume(self, by: str) -> None:  # noqa: ARG002  # idempotent: nothing to record
+    async def resume(self) -> None:
         """Let agents start again; a second call changes nothing."""
         async with self._uow() as session:
             await HaltRepository(session).resume()
@@ -142,7 +142,7 @@ class Ending(Reading):
             halt = await HaltRepository(session).halted()
         return None if halt is None else halt.halted_at
 
-    async def collect(self, now: datetime | None = None) -> list[Ended]:  # noqa: ARG002  # kept for the follower's explicit pass
+    async def collect(self) -> list[Ended]:
         """One pass: end every run that finished, run the effects of every unsettled end.
 
         Single flight: a pass started while one runs waits and then finds nothing to do.

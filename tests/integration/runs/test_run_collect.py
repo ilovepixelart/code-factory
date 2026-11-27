@@ -12,11 +12,11 @@ from code_factory.runs.ports import Given, Limit, LogUsage, TicketFacts
 from code_factory.runs.repository import RunEnd, RunRepository
 from code_factory.runs.service import RunService
 from runs_fakes import Fakes
-from runs_values import NOW, OWNER, FakeClock, a_run
+from runs_values import NOW, FakeClock, a_run
 
 
 async def started(runs: RunService, facts: TicketFacts) -> Run:
-    return (await runs.start(facts.id, by=OWNER)).runs[0]
+    return (await runs.start(facts.id)).runs[0]
 
 
 async def wait_for_exit(runs: RunService, run: Run) -> None:
@@ -66,7 +66,7 @@ async def test_a_process_that_ended_without_an_exit_file_is_recorded_with_its_re
 ) -> None:
     command, code = case
     fakes.agents.argv = ("/bin/sh", "-c", command)
-    (run,) = (await runs.start(facts.id, stage="spec", by=OWNER)).runs
+    (run,) = (await runs.start(facts.id, stage="spec")).runs
     for _ in range(100):
         if await runs.collect():
             break

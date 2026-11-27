@@ -26,7 +26,7 @@ async def _halt(args: argparse.Namespace, services: Services) -> int:  # noqa: A
 
 
 async def _resume(args: argparse.Namespace, services: Services) -> int:  # noqa: ARG001
-    await services.get(RunService).resume("cli")
+    await services.get(RunService).resume()
     sys.stdout.write("agents may start again\n")
     return 0
 
@@ -75,7 +75,7 @@ async def _runs(args: argparse.Namespace, services: Services) -> int:
         if not args.run:
             msg = "stop needs a run id: `code-factory runs list --active` shows them"
             raise BadRequestError(msg)
-        stopped = await runs.stop(args.run, "cli")
+        stopped = await runs.stop(args.run)
         sys.stdout.write(f"stopped run {stopped.id}\n")
         return 0
     await _list(runs, args)

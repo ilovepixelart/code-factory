@@ -84,14 +84,14 @@ async def _run(services: Services, repository: str, runtime: str) -> None:
     )
     runs = services.get(RunService)
     (started,) = (
-        await runs.start(ticket.id, stage="build", options=StartOptions(prompt=PROMPT), by="owner")
+        await runs.start(ticket.id, stage="build", options=StartOptions(prompt=PROMPT))
     ).runs
     try:
         async with asyncio.timeout(95):
             while (run := await runs.get(started.id)).settled_at is None:  # noqa: ASYNC110
                 await asyncio.sleep(0.3)
     except TimeoutError:
-        await runs.stop(started.id, "owner")
+        await runs.stop(started.id)
         pytest.fail(f"{runtime} > settlement: timed out")
     assert (run.exit_code, len(run.commits or [])) == (0, 1), f"{runtime} > committed Build"
     assert run.commits is not None

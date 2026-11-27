@@ -18,7 +18,7 @@ from code_factory.runs.ports import Launch, Settings, TicketFacts
 from code_factory.runs.repository import PreviewRepository
 from code_factory.runs.service.previews import PreviewService, free_port
 from runs_fakes import Fakes
-from runs_values import NOW, OWNER, FakeClock, at
+from runs_values import NOW, FakeClock, at
 
 BOARD = "http://localhost:4100"
 
@@ -109,7 +109,7 @@ async def test_a_start_without_a_command_is_refused_with_the_config_sentence(
     with pytest.raises(
         ConflictError, match=r"^no \[preview\] command in .code-factory/config.toml$"
     ):
-        await previews.start(facts.id, OWNER)
+        await previews.start(facts.id)
 
 
 async def test_a_start_without_a_worktree_is_refused_naming_the_ticket(
@@ -117,7 +117,7 @@ async def test_a_start_without_a_worktree_is_refused_naming_the_ticket(
 ) -> None:
     setup.tree = None
     with pytest.raises(ConflictError, match=f"^{facts.id} has no worktree to preview$"):
-        await previews.start(facts.id, OWNER)
+        await previews.start(facts.id)
 
 
 async def test_a_start_the_sandbox_refuses_leaves_no_preview(
@@ -125,7 +125,7 @@ async def test_a_start_the_sandbox_refuses_leaves_no_preview(
 ) -> None:
     setup.refusal = UnavailableError("srt is not installed")
     with pytest.raises(UnavailableError, match="srt is not installed"):
-        await previews.start(facts.id, OWNER)
+        await previews.start(facts.id)
     assert await previews.running() == []
 
 
@@ -135,7 +135,7 @@ async def test_a_start_runs_the_command_in_the_tree_with_its_port(
     fakes.config.value = Settings(
         preview_command='echo "$CODE_FACTORY_PORT" > port.txt; pwd > where.txt; sleep 30'
     )
-    status = await previews.start(facts.id, OWNER)
+    status = await previews.start(facts.id)
     assert status.running is True
     assert status.port == 5001
     assert status.address == "http://127.0.0.1:4100/preview/5001"
@@ -157,10 +157,10 @@ async def test_a_second_start_replaces_the_running_preview(
     db_session: AsyncSession,
     registry: ProcessRegistry,
 ) -> None:
-    first = await previews.start(facts.id, OWNER)
+    first = await previews.start(facts.id)
     recorded = await PreviewRepository(db_session).get(facts.number)
     assert recorded is not None
-    second = await previews.start(facts.id, OWNER)
+    second = await previews.start(facts.id)
     assert (first.port, second.port) == (5001, 5002)
     for _ in range(100):
         if registry.returncode(recorded.pgid) is not None:
@@ -178,7 +178,7 @@ async def test_a_stop_ends_the_whole_group_and_removes_the_preview(
     fakes.config.value = Settings(
         preview_command=f"sleep 30 & echo $! > {marker}; wait", preview_idle_s=60
     )
-    await previews.start(facts.id, OWNER)
+    await previews.start(facts.id)
     for _ in range(100):
         if marker.exists() and marker.read_text().strip():
             break
@@ -201,7 +201,7 @@ async def test_a_preview_that_ended_by_itself_loses_its_row(
     previews: PreviewService, fakes: Fakes, facts: TicketFacts, registry: ProcessRegistry
 ) -> None:
     fakes.config.value = Settings(preview_command="exit 0", preview_idle_s=60)
-    await previews.start(facts.id, OWNER)
+    await previews.start(facts.id)
     await registry.reap_all()
     assert (await previews.status(facts.id)).running is False
     assert await previews.running() == []
@@ -233,7 +233,7 @@ async def test_a_recorded_group_nobody_can_vouch_for_is_never_signalled(
 async def test_the_sweep_stops_the_preview_of_a_ticket_that_is_no_longer_open(
     previews: PreviewService, facts: TicketFacts
 ) -> None:
-    await previews.start(facts.id, OWNER)
+    await previews.start(facts.id)
     assert await previews.sweep({facts.id}, NOW) == []
     assert await previews.sweep(set(), NOW) == [facts.id]
     assert await previews.running() == []
@@ -242,7 +242,7 @@ async def test_the_sweep_stops_the_preview_of_a_ticket_that_is_no_longer_open(
 async def test_the_sweep_stops_a_preview_idle_for_the_limit_not_a_second_before(
     previews: PreviewService, facts: TicketFacts, clock: FakeClock
 ) -> None:
-    await previews.start(facts.id, OWNER)
+    await previews.start(facts.id)
     clock.advance(59)
     assert await previews.sweep({facts.id}, clock.now) == []
     clock.advance(1)
@@ -252,7 +252,7 @@ async def test_the_sweep_stops_a_preview_idle_for_the_limit_not_a_second_before(
 async def test_the_sweep_keeps_a_preview_when_the_repository_sets_no_idle_limit(
     previews: PreviewService, fakes: Fakes, facts: TicketFacts, clock: FakeClock
 ) -> None:
-    await previews.start(facts.id, OWNER)
+    await previews.start(facts.id)
     fakes.config.value = Settings(preview_command="sleep 30")
     clock.advance(10_000)
     assert await previews.sweep({facts.id}, clock.now) == []

@@ -205,7 +205,7 @@ async def test_a_run_refused_by_the_hold_leaves_the_stopped_agents_once_they_res
     other = await _refused_by_the_halt(app, uow, "agent failed (exit 1)")
     runs = app.state.services.get(RunService)
     await runs.stop_all("owner:owner")
-    await runs.resume("owner:owner")
+    await runs.resume()
 
     page = await app.state.services.get(InboxService).page()
 

@@ -88,7 +88,8 @@ class TicketsAdapter:
         """The ticket with the ids of its blockers that are not merged."""
         tickets = self._services.get(TicketService)
         ticket = await tickets.get(ticket_id)
-        waiting = tuple([b for b in ticket.blocked_by if not (await tickets.get(b)).merged])
+        blockers = [(b, await tickets.get(b)) for b in ticket.blocked_by]
+        waiting = tuple(b for b, blocker in blockers if not blocker.merged)
         return TicketFacts(
             id=ticket.id,
             number=ticket.number,
@@ -242,7 +243,7 @@ class AgentsAdapter:
         self._services = services
         self._launcher = launcher
 
-    async def given(self, agent: str, stage: str, repository: str) -> Given:  # noqa: ARG002  # the setup does not vary by stage
+    async def given(self, agent: str, stage: str) -> Given:  # noqa: ARG002  # the setup does not vary by stage
         """The agent's setup (the default agent for ''), its refusal and a fingerprint of both."""
         agents = self._services.get(AgentService)
         resolved = await agents.resolve_agent(agent or None)

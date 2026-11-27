@@ -250,9 +250,7 @@ class WorkAdapter(_Neighbour):
     async def start(self, ticket_id: str, stage: str) -> None:
         """Start a looping run of the stage."""
         options = StartOptions(looping=stage in {"spec", "build"})
-        await self._services.get(RunService).start(
-            ticket_id, stage=stage, options=options, by="board"
-        )
+        await self._services.get(RunService).start(ticket_id, stage=stage, options=options)
 
 
 class FilingAdapter(_Neighbour):

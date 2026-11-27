@@ -227,7 +227,7 @@ class Trees(Protocol):
 class Agents(Protocol):
     """The agents module: what a run starts with, its command and its log's facts."""
 
-    async def given(self, agent: str, stage: str, repository: str) -> Given:
+    async def given(self, agent: str, stage: str) -> Given:
         """The agent's setup (the default agent for ''): its model check and fingerprint."""
         ...
 
