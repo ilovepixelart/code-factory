@@ -209,6 +209,16 @@ class StageRepository:
         )
         await self._session.flush()
 
+    async def remove_unlaunched_round(self, number: int, run_id: str) -> None:
+        """Remove a CI or conflict reservation owned by the run that could not launch."""
+        await self._session.execute(
+            delete(FixRoundRow).where(
+                FixRoundRow.ticket_number == number,
+                FixRoundRow.run_id == run_id,
+                FixRoundRow.reason.in_(("ci", "conflict")),
+            )
+        )
+
     async def halts_of(self, number: int) -> list[FixHalt]:
         """The heads and reasons the rounds ran out on, oldest first."""
         rows = await self._session.scalars(

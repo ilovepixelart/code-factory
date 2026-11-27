@@ -142,6 +142,7 @@ class StageAssessment(_Value):
     facts_known: bool
     git_unreadable: bool
     observed_at: datetime | None
+    head: str = ""
 
 
 class StageMove(_Value):

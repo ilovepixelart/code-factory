@@ -39,6 +39,7 @@ def _assessment(
         refusals=rules.refusals(ticket.id, stage, items),
         hold=rules.card_hold(items, stage),
         landed=rules.is_landed(stage),
+        head=facts.head if own and facts.known and facts.has_commits else "",
         facts_known=own and facts.known,
         git_unreadable=own and not facts.known,
         observed_at=row.observed_at if row is not None and own else None,

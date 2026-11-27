@@ -11,12 +11,14 @@ from code_factory.evals.service import JudgeService
 from code_factory.follower.models import ActiveRunFact, Card
 from code_factory.follower.rules import due_for_fix, due_for_review, failure_streak
 from code_factory.follower.rules.filing import main_failure_fields, revert_fields
-from code_factory.follower.rules.queue import Rule, reader_due, roles_due
+from code_factory.follower.rules.queue import Rule, reader_due, ready, roles_due
 from code_factory.follower.service import QueueService
+from code_factory.follower.service.repairs import repairs_for
 from code_factory.metrics.service import MetricsService
+from code_factory.platform.errors import ConflictError
 from code_factory.platform.services import Services
 from code_factory.repositories.service import RepositoryService
-from code_factory.runs.models import RunView, StartOptions
+from code_factory.runs.models import Repair, RunView, StartOptions
 from code_factory.runs.service import RunService
 from code_factory.settings.models import ConfigUnjudgedError, reviews
 from code_factory.settings.service import SettingsService
@@ -167,6 +169,7 @@ class BoardAdapter(_Neighbour):
         runs = self._services.get(RunService)
         running = {a.run.ticket_key for a in await runs.active_runs()}
         history = await runs.card_runs([t.id for t in tickets])
+        repairs = await repairs_for(self._services, assessed, running)
         known: dict[str, bool] = {}
         roles: dict[str, list[str]] = {}
         readers: dict[str, tuple[bool, bool]] = {}
@@ -175,40 +178,47 @@ class BoardAdapter(_Neighbour):
             facts = assessed.get(ticket.id)
             views = history.get(ticket.id, [])
             failures, last_end, limited_until = _history(views)
-            review_due, fix_due = await self._due(ticket, facts, views, known)
+            repair = repairs.get(ticket.id)
+            if repair is None:
+                stage = facts.stage if facts else str(ticket.column)
+                review_due, fix_due = await self._due(ticket, facts, views, known)
+            else:
+                stage, review_due, fix_due = "build", False, True
             due_roles = await self._roles_due(ticket, views, roles) if review_due else []
-            stage = facts.stage if facts else str(ticket.column)
             gaps, reader = await self._build_extras(
                 ticket, views, readers, stage=stage, fix_due=fix_due
             )
-            cards.append(
-                Card(
-                    id=ticket.id,
-                    repository=ticket.repository,
-                    stage=stage,
-                    priority=str(ticket.priority),
-                    rank=ticket.rank,
-                    archived=ticket.archived,
-                    blocked=ticket.blocked,
-                    work_done=bool(facts and facts.work_done),
-                    runs=1 if ticket.id in running else 0,
-                    unanswered=unanswered.get(ticket.id, 0),
-                    open_blockers=tuple(
-                        b for b in ticket.blocked_by if b in assessed and b not in landed
-                    ),
-                    budget=_budget(ticket.budget),
-                    spent=await self._spent(ticket),
-                    kind=str(ticket.type),
-                    labels=",".join(ticket.labels),
-                    failures=failures,
-                    last_end=last_end,
-                    limited_until=limited_until,
-                    review_due=review_due,
-                    fix_due=fix_due,
-                    build_gaps=tuple(gaps),
-                    run_stage=due_roles[0] if due_roles else reader,
-                )
+            card = Card(
+                id=ticket.id,
+                repository=ticket.repository,
+                stage=stage,
+                priority=str(ticket.priority),
+                rank=ticket.rank,
+                archived=ticket.archived,
+                blocked=ticket.blocked,
+                work_done=bool(facts and facts.work_done),
+                runs=1 if ticket.id in running else 0,
+                unanswered=unanswered.get(ticket.id, 0),
+                open_blockers=tuple(
+                    b for b in ticket.blocked_by if b in assessed and b not in landed
+                ),
+                budget=_budget(ticket.budget),
+                spent=await self._spent(ticket),
+                kind=str(ticket.type),
+                labels=",".join(ticket.labels),
+                failures=failures,
+                last_end=last_end,
+                limited_until=limited_until,
+                review_due=review_due,
+                fix_due=fix_due,
+                repair=repair,
+                build_gaps=tuple(gaps),
+                run_stage=due_roles[0] if due_roles else reader,
             )
+            if repair is not None and ready(card):
+                hold = await runs.repair_refusal(ticket.id, repair)
+                card = card.model_copy(update={"repair_hold": hold})
+            cards.append(card)
         return cards
 
     async def active(self) -> list[ActiveRunFact]:
@@ -262,10 +272,27 @@ class WorkAdapter(_Neighbour):
         """Observe the stages."""
         return (await self._services.get(StageService).observe()).observed
 
-    async def start(self, ticket_id: str, stage: str) -> None:
-        """Start a looping run of the stage."""
-        options = StartOptions(looping=stage in {"spec", "build"})
+    async def start(self, ticket_id: str, stage: str, repair: Repair | None = None) -> None:
+        """Start the stage, supplying the check evidence when it is a repair."""
+        if repair is not None:
+            repair = await self._current_repair(ticket_id, repair)
+        options = StartOptions(looping=stage in {"spec", "build"}, repair=repair)
         await self._services.get(RunService).start(ticket_id, stage=stage, options=options)
+
+    async def _current_repair(self, ticket_id: str, planned: Repair) -> Repair:
+        """Recheck evidence that could have changed while the ticket waited for its slot."""
+        stages = self._services.get(StageService)
+        facts = await stages.assess(ticket_id)
+        current = (await repairs_for(self._services, {ticket_id: facts}, set())).get(ticket_id)
+        if current is None or current.head != planned.head or current.reason != planned.reason:
+            msg = "the repair evidence changed before the Build run could start"
+            raise ConflictError(msg)
+        if (
+            current.reason == "ci"
+            and (task := await stages.checks_task(ticket_id, current.head)) is not None
+        ):
+            return current.model_copy(update={"task": task})
+        return current
 
 
 class FilingAdapter(_Neighbour):

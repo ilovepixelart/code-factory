@@ -6,6 +6,7 @@ from typing import Protocol
 
 from code_factory.follower.models import ActiveRunFact, Card
 from code_factory.follower.rules.queue import Rule
+from code_factory.runs.models import Repair
 
 
 class Board(Protocol):
@@ -51,7 +52,7 @@ class Work(Protocol):
         """Observe the stages; how many tickets."""
         ...
 
-    async def start(self, ticket_id: str, stage: str) -> None:
+    async def start(self, ticket_id: str, stage: str, repair: Repair | None = None) -> None:
         """Start a run; a refusal raises a platform error with its sentence."""
         ...
 

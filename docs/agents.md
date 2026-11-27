@@ -42,9 +42,7 @@ held-back cases can use the existing private QA files.
 Use the pipeline evaluation runner to compare two and three CI or conflict repair rounds on the
 same cases. The runner checks out the same commit twice, disables shipping, and sets each arm's
 repository `[agents] fix_rounds`. The review round cap and all selected pipeline steps stay the same.
-The stage service enforces this cap when a caller requests a repair round. The follower does not
-yet request CI or conflict repair rounds through that service. An isolated driver must exercise
-that admission path explicitly until the follower does.
+Exercise both caps through the follower in the isolated driver.
 Save the following as a TOML manifest:
 
 ```toml
@@ -161,3 +159,11 @@ Only the runtimes `claude` and `codex` exist. The previous implementation's buil
 opencode and acp (`omp_settings`, `acp_settings`, `pi_files`, `acp_hosts`, `opencode_config`) and
 the log readers of those runtimes are not ported; `process_settings` is the srt profile of a
 contained codex process, and `connections.agent_refusal` decides which connection a runtime takes.
+
+## Automatic repairs
+
+A confirmed CI failure or merge conflict on the current ticket branch can queue a Build repair.
+The `[agents] fix_rounds` setting defaults to 3 and limits these repairs over the ticket's lifetime.
+Factory attempts each cause once per commit. If the agent cannot launch, the reservation is
+released. When the cap is reached, the queue shows the reason and the owner can take over.
+Review returns use the separate `review_rounds` setting.

@@ -4,6 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from code_factory.runs.models import Repair
+
 
 class Frozen(BaseModel):
     """A value."""
@@ -34,6 +36,8 @@ class Card(Frozen):
     spent: float = 0.0
     review_due: bool = False
     fix_due: bool = False
+    repair: Repair | None = None
+    repair_hold: str = ""
     kind: str = "feature"
     labels: str = ""
     failures: int = 0

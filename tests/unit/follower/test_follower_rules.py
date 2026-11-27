@@ -208,3 +208,17 @@ def test_a_recurring_entry_files_once_per_period() -> None:
         "labels": ["ops", "security"],
     }  # fmt: skip
     assert recurring_due(entries, {"recurring:Rotate keys@2026-09"}, now) == []
+
+
+def test_an_exhausted_repair_keeps_its_note_without_holding_a_queue_slot() -> None:
+    exhausted = Card(
+        id="CF-1", repository="r", stage="build", fix_due=True, repair_hold="Fix rounds exhausted"
+    )
+    ordinary = Card(id="CF-2", repository="r", stage="build")
+
+    plan = plan_queue([exhausted, ordinary], [], slots={"r": 1}, overall=None, limits={})
+
+    assert [(card.id, card.reason) for card in plan] == [
+        ("CF-1", "Fix rounds exhausted"),
+        ("CF-2", ""),
+    ]

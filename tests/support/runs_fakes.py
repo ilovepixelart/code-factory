@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 from code_factory.platform.errors import ConflictError, NotFoundError, UnavailableError
+from code_factory.runs.models import Repair
 from code_factory.runs.ports import (
     Claimed,
     Given,
@@ -246,6 +247,8 @@ class FakeFlow:
         self.prepare_error: Exception | None = None
         self.verified: list[tuple[str, str]] = []
         self.verify_error: Exception | None = None
+        self.reservations: list[tuple[str, Repair, str]] = []
+        self.released: list[tuple[str, str]] = []
 
     async def prepare_build(self, ticket_id: str) -> bool:
         self.prepared.append(ticket_id)
@@ -257,6 +260,13 @@ class FakeFlow:
         self.verified.append((ticket_id, head))
         if self.verify_error is not None:
             raise self.verify_error
+
+    async def admit_repair(self, ticket_id: str, repair: Repair, run_id: str = "") -> None:
+        if run_id:
+            self.reservations.append((ticket_id, repair, run_id))
+
+    async def release_repair(self, ticket_id: str, run_id: str) -> None:
+        self.released.append((ticket_id, run_id))
 
     async def build_ended(self, ticket_id: str, head: str) -> None:
         self.calls.append(("build", ticket_id, head))

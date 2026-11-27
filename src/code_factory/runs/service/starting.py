@@ -15,6 +15,7 @@ from code_factory.platform.errors import (
 from code_factory.runs.adapters.processes import Spawned, Target
 from code_factory.runs.models import (
     PERMISSION_MODES,
+    Repair,
     Run,
     Started,
     StartOptions,
@@ -60,6 +61,7 @@ class _Start:
     run: Run | None = None
     spawned: Spawned | None = None
     attached: bool = False
+    reserving_repair: bool = False
     count: int = 1
 
     def made(self) -> tuple[Run, Tree, Given]:
@@ -112,6 +114,14 @@ class Starting(Reading):
         settings = await self._ports.config.settings(facts.repository)
         return await self._ports.teams.start_refusal(ticket_id, stage or facts.column, settings)
 
+    async def repair_refusal(self, ticket_id: str, repair: Repair) -> str:
+        """Why a scheduler repair waits, recording a halt at the cap."""
+        try:
+            await self._ports.flow.admit_repair(ticket_id, repair)
+        except (ConflictError, UnavailableError) as error:
+            return str(error)
+        return ""
+
     async def start(
         self,
         ticket_id: str,
@@ -130,6 +140,10 @@ class Starting(Reading):
         if await self._halted():
             raise ConflictError(HALTED)
         self._check_ask(facts, begin.stage, begin.options)
+        if (repair := begin.options.repair) is not None:
+            if begin.stage != "build" or begin.options.attempt != 0:
+                raise BadRequestError("a repair needs one Build run on the ticket branch")
+            await self._ports.flow.admit_repair(facts.id, repair)
         if begin.stage == "build" and await self._ports.flow.prepare_build(facts.id):
             if await self._halted():
                 raise ConflictError(HALTED)
@@ -141,7 +155,8 @@ class Starting(Reading):
             begin.facts = facts
         begin.settings = await self._ports.config.settings(facts.repository)
         claimed = await self._ports.teams.claim_for_run(ticket_id, begin.stage, begin.settings)
-        begin.count = budget_rules.attempt_count(facts.parallel, begin.settings.attempts)
+        if repair is None:
+            begin.count = budget_rules.attempt_count(facts.parallel, begin.settings.attempts)
         return Started(runs=await self._start_attempts(begin, claimed.agent))
 
     async def _start_attempts(self, first: _Start, agent: str) -> list[Run]:
@@ -180,6 +195,8 @@ class Starting(Reading):
             facts.repository, facts.id, options.attempt
         )
         head = await self._ports.trees.head(tree)
+        if options.repair is not None and options.repair.head != head:
+            raise ConflictError("the repair head changed before the Build run could start")
         if begin.stage == "build":
             await self._ports.flow.verify_build(facts.id, head)
         run_id = secrets.token_hex(6)
@@ -227,7 +244,7 @@ class Starting(Reading):
             exit_file=self.exit_path(run.id),
             log=Path(run.log),
             prompt=begin.options.prompt,
-            nudge=begin.options.nudge,
+            nudge=begin.options.repair.task if begin.options.repair else begin.options.nudge,
             looping=run.looping,
             iteration=run.iteration,
             timeout_s=limit,
@@ -236,6 +253,9 @@ class Starting(Reading):
         )
         launch = await self._ports.agents.launch(plan)
         async with self._start_slots:
+            if (repair := begin.options.repair) is not None:
+                begin.reserving_repair = True
+                await self._ports.flow.admit_repair(facts.id, repair, run.id)
             begin.spawned = await self._registry.spawn(
                 launch.argv, env=launch.env, cwd=tree.path, log=Path(run.log)
             )
@@ -271,6 +291,8 @@ class Starting(Reading):
             if begin.spawned is not None:
                 target = Target(begin.spawned.pid, begin.spawned.started_at, self.exit_path(run.id))
                 await self._registry.stop(target)
+            elif begin.reserving_repair:
+                await self._ports.flow.release_repair(run.ticket_key, run.id)
             async with self._uow() as session:
                 await RunRepository(session).end(
                     run.id,
