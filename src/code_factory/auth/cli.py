@@ -32,40 +32,48 @@ def _configure(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--days", type=int, default=DEFAULT_DAYS, help="create: lifetime in days")
 
 
+async def _create(args: argparse.Namespace, auth: AuthService) -> None:
+    if not args.label:
+        raise BadRequestError("create needs --label: say what the token is for")
+    if not 1 <= args.days <= LONGEST_DAYS:
+        msg = f"--days is a whole number from 1 to {LONGEST_DAYS}"
+        raise BadRequestError(msg)
+    issued = await auth.issue_owner_token(args.label, lifetime=timedelta(days=args.days))
+    sys.stdout.write(issued.token.get_secret_value() + "\n")
+    sys.stderr.write(
+        f"token {issued.id} ({args.label}) expires {issued.expires_at:%Y-%m-%d}; "
+        "the value is shown once and is not stored; put it in CODE_FACTORY_MCP_TOKEN\n"
+    )
+
+
+async def _list(auth: AuthService) -> None:
+    sys.stdout.write("ID  KIND  LABEL  EXPIRES  LAST_USED\n")
+    for info in await auth.list_tokens(kinds=OWNER_TOKENS):
+        used = "never" if info.last_used_at is None else f"{info.last_used_at:%Y-%m-%d %H:%M}"
+        sys.stdout.write(
+            f"{info.id}  {info.kind.value}  {info.label or info.subject}  "
+            f"{info.expires_at:%Y-%m-%d}  {used}\n"
+        )
+
+
+async def _revoke(args: argparse.Namespace, auth: AuthService) -> None:
+    if args.id is None:
+        raise BadRequestError("revoke needs the token's id; `code-factory token list` shows them")
+    live = {info.id: info for info in await auth.list_tokens(kinds=OWNER_TOKENS)}
+    if args.id not in live or not await auth.revoke(args.id, kinds=OWNER_TOKENS):
+        msg = f"no live token with id {args.id}; `code-factory token list` shows them"
+        raise NotFoundError(msg)
+    sys.stdout.write(f"revoked token {args.id} ({live[args.id].label or live[args.id].subject})\n")
+
+
 async def _run(args: argparse.Namespace, services: Services) -> int:
     auth = services.get(AuthService)
     if args.action == "create":
-        if not args.label:
-            raise BadRequestError("create needs --label: say what the token is for")
-        if not 1 <= args.days <= LONGEST_DAYS:
-            msg = f"--days is a whole number from 1 to {LONGEST_DAYS}"
-            raise BadRequestError(msg)
-        issued = await auth.issue_owner_token(args.label, lifetime=timedelta(days=args.days))
-        sys.stdout.write(issued.token.get_secret_value() + "\n")
-        sys.stderr.write(
-            f"token {issued.id} ({args.label}) expires {issued.expires_at:%Y-%m-%d}; "
-            "the value is shown once and is not stored; put it in CODE_FACTORY_MCP_TOKEN\n"
-        )
+        await _create(args, auth)
     elif args.action == "list":
-        sys.stdout.write("ID  KIND  LABEL  EXPIRES  LAST_USED\n")
-        for info in await auth.list_tokens(kinds=OWNER_TOKENS):
-            used = "never" if info.last_used_at is None else f"{info.last_used_at:%Y-%m-%d %H:%M}"
-            sys.stdout.write(
-                f"{info.id}  {info.kind.value}  {info.label or info.subject}  "
-                f"{info.expires_at:%Y-%m-%d}  {used}\n"
-            )
+        await _list(auth)
     else:
-        if args.id is None:
-            raise BadRequestError(
-                "revoke needs the token's id; `code-factory token list` shows them"
-            )
-        live = {info.id: info for info in await auth.list_tokens(kinds=OWNER_TOKENS)}
-        if args.id not in live or not await auth.revoke(args.id, kinds=OWNER_TOKENS):
-            msg = f"no live token with id {args.id}; `code-factory token list` shows them"
-            raise NotFoundError(msg)
-        sys.stdout.write(
-            f"revoked token {args.id} ({live[args.id].label or live[args.id].subject})\n"
-        )
+        await _revoke(args, auth)
     return 0
 
 
