@@ -140,6 +140,12 @@ def test_the_commands_page_has_a_section_per_command_depth_first_with_each_optio
     )
 
 
+def test_an_option_with_only_a_short_flag_is_named_by_it() -> None:
+    short = argparse.ArgumentParser(prog="tool", description="the tool")
+    short.add_argument("-v", help="talk more")
+    assert "- `-v`: talk more\n" in render_commands_page(short)
+
+
 def test_a_hidden_command_help_and_version_are_left_out() -> None:
     page = render_commands_page(parser())
     for absent in ("secret", "--help", "-h", "--version"):

@@ -77,11 +77,12 @@ def _argument(action: argparse.Action) -> str | None:
     if isinstance(action, _SKIPPED) or action.help == argparse.SUPPRESS:
         return None
     longs = [s for s in action.option_strings if s.startswith("--")]
-    name = (
-        longs[0]
-        if longs
-        else (action.option_strings[0] if action.option_strings else f"<{action.dest}>")
-    )
+    if longs:
+        name = longs[0]
+    elif action.option_strings:
+        name = action.option_strings[0]
+    else:
+        name = f"<{action.dest}>"
     help_text = _help(action)
     return f"- `{name}`: {help_text}" if help_text else f"- `{name}`"
 
