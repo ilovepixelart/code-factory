@@ -13,12 +13,15 @@ tests in their own root, `tests/` and `web/tests/`, and each folder runs as its 
 | `tests/support/` | shared helpers, golden answers and fixtures, imported by name | |
 | `web/tests/unit/` | Node only: no DOM (Vitest project `unit`, `pnpm --dir web test`) | the gate, CI |
 | `web/tests/component/` | Vue components rendered into happy-dom (Vitest project `component`, `pnpm --dir web test:component`) | on demand |
-| `web/tests/e2e/` | the served board in a browser (Playwright, `pnpm --dir web e2e`) | on demand |
+| `web/tests/e2e/` | the served board in a browser (Playwright, `pnpm --dir web e2e`) | delivery journey in CI, full suite on demand |
 | `web/tests/support/` | shared helpers of the web tests | |
 
-A test that renders into a DOM is a component test, not a unit or integration test: Vitest names
-it so and recommends Browser Mode for it, which is why component and browser tests stay out of
-the gate and CI. A backend test that requests a database fixture (`settings`, `connection`,
+The backend end-to-end CI job runs `web/tests/e2e/delivery_journey.spec.ts` in Chromium.
+It files a ticket through the UI, commits in its Factory worktree, and verifies the board's Build,
+Review, and Merged states against a local bare Git origin. The GitHub CLI is substituted at the
+process boundary so CI can exercise shipping and merging without a GitHub token.
+
+A backend test that requests a database fixture (`settings`, `connection`,
 `uow`, `app`, ...) belongs in `tests/integration`; one in `tests/unit` that starts needing one
 stops the unit suite, which runs without a database.
 
