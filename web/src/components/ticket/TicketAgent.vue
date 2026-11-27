@@ -5,7 +5,7 @@ import SectionHeading from './SectionHeading.vue'
 import { PlayIcon, StopIcon, Tick02Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { useQuery } from '@tanstack/vue-query'
-import { computed, ref } from 'vue'
+import { computed, ref, useId } from 'vue'
 import { act, Refused } from '../../lib/actions'
 import { STAGE_LABELS } from '../../lib/board'
 import { keys } from '../../lib/queryKeys'
@@ -27,6 +27,7 @@ import { Textarea } from '@/components/ui/textarea'
 // The agent working the ticket: its spend, its runs, the session subagents at work on it (CF-1184),
 // and the controls that start, stop or review.
 const { view, now } = defineProps<{ view: TicketView; now: number }>()
+const uid = useId()
 
 const { base, busy, refresh, task, send, press, spins } = useTicketForm()
 
@@ -230,9 +231,9 @@ async function stopRun(run: string): Promise<void> {
       </div>
       <form v-if="splitOpen" class="mt-3 grid gap-2" @submit.prevent="press('split', startSplit)">
         <Field :data-invalid="splitRefusal ? true : undefined">
-          <FieldLabel for="split-brief">What to split this ticket into</FieldLabel>
+          <FieldLabel :for="`${uid}-brief`">What to split this ticket into</FieldLabel>
           <Textarea
-            id="split-brief"
+            :id="`${uid}-brief`"
             :model-value="brief"
             name="brief"
             rows="4"

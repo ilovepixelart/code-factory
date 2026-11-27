@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Card, CardContent } from '@/components/ui/card'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, useId } from 'vue'
 import { useRoute } from 'vue-router'
 import { act, ask, Refused } from '../lib/actions'
 import { span } from '../lib/format'
@@ -17,6 +17,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { usePressed } from '../lib/pressed'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Textarea } from '@/components/ui/textarea'
+
+const uid = useId()
 
 // What a pushed permission request's or question's reply link opens, without the sign-in (CF-760,
 // CF-997): the one item, read on load, and answered only when a button is pressed, since link
@@ -112,9 +114,9 @@ async function answer(): Promise<void> {
                 @enter="answer()"
               />
               <Field v-else>
-                <FieldLabel for="reply-answer">Your answer</FieldLabel>
+                <FieldLabel :for="`${uid}-answer`">Your answer</FieldLabel>
                 <Textarea
-                  id="reply-answer"
+                  :id="`${uid}-answer`"
                   :model-value="written"
                   rows="3"
                   @update:model-value="written = String($event)"

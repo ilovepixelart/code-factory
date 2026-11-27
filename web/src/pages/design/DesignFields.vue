@@ -2,7 +2,7 @@
 import SectionCard from '../../components/SectionCard.vue'
 import { Search01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
-import { ref } from 'vue'
+import { ref, useId } from 'vue'
 import PropertyDate from '../../components/ticket/PropertyDate.vue'
 import PropertyLabels from '../../components/ticket/PropertyLabels.vue'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -29,6 +29,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 
+const uid = useId()
+
 // The form field samples of the /design page: shadcn-vue's Field family and its controls.
 const fieldName = ref<string | number>('granite')
 const fieldKind = ref<string>('lesson')
@@ -49,13 +51,13 @@ const fieldLabels = ref('ui, auth')
   >
     <FieldGroup class="grid items-start md:grid-cols-2">
       <Field>
-        <FieldLabel for="design-name">Input</FieldLabel>
-        <Input id="design-name" v-model="fieldName" class="font-mono" />
+        <FieldLabel :for="`${uid}-name`">Input</FieldLabel>
+        <Input :id="`${uid}-name`" v-model="fieldName" class="font-mono" />
         <FieldDescription>One line; font-mono for code</FieldDescription>
       </Field>
       <Field data-invalid>
-        <FieldLabel for="design-refused">With a refusal</FieldLabel>
-        <Input id="design-refused" model-value="0" aria-invalid="true" />
+        <FieldLabel :for="`${uid}-refused`">With a refusal</FieldLabel>
+        <Input :id="`${uid}-refused`" model-value="0" aria-invalid="true" />
         <FieldError>A limit is a whole number above 0</FieldError>
       </Field>
       <Field>
@@ -71,8 +73,8 @@ const fieldLabels = ref('ui, auth')
         </NativeSelect>
       </Field>
       <Field>
-        <FieldLabel for="design-note">Textarea</FieldLabel>
-        <Textarea id="design-note" v-model="fieldNote" class="font-mono" rows="3" />
+        <FieldLabel :for="`${uid}-note`">Textarea</FieldLabel>
+        <Textarea :id="`${uid}-note`" v-model="fieldNote" class="font-mono" rows="3" />
       </Field>
       <Field>
         <FieldLabel for="design-limit">Number field</FieldLabel>
@@ -120,8 +122,8 @@ const fieldLabels = ref('ui, auth')
         </RadioGroup>
       </FieldSet>
       <Field data-disabled>
-        <FieldLabel for="design-disabled">Disabled input</FieldLabel>
-        <Input id="design-disabled" v-model="fieldName" disabled />
+        <FieldLabel :for="`${uid}-disabled`">Disabled input</FieldLabel>
+        <Input :id="`${uid}-disabled`" v-model="fieldName" disabled />
       </Field>
       <PropertyDate id="design-due" v-model="fieldDue" label="Date picker" placeholder="none" />
       <PropertyLabels
