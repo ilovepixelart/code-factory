@@ -11,7 +11,7 @@ export function useLabelColor(): (name: string) => string {
   return (name: string) => {
     const all = [
       ...new Set((live?.board.value?.options.label ?? []).map((l) => l.trim().toLowerCase())),
-    ].sort()
+    ].sort((a, b) => Number(a > b) - Number(a < b)) // code-unit order, as sort() without one
     const index = all.indexOf(name.trim().toLowerCase())
     return index < 0
       ? labelColor(name)
