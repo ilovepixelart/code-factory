@@ -27,15 +27,19 @@ def recurring_due(
         source = recurring_source(title, when)
         if source in known:
             continue
-        fields: dict[str, object] = {"title": title, "source": source}
-        if kind:
-            fields["type"] = kind
-        if entry.get("description"):
-            fields["description"] = str(entry["description"])
-        if entry.get("labels"):
-            fields["labels"] = [s.strip() for s in str(entry["labels"]).split(",") if s.strip()]
-        due.append(fields)
+        due.append({"title": title, "source": source, **_optional_fields(entry, kind)})
     return due
+
+
+def _optional_fields(entry: Mapping[str, object], kind: str) -> dict[str, object]:
+    fields: dict[str, object] = {}
+    if kind:
+        fields["type"] = kind
+    if entry.get("description"):
+        fields["description"] = str(entry["description"])
+    if entry.get("labels"):
+        fields["labels"] = [s.strip() for s in str(entry["labels"]).split(",") if s.strip()]
+    return fields
 
 
 def _caused_by(ticket: str | None) -> dict[str, object]:

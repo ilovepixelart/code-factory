@@ -140,6 +140,23 @@ class BoardAdapter(_Neighbour):
         runs = [(v.started_at, bool(v.commits)) for v in ended]
         return review, due_for_fix(facts.stage, returned_at, runs)
 
+    async def _build_extras(
+        self,
+        ticket: Ticket,
+        views: list[RunView],
+        readers: dict[str, tuple[bool, bool]],
+        *,
+        stage: str,
+        fix_due: bool,
+    ) -> tuple[list[str], str]:
+        """The document gaps of a ticket in build, and the reader role it is due, if any."""
+        if stage != "build":
+            return [], ""
+        gaps = await self._services.get(DocumentService).build_gaps(ticket.id)
+        if fix_due or gaps:
+            return gaps, ""
+        return gaps, await self._reader_due(ticket, views, readers)
+
     async def cards(self) -> list[Card]:
         """Every live ticket as a queue card."""
         tickets = await self._services.get(TicketService).list()
@@ -153,7 +170,6 @@ class BoardAdapter(_Neighbour):
         known: dict[str, bool] = {}
         roles: dict[str, list[str]] = {}
         readers: dict[str, tuple[bool, bool]] = {}
-        documents = self._services.get(DocumentService)
         cards = []
         for ticket in tickets:
             facts = assessed.get(ticket.id)
@@ -162,10 +178,9 @@ class BoardAdapter(_Neighbour):
             review_due, fix_due = await self._due(ticket, facts, views, known)
             due_roles = await self._roles_due(ticket, views, roles) if review_due else []
             stage = facts.stage if facts else str(ticket.column)
-            gaps = await documents.build_gaps(ticket.id) if stage == "build" else []
-            reader = ""
-            if stage == "build" and not fix_due and not gaps:
-                reader = await self._reader_due(ticket, views, readers)
+            gaps, reader = await self._build_extras(
+                ticket, views, readers, stage=stage, fix_due=fix_due
+            )
             cards.append(
                 Card(
                     id=ticket.id,
