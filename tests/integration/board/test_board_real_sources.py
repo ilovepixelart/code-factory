@@ -6,6 +6,7 @@ from typing import Any, cast
 
 import pytest
 from fastapi import FastAPI
+from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from code_factory.board.service import BoardService
@@ -13,6 +14,7 @@ from code_factory.delivery.models import DeliveryEvent, PullReading
 from code_factory.delivery.repository import DeliveryRepository
 from code_factory.platform.services import Services
 from code_factory.runs.repository import RunRepository
+from code_factory.talk.tables import PostRow
 from code_factory.ticket_writes.service import TicketWriteService
 from code_factory.tickets.models import NewTicket, Ticket
 from code_factory.tickets.service import TicketService
@@ -109,3 +111,27 @@ async def test_the_board_carries_the_column_limits_the_owner_set(services: Servi
     board = json.loads((await services.get(BoardService).board()).body)
 
     assert board["limits"] == {"build": 3}
+
+
+async def test_the_ticket_page_shows_the_latest_comments_after_a_thousand_posts(
+    services: Services, db_session: AsyncSession, wired: Ticket
+) -> None:
+    await db_session.execute(
+        insert(PostRow),
+        [
+            {
+                "ticket_number": wired.number,
+                "kind": "comment",
+                "author": OWNER,
+                "text": f"Comment {number}",
+                "created_at": READ_AT,
+            }
+            for number in range(1, 1002)
+        ],
+    )
+
+    page = await services.get(BoardService).ticket_page(wired.repository, wired.id)
+
+    comments = [entry["text"] for entry in page["activity"] if entry["kind"] == "comment"]
+    assert comments[:2] == ["Comment 1001", "Comment 1000"]
+    assert "Comment 1" not in comments
