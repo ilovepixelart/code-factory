@@ -11,7 +11,7 @@ export const keyOf = (repository: string, id: string): string => `${repository}/
 /** Keep only the chosen cards still `present`. */
 export function keepPresent(selection: Set<string>, present: Iterable<string>): void {
   const shown = new Set(present)
-  for (const key of [...selection]) if (!shown.has(key)) selection.delete(key)
+  for (const key of selection) if (!shown.has(key)) selection.delete(key)
 }
 
 export function toggle(key: string): void {

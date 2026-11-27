@@ -4,10 +4,10 @@ export const FLOW = '/analytics'
 
 /** Tabs hidden until the evals that feed them exist, so the app offers no tab that can only say
  *  it is not available: their addresses lead to Flow (`router.ts`). Empty the list to show them. */
-const HIDDEN_TABS: readonly string[] = ['/analytics/benchmarks', '/analytics/self-improvement']
+const HIDDEN_TABS: ReadonlySet<string> = new Set(['/analytics/benchmarks', '/analytics/self-improvement'])
 
 /** Whether the tab at `path` is shown. */
-export const shownTab = (path: string): boolean => !HIDDEN_TABS.includes(path)
+export const shownTab = (path: string): boolean => !HIDDEN_TABS.has(path)
 
 export const ANALYTICS_TABS = (
   [

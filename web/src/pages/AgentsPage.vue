@@ -167,8 +167,8 @@ async function check(): Promise<void> {
   try {
     const read = await ask<ConnectionStatus>('/api/connection-status')
     if (current()) status.value = read
-  } catch (failure) {
-    if (current()) checkRefusal.value = refusalText(failure)
+  } catch (error_) {
+    if (current()) checkRefusal.value = refusalText(error_)
   } finally {
     if (current()) checking.value = false
   }

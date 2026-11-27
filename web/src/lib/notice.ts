@@ -81,8 +81,8 @@ export function useAction(): Action {
       const answer = await act(method, path, body)
       announce(answer)
       await done(answer)
-    } catch (failure) {
-      error.value = refusalText(failure)
+    } catch (error_) {
+      error.value = refusalText(error_)
     }
     busy.value = false
   }

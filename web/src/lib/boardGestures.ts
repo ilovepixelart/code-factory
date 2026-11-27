@@ -30,6 +30,12 @@ function onChoose(event: MouseEvent): void {
 // Pressing on empty board space and dragging sideways pans the board (pan.js).
 const INTERACTIVE = 'li[data-ticket], button, a, input, select, textarea, summary, label'
 
+/** A key pressed without Cmd or Ctrl (nor Alt, unless `alt` allows it), outside a field and a dialog. */
+function plain(event: KeyboardEvent, alt: boolean): boolean {
+  const held = event.metaKey || event.ctrlKey || (!alt && event.altKey)
+  return !held && !typing(event.target) && !dialogOpen()
+}
+
 export function useBoardGestures(actions: BoardActions): BoardGestures {
   // A plain click on a card, or on its title, opens its panel; the title
   // stays a link for the keyboard, a middle click and the browser's link menu.
@@ -43,11 +49,6 @@ export function useBoardGestures(actions: BoardActions): BoardGestures {
     if (link && !link.matches('[data-js-card-link]')) return
     event.preventDefault()
     actions.openPanel(card.dataset.repository ?? '', card.dataset.ticket ?? '')
-  }
-  /** A key pressed without Cmd or Ctrl (nor Alt, unless `alt` allows it), outside a field and a dialog. */
-  function plain(event: KeyboardEvent, alt: boolean): boolean {
-    const held = event.metaKey || event.ctrlKey || (!alt && event.altKey)
-    return !held && !typing(event.target) && !dialogOpen()
   }
   function onKey(event: KeyboardEvent): void {
     if (event.key === 'Escape' && selection.chosen.size && !dialogOpen()) selection.clearSelection()

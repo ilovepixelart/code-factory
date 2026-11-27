@@ -222,11 +222,11 @@ export interface PagedArchive extends Archive {
   size: number
 }
 
-const SORTS = ['id', 'title', 'type', 'stage', 'priority', 'assignee', 'repository', 'archived']
+const SORTS = new Set(['id', 'title', 'type', 'stage', 'priority', 'assignee', 'repository', 'archived'])
 
 /** The archive's order from its address: the asked column and direction, else newest first. */
 export function currentSort(sort: string, dir: string): [string, string] {
-  return SORTS.includes(sort) ? [sort, dir] : ['archived', 'desc']
+  return SORTS.has(sort) ? [sort, dir] : ['archived', 'desc']
 }
 
 /** The kinds of archived ticket a person can ask for: both, or one alone (CF-1207). */
