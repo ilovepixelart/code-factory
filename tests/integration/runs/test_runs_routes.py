@@ -93,3 +93,28 @@ async def test_a_ticket_of_an_untracked_repository_has_no_preview(
     response = await client.get(f"/api/tickets/untracked-here/{ticket.id}/preview")
 
     assert (response.status_code, response.json()["detail"]) == (404, "unknown repository")
+
+
+async def test_a_configured_preview_explains_why_it_cannot_start(
+    client: httpx.AsyncClient, app: FastAPI, tmp_path: Path
+) -> None:
+    root = tmp_path / "preview-disabled"
+    config = root / ".code-factory"
+    config.mkdir(parents=True)
+    (config / "config.toml").write_text('[preview]\ncommand = "echo preview"\n')
+    services = app.state.services
+    record = await services.get(RepositoryService).track(root)
+    ticket = await services.get(TicketService).create(
+        NewTicket(repository=record.name, title="Preview me"), by="owner"
+    )
+    path = f"/api/tickets/{record.name}/{ticket.id}/preview"
+
+    status, start = await client.get(path), await client.post(path)
+
+    assert status.status_code == 200
+    assert status.json()["configured"] is True
+    assert status.json()["unavailable_reason"] == "This board has no isolated preview runtime."
+    assert (start.status_code, start.json()["detail"]) == (
+        503,
+        status.json()["unavailable_reason"],
+    )

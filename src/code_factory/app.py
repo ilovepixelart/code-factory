@@ -21,6 +21,7 @@ from code_factory.board.module import module as board
 from code_factory.broker.module import module as broker
 from code_factory.checks.module import GitChecks
 from code_factory.checks.module import build_module as build_checks
+from code_factory.checks.service import CheckService
 from code_factory.commands.module import module as commands
 from code_factory.delivery.module import ChecksForge, DeliveredPulls, GitForge
 from code_factory.delivery.module import module as delivery
@@ -174,16 +175,15 @@ class _GitTickets(TicketPort):
         return parent.branch if in_flight and parent.branch and not waiting else None
 
 
-class _NoSetup(HooksPort):
-    """No setup command until a module owns one."""
+class _TreeHooks(HooksPort):
+    """A clone's repository-owned setup, through the board's contained runner."""
+
+    def __init__(self, services: Services) -> None:
+        self._services = services
 
     @override
-    async def setup_command(self, repository: str) -> str | None:
-        return None
-
-    @override
-    async def run_setup(self, repository: str, ticket_id: str, tree: Path) -> HookOutcome:
-        return HookOutcome(code=0)
+    async def run_setup(self, repository: str, tree: Path) -> HookOutcome:
+        return await self._services.get(CheckService).worktree_setup(repository, tree)
 
 
 def _git_ports(services: Services) -> GitPorts:
@@ -191,7 +191,7 @@ def _git_ports(services: Services) -> GitPorts:
     forge = GitForge(services)
     return GitPorts(
         directory=_Directory(services), tickets=_GitTickets(services),
-        forge=forge, checks=GitChecks(services), screen=forge, hooks=_NoSetup(),
+        forge=forge, checks=GitChecks(services), screen=forge, hooks=_TreeHooks(services),
     )  # fmt: skip
 
 

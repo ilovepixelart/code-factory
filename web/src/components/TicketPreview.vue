@@ -17,7 +17,8 @@ interface PreviewState {
   running: boolean
   port: number | null
   address: string | null
-  idle_seconds: number
+  unavailable_reason: string | null
+  idle_seconds: number | null
 }
 
 const busy = ref(false)
@@ -34,7 +35,14 @@ const state = preview.data
 // The board names the address: another host than the page's, so the browser sends the board's
 // cookie nowhere near the preview (CF-1426).
 const address = computed(() => state.value?.address ?? '')
-const minutes = computed(() => Math.max(1, Math.round((state.value?.idle_seconds ?? 0) / 60)))
+const description = computed(() => {
+  const current = state.value
+  if (!current) return ''
+  if (!current.running && current.unavailable_reason) return current.unavailable_reason
+  if (current.idle_seconds === null) return 'Stops on merge'
+  const minutes = Math.max(1, Math.round(current.idle_seconds / 60))
+  return `Stops on merge or after ${String(minutes)} min`
+})
 
 async function change(method: 'POST' | 'DELETE'): Promise<void> {
   busy.value = true
@@ -50,7 +58,7 @@ async function change(method: 'POST' | 'DELETE'): Promise<void> {
     class="px-6 py-6"
     heading="preview-heading"
     title="Preview"
-    :description="`stops on a merge or after ${String(minutes)} min`"
+    :description="description"
   >
     <div class="flex flex-wrap items-center gap-3">
       <template v-if="state.running">
@@ -62,9 +70,15 @@ async function change(method: 'POST' | 'DELETE'): Promise<void> {
           ><Spinner v-if="busy" data-icon="inline-start" />Stop</Button
         >
       </template>
-      <Button v-else type="button" variant="secondary" :disabled="busy" @click="change('POST')"
-        ><Spinner v-if="busy" data-icon="inline-start" />Preview</Button
+      <Button
+        v-else-if="!state.unavailable_reason"
+        type="button"
+        variant="secondary"
+        :disabled="busy"
+        @click="change('POST')"
       >
+        <Spinner v-if="busy" data-icon="inline-start" />Preview
+      </Button>
     </div>
   </SectionCard>
 </template>

@@ -5,8 +5,10 @@ import os
 import secrets
 from pathlib import Path
 
+import anyio
+
 from code_factory.git.adapters import trees as tree_io
-from code_factory.git.adapters.folders import exists, threaded
+from code_factory.git.adapters.folders import exists, snapshot_tree, threaded
 from code_factory.git.adapters.transport import fetch_origin
 from code_factory.git.models import (
     GitFacts,
@@ -16,6 +18,7 @@ from code_factory.git.models import (
     TreeInfo,
     TreeKind,
     TreeRecord,
+    TreeRedirectedError,
 )
 from code_factory.git.repository import GitStore
 from code_factory.git.rules import facts as fact_rules
@@ -81,6 +84,15 @@ class TreesMixin(PlainMixin):
     ) -> TreeInfo:
         """Make the ticket's tree: a recorded clone for a run, a linked worktree for the owner."""
         root = await self._root(repository)
+        name = attempt_tree_name(ticket_id, attempt)
+        tree = root / TREES / name
+        by_hand = owner_by_hand and attempt == 0
+        async with self._runner.tree_lock(tree):
+            return await self._start_tree(repository, ticket_id, root, tree, attempt, by_hand)
+
+    async def _start_tree(  # noqa: PLR0913, PLR0917  # identity and kind of one tree
+        self, repository: str, ticket_id: str, root: Path, tree: Path, attempt: int, by_hand: bool
+    ) -> TreeInfo:
         ticket = await self._ports.tickets.ticket(repository, ticket_id)
         facts = await self.facts(repository)
         if facts.default_branch not in facts.local:
@@ -91,14 +103,12 @@ class TreesMixin(PlainMixin):
         if why is not None:
             msg = f"bad branch {own}: {why}"
             raise BadRequestError(msg)
-        name = attempt_tree_name(ticket_id, attempt)
+        name = tree.name
         existing = await self._record(repository, name)
-        by_hand = owner_by_hand and attempt == 0
         if existing is not None and existing.kind is TreeKind.WORKTREE and not by_hand:
             raise ConflictError(LINKED.format(path=existing.path, ticket=ticket_id))
         branch = attempt_branch(own, attempt)
-        tree = root / TREES / name
-        if existing is not None and tree.is_dir():
+        if existing is not None and await threaded(tree.is_dir):
             return _info(existing)
         if existing is not None:  # the row outlived its folder
             async with self._uow() as session:
@@ -114,11 +124,6 @@ class TreesMixin(PlainMixin):
             token=secrets.token_hex(16),
         )  # fmt: skip
         await self._make(root, tree, record, base, branch in facts.local)
-        try:
-            await self._set_up(repository, ticket_id, tree)
-        except BaseException:
-            await self._discard(repository, name)
-            raise
         if ticket.branch != branch and attempt == 0:
             await self._ports.tickets.record_branch(repository, ticket_id, branch)
         self.invalidate(repository)
@@ -138,10 +143,17 @@ class TreesMixin(PlainMixin):
         self, root: Path, tree: Path, record: TreeRecord, base: str, exists: bool
     ) -> None:
         run = self._runner
+        clone = record.kind is TreeKind.CLONE
+        owned = False
         try:
+            if clone:
+                with anyio.CancelScope(shield=True):
+                    await tree_io.reserve_clone(root, tree)
+                owned = True
             async with run.ref_lock(root):
                 await tree_io.exclude_trees_folder(run, root)
-                if record.kind is TreeKind.WORKTREE:
+                if not clone:
+                    owned = True
                     await tree_io.make_worktree(
                         run, root, tree, record.branch, None if exists else base
                     )
@@ -151,9 +163,13 @@ class TreesMixin(PlainMixin):
                             root, ["branch", "--no-track", "--end-of-options", record.branch, base]
                         )
                     await tree_io.make_clone(run, root, tree, record.branch, record.token)
+            if clone:
+                await self._set_up(record, root)
             await self._insert(record)
         except BaseException:
-            await self._remove_folder(record.repository, tree)
+            if owned:
+                with anyio.CancelScope(shield=True):
+                    await self._remove_folder(record.repository, tree)
             raise
 
     async def _insert(self, record: TreeRecord) -> None:
@@ -163,11 +179,12 @@ class TreesMixin(PlainMixin):
             msg = f"{record.name} is already recorded for {record.repository}"
             raise ConflictError(msg)
 
-    async def _set_up(self, repository: str, ticket_id: str, tree: Path) -> None:
-        hooks = self._ports.hooks
-        if await hooks.setup_command(repository) is None:
-            return
-        outcome = await hooks.run_setup(repository, ticket_id, tree)
+    async def _set_up(self, record: TreeRecord, root: Path) -> None:
+        snapshot = await threaded(lambda: snapshot_tree(Path(record.path), root))
+        checked = validate_tree(snapshot, record)
+        if isinstance(checked, Redirected):
+            raise TreeRedirectedError(checked.reason)
+        outcome = await self._ports.hooks.run_setup(record.repository, Path(checked.worktree))
         if outcome.code == 0:
             return
         said = (
@@ -183,12 +200,6 @@ class TreesMixin(PlainMixin):
         common = await self._common(repository)
         async with self._runner.ref_lock(root):
             await tree_io.remove_tree(root, common, tree)
-
-    async def _discard(self, repository: str, name: str) -> None:
-        root = await self._root(repository)
-        await self._remove_folder(repository, root / TREES / name)
-        async with self._uow() as session:
-            await GitStore(session).remove_tree(repository, name)
 
     async def remove_tree(self, repository: str, name: str) -> None:
         """Trash then delete the tree's folder, then its row; one outside the folder is refused."""

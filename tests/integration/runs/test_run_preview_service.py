@@ -34,6 +34,9 @@ class FakeSetup:
     async def tree_of(self, repository: str, ticket_id: str) -> Path | None:  # noqa: ARG002
         return self.tree
 
+    def unavailable_reason(self) -> str | None:
+        return None if self.refusal is None else str(self.refusal)
+
     async def contain(self, argv: Sequence[str], tree: Path, port: int) -> Launch:
         if self.refusal is not None:
             raise self.refusal

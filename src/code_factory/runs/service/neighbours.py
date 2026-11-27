@@ -39,10 +39,7 @@ from code_factory.team.service import TeamService
 from code_factory.tickets.models import NewActivity
 from code_factory.tickets.service import ActivityService, TicketService
 
-PREVIEW_UNCONTAINED = (
-    "a preview runs inside the sandbox, which the agents module does not build yet, "
-    "so no preview starts"
-)
+PREVIEW_UNCONTAINED = "This board has no isolated preview runtime."
 
 
 class ConfigAdapter:
@@ -141,16 +138,24 @@ class TeamsAdapter:
             escalate=settings.escalate,
         )
         name = "" if claim.agent is None else claim.agent.name
-        return Claimed(agent=name, passed_over=claim.passed_over)
+        return Claimed(agent=name, passed_over=claim.passed_over, lease_id=claim.lease_id)
 
-    async def attach_run(self, ticket_id: str, run_id: str) -> None:
+    async def beat_start(self, ticket_id: str, lease_id: int) -> bool:
+        """Keep this exact starting claim while work is being prepared."""
+        return await self._services.get(TeamService).beat_start(ticket_id, lease_id)
+
+    async def attach_run(self, ticket_id: str, run_id: str, *, lease_id: int | None = None) -> None:
         """Record the run under the claim."""
-        await self._services.get(TeamService).attach_run(ticket_id, run_id)
+        await self._services.get(TeamService).attach_run(ticket_id, run_id, lease_id=lease_id)
 
-    async def end_claim(self, ticket_id: str, run_id: str | None) -> None:
+    async def end_claim(
+        self, ticket_id: str, run_id: str | None, *, lease_id: int | None = None
+    ) -> None:
         """End the claim a run is under; a claim already gone or taken again stays."""
         try:
-            await self._services.get(TeamService).end_claim(ticket_id, run_id=run_id)
+            await self._services.get(TeamService).end_claim(
+                ticket_id, run_id=run_id, lease_id=lease_id
+            )
         except NotFoundError, ConflictError:
             return
 
@@ -299,7 +304,7 @@ class AgentsAdapter:
 
 
 class PreviewSetupAdapter:
-    """A preview's tree from git; its sandbox is the agents module's, which offers none yet."""
+    """A preview's tree from git and the board's preview runtime availability."""
 
     def __init__(self, services: Services) -> None:
         self._services = services
@@ -311,8 +316,12 @@ class PreviewSetupAdapter:
                 return Path(info.path)
         return None
 
-    async def contain(self, argv: Sequence[str], tree: Path, port: int) -> Launch:  # noqa: ARG002  # nothing builds a sandbox yet
-        """`argv` inside the sandbox; the agents module provides none yet."""
+    def unavailable_reason(self) -> str:
+        """A preview needs its own isolated listener before it can run ticket code."""
+        return PREVIEW_UNCONTAINED
+
+    async def contain(self, argv: Sequence[str], tree: Path, port: int) -> Launch:  # noqa: ARG002  # no isolated listener
+        """Refuse until an isolated preview runtime owns the listener."""
         raise UnavailableError(PREVIEW_UNCONTAINED)
 
 

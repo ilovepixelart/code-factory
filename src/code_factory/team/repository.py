@@ -74,7 +74,7 @@ class LeaseRepository:
             for row in rows
         }
 
-    async def add(self, number: int, agent: str, now: float) -> None:
+    async def add(self, number: int, agent: str, now: float) -> int:
         """Insert the ticket's claim.
 
         `ConflictError` when it has one (the unique ticket is the guard against a double claim),
@@ -82,15 +82,15 @@ class LeaseRepository:
         """
         try:
             async with self._session.begin_nested():
-                self._session.add(
-                    TeamLeaseRow(
-                        ticket_number=number,
-                        agent=agent,
-                        claimed_at=to_moment(now),
-                        beat_at=to_moment(now),
-                    )
+                row = TeamLeaseRow(
+                    ticket_number=number,
+                    agent=agent,
+                    claimed_at=to_moment(now),
+                    beat_at=to_moment(now),
                 )
+                self._session.add(row)
                 await self._session.flush()
+                return row.id
         except IntegrityError as error:
             code = getattr(error.orig, "sqlstate", "")
             if code == _UNIQUE_VIOLATION:
@@ -101,16 +101,22 @@ class LeaseRepository:
                 raise NotFoundError(msg) from error
             raise
 
-    async def replace(self, number: int, agent: str, now: float) -> None:
-        """Give the ticket a fresh claim for `agent` in place of any claim it has."""
+    async def replace(self, number: int, agent: str, now: float) -> int:
+        """Give the ticket a fresh claim for `agent` and return its id."""
         await self.delete(number)
-        await self.add(number, agent, now)
+        return await self.add(number, agent, now)
 
-    async def attach(self, number: int, run_id: str) -> bool:
-        """Record a run under the ticket's claim; `False` when the ticket has no claim."""
-        lease_id = await self._session.scalar(
+    async def id_for(self, number: int) -> int | None:
+        """The id of this ticket's current claim."""
+        return await self._session.scalar(
             select(TeamLeaseRow.id).where(TeamLeaseRow.ticket_number == number)
         )
+
+    async def attach(self, number: int, run_id: str, *, expected: int | None = None) -> bool:
+        """Record a run under the ticket's claim; `False` when the ticket has no claim."""
+        lease_id = await self.id_for(number)
+        if expected is not None and expected != lease_id:
+            raise ConflictError("the ticket's starting claim changed")
         if lease_id is None:
             return False
         await self._session.execute(
