@@ -52,44 +52,60 @@ def resolve(directory: str, target: str) -> str:
     return ("/" if absolute else "") + "/".join(parts)
 
 
-def segments(text: str) -> list[list[str]]:
-    """The simple commands of a shell command, split at `; & | ( )`, backquotes and newlines."""
-    out: list[list[str]] = []
-    words: list[str] = []
-    word: str | None = None
-    at, end = 0, len(text)
-    while at < end:
+class _Splitter:
+    """The state of `segments`: the finished commands, the open one and the word being read."""
+
+    def __init__(self) -> None:
+        self.out: list[list[str]] = []
+        self.words: list[str] = []
+        self.word: str | None = None
+
+    def end_word(self) -> None:
+        if self.word is not None:
+            self.words.append(self.word)
+            self.word = None
+
+    def end_command(self) -> None:
+        self.end_word()
+        if self.words:
+            self.out.append(self.words)
+            self.words = []
+
+    def add(self, text: str) -> None:
+        self.word = (self.word or "") + text
+
+    def read(self, text: str, at: int) -> int:
+        """Consume the character at `at` and anything it quotes; the index after them."""
         char = text[at]
         at += 1
         if char in " \t\r":
-            if word is not None:
-                words.append(word)
-                word = None
+            self.end_word()
         elif char in "\n;&|()`":
-            if word is not None:
-                words.append(word)
-                word = None
-            if words:
-                out.append(words)
-                words = []
+            self.end_command()
         elif char == "'":
             stop = text.find("'", at)
-            stop = end if stop < 0 else stop
-            word = (word or "") + text[at:stop]
+            stop = len(text) if stop < 0 else stop
+            self.add(text[at:stop])
             at = stop + 1
         elif char == '"':
             quoted, at = double_quoted(text, at)
-            word = (word or "") + quoted
+            self.add(quoted)
         elif char == "\\":
-            word = (word or "") + text[at : at + 1]
+            self.add(text[at : at + 1])
             at += 1
         else:
-            word = (word or "") + char
-    if word is not None:
-        words.append(word)
-    if words:
-        out.append(words)
-    return out
+            self.add(char)
+        return at
+
+
+def segments(text: str) -> list[list[str]]:
+    """The simple commands of a shell command, split at `; & | ( )`, backquotes and newlines."""
+    splitter = _Splitter()
+    at = 0
+    while at < len(text):
+        at = splitter.read(text, at)
+    splitter.end_command()
+    return splitter.out
 
 
 def double_quoted(text: str, at: int) -> tuple[str, int]:
