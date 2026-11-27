@@ -69,9 +69,7 @@ test('e2e_a_memory_entry_is_added_from_the_page', async ({ served, writesBoard }
   await added.getByText('Ship one ticket at a time').click()
 
   await expect(added.getByText('Why: Parallel tickets collided')).toBeVisible()
-  await expect
-    .poll(async () => Number(await meter.getAttribute('value')))
-    .toBeGreaterThan(before)
+  await expect.poll(async () => Number(await meter.getAttribute('value'))).toBeGreaterThan(before)
   await expect(meter).toHaveAttribute('max', '8000')
 })
 

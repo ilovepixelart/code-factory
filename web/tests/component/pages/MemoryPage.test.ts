@@ -527,10 +527,7 @@ test('the_meter_is_a_flat_section_of_its_sentence_and_bar_while_the_store_is_sma
 
   const meter = page.get('[data-memory-meter]')
   const value = meter.get('meter')
-  expect([value.attributes('value'), value.attributes('max')]).toStrictEqual([
-    '1500',
-    '4000',
-  ])
+  expect([value.attributes('value'), value.attributes('max')]).toStrictEqual(['1500', '4000'])
   // The meter is flat like the page's sections, its sentence in the heading row over its bar.
   expect([
     meter.attributes('data-section'),

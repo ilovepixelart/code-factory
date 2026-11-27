@@ -42,11 +42,7 @@ const near = computed(() => loaded >= ceiling * NEAR || left.value.length > 0 ||
 </script>
 
 <template>
-  <div
-    data-memory-meter
-    data-section
-    class="flex min-w-0 flex-col gap-3 rounded-lg bg-muted p-4"
-  >
+  <div data-memory-meter data-section class="flex min-w-0 flex-col gap-3 rounded-lg bg-muted p-4">
     <div class="flex min-h-7 items-center gap-3">
       <p class="cn-font-heading min-w-0 flex-1 text-sm font-medium">
         Every session loads <b>{{ thousands(loaded) }}</b> of {{ thousands(ceiling) }} characters

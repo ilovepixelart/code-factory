@@ -99,5 +99,10 @@ test('cards_are_newest_first_by_repository_then_the_number_in_the_id', () => {
     card('a', 'CF-10'),
     card('a', 'x'),
   ])
-  expect(sorted.map((c) => `${c.repository}/${c.id}`)).toEqual(['a/CF-10', 'a/CF-9', 'a/x', 'b/CF-2'])
+  expect(sorted.map((c) => `${c.repository}/${c.id}`)).toEqual([
+    'a/CF-10',
+    'a/CF-9',
+    'a/x',
+    'b/CF-2',
+  ])
 })

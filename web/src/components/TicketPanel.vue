@@ -54,7 +54,9 @@ defineExpose({ open: show })
             ><span class="text-muted-foreground">/</span
             ><span class="font-mono text-sm">{{ shown.id }}</span>
           </SheetTitle>
-          <SheetDescription class="sr-only">The ticket's fields, work and history.</SheetDescription>
+          <SheetDescription class="sr-only"
+            >The ticket's fields, work and history.</SheetDescription
+          >
           <Button
             as-child
             variant="ghost"

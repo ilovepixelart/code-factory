@@ -222,7 +222,16 @@ export interface PagedArchive extends Archive {
   size: number
 }
 
-const SORTS = new Set(['id', 'title', 'type', 'stage', 'priority', 'assignee', 'repository', 'archived'])
+const SORTS = new Set([
+  'id',
+  'title',
+  'type',
+  'stage',
+  'priority',
+  'assignee',
+  'repository',
+  'archived',
+])
 
 /** The archive's order from its address: the asked column and direction, else newest first. */
 export function currentSort(sort: string, dir: string): [string, string] {
