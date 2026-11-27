@@ -24,7 +24,7 @@ const { paged, offset } = useSectionPage('sessions', () => items)
 const { rows } = paged
 
 const place = (cwd: string): string => {
-  const name = cwd.replace(/\/+$/, '').split('/').at(-1) ?? ''
+  const name = cwd.split('/').filter(Boolean).at(-1) ?? ''
   return name === '' ? cwd : name
 }
 </script>
