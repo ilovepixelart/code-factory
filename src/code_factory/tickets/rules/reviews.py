@@ -10,7 +10,7 @@ from code_factory.tickets.models import Finding, FindingState, Problem, Review
 _DISMISSED = "finding.dismissed"
 
 _RULE = re.compile(r"[a-z][a-z0-9]*(-[a-z0-9]+)*")
-_RULE_TAG = re.compile(r"\s*\[rule:\s*([^\]]*?)\s*\]\s*$")
+_RULE_TAG = re.compile(r"\[rule:([^\]]*)\]\s*$")
 RULE_LIMIT = 40
 BLOCKING = ("blocker", "major")
 
@@ -25,16 +25,23 @@ def plain_rule(name: str) -> bool:
     return len(name) <= RULE_LIMIT and _RULE.fullmatch(name) is not None
 
 
+def _tag(text: str) -> tuple[int, str] | None:
+    """Where the trailing `[rule: ...]` tag starts (leading whitespace too) and its name."""
+    found = _RULE_TAG.search(text)
+    if found is None:
+        return None
+    return len(text[: found.start()].rstrip()), str(found.group(1)).strip()
+
+
 def split_rule(text: str) -> tuple[str, str | None]:
     """A review item's text without its trailing `[rule: name]` tag, and the name it holds.
 
     The text whole and no name when it has no tag or the tag's name is not a plain rule name.
     """
-    tag = _RULE_TAG.search(text)
-    if tag is None or not plain_rule(tag.group(1)):
+    tag = _tag(text)
+    if tag is None or not plain_rule(tag[1]):
         return text, None
-    name = str(tag.group(1))
-    return text[: tag.start()], name
+    return text[: tag[0]], tag[1]
 
 
 def rule_problems(review: str) -> list[Problem]:
@@ -42,10 +49,10 @@ def rule_problems(review: str) -> list[Problem]:
     problems = []
     for number, line in enumerate(review.splitlines(), start=1):
         item = line.lstrip()
-        tag = _RULE_TAG.search(line) if item.startswith(("- ", "* ")) else None
-        if tag is not None and not plain_rule(tag.group(1)):
+        tag = _tag(line) if item.startswith(("- ", "* ")) else None
+        if tag is not None and not plain_rule(tag[1]):
             message = (
-                f'rule: "{tag.group(1)}" is not a plain name '
+                f'rule: "{tag[1]}" is not a plain name '
                 f"(lower-case words joined by hyphens, at most {RULE_LIMIT} characters)"
             )
             problems.append(Problem(line=number, message=message))
