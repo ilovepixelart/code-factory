@@ -1,6 +1,6 @@
 """A ticket's documents: versioned markdown, written whole or appended to, read in pages."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from datetime import datetime
 
 from code_factory.platform.db import UnitOfWork
@@ -169,13 +169,23 @@ class DocumentService:
 
     async def build_gaps(self, ticket: str) -> list[str]:
         """What the ticket's requirements and spec lack before Build may start; empty when ready."""
-        texts = {}
-        for name in (DocumentName.REQUIREMENTS, DocumentName.SPEC):
-            try:
-                texts[name] = (await self.get_document(ticket, name)).body
-            except NotFoundError:
-                texts[name] = ""
-        return build_gaps(texts[DocumentName.REQUIREMENTS], texts[DocumentName.SPEC])
+        requirements, spec = DocumentName.REQUIREMENTS, DocumentName.SPEC
+        try:
+            texts = await self.document_bodies(ticket, (requirements, spec))
+        except NotFoundError:
+            texts = {}
+        return build_gaps(texts.get(requirements, ""), texts.get(spec, ""))
+
+    async def document_bodies(
+        self, ticket: str, names: Sequence[DocumentName]
+    ) -> dict[DocumentName, str]:
+        """The requested document bodies, omitting missing names. Raise for an absent ticket."""
+        number = ticket_number(ticket)
+        async with self._uow() as session:
+            if await TicketRepository(session).find(number) is None:
+                raise not_found(number)
+            texts = await DocumentRepository(session).bodies(number, [name.value for name in names])
+        return {DocumentName(name): body for name, body in texts.items()}
 
     async def get_document(self, ticket: str, name: DocumentName) -> Document:
         """The whole document; `NotFoundError` when the ticket has none of that name."""

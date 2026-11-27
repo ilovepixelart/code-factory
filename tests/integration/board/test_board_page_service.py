@@ -129,6 +129,16 @@ async def test_the_mock_is_listed_only_for_a_ui_ticket(
     assert [d["stage"] for d in page["documents"]] == ["requirements", "spec", "uat"]
 
 
+@pytest.mark.parametrize("title", ["A bug in flight", "Specs written"])
+async def test_the_page_reads_its_documents_in_one_query(
+    board: BoardService, connection: AsyncConnection, board_ids: dict[str, str], title: str
+) -> None:
+    with recorded(connection) as seen:
+        await board.ticket_page("sample", board_ids[title])
+    document_reads = [s for s in seen if "FROM ticket_documents" in s]
+    assert len(document_reads) == 1
+
+
 async def test_a_ticket_with_no_run_and_no_check_has_empty_run_words(
     board: BoardService, board_ids: dict[str, str]
 ) -> None:

@@ -1,5 +1,7 @@
 """Queries over a ticket's documents and mock images."""
 
+from collections.abc import Sequence
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,6 +25,16 @@ class DocumentRepository:
             select(TicketDocumentRow).where(TicketDocumentRow.ticket_number == number)
         )
         return list(rows)
+
+    async def bodies(self, number: int, names: Sequence[str]) -> dict[str, str]:
+        """The text of the requested documents that exist."""
+        rows = await self._session.execute(
+            select(TicketDocumentRow.name, TicketDocumentRow.body).where(
+                TicketDocumentRow.ticket_number == number,
+                TicketDocumentRow.name.in_(names),
+            )
+        )
+        return dict(rows.all())
 
     async def save(self, row: TicketDocumentRow) -> None:
         """Insert or update the document."""
