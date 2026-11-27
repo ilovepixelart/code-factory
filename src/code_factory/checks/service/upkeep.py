@@ -102,6 +102,7 @@ class UpkeepMixin(PipelineMixin):
         """
         async with asyncio.TaskGroup() as group:
             self._group = group
+            group.create_task(self._beat(), name="check-heartbeats")
             try:
                 while True:
                     check_id = await self._queue.get()

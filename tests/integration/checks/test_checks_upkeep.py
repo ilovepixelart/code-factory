@@ -1,5 +1,8 @@
 """The keeper's upkeep: lost runs, stopping, pruning, flaky bugs and the pending status."""
 
+import asyncio
+from dataclasses import replace
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -8,7 +11,8 @@ import pytest
 from checks_support import REPO, Clock, FakeForge, write_config
 from code_factory.checks.models import PullHead, RunState
 from code_factory.checks.repository import CheckStore
-from code_factory.checks.service import CheckService
+from code_factory.checks.repository.runs import RunStore
+from code_factory.checks.service import CheckOptions, CheckService
 from code_factory.platform.db import UnitOfWork
 from code_factory.platform.errors import BadRequestError, ConflictError, NotFoundError
 from code_factory.tickets.models import NewTicket, Ticket
@@ -58,6 +62,71 @@ async def test_a_run_of_another_process_cannot_be_stopped_from_this_one(
     with pytest.raises(ConflictError, match="the check runs in another process"):
         await checks.stop(foreign)
     assert (await checks.get(foreign)).state is RunState.QUEUED
+
+
+async def test_heartbeat_batch_refreshes_only_active_rows_of_its_owner(
+    checks: CheckService, uow: UnitOfWork, clock: Clock
+) -> None:
+    first = await insert(uow, "CF-1", clock)
+    second = await insert(uow, "CF-2", clock)
+    foreign = await insert(uow, "CF-3", clock, owner="elsewhere")
+    stopped = await insert(uow, "CF-4", clock)
+    original = clock.now
+    clock.after(seconds=30)
+    refreshed = clock.now
+    async with uow() as session:
+        runs = CheckStore(session).runs
+        await runs.lose(stopped, refreshed)
+        assert await runs.beat([first, second, foreign, stopped], "me", refreshed)
+    clock.after(seconds=31)
+
+    assert await checks.reconcile() == 1
+    for check_id in (first, second):
+        row = await checks.get(check_id)
+        assert (row.state, row.beat_at) == (RunState.QUEUED, refreshed)
+    for check_id in (foreign, stopped):
+        row = await checks.get(check_id)
+        assert (row.state, row.beat_at) == (RunState.LOST, original)
+
+
+async def test_the_supervisor_batches_a_burst_into_one_heartbeat(
+    checks: CheckService, options: CheckOptions, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ids = list(range(1, 33))
+    observed: list[list[int]] = []
+    recorded = asyncio.Event()
+    parked = asyncio.Event()
+    running = checks._running  # simulate checks waiting on execution permits
+
+    async def hold(check_id: int) -> None:
+        task = asyncio.current_task()
+        assert task is not None
+        running[check_id] = task
+        try:
+            await parked.wait()
+        finally:
+            del running[check_id]
+
+    async def record(_store: RunStore, check_ids: list[int], _owner: str, _now: datetime) -> bool:
+        if not recorded.is_set():
+            observed.append(check_ids)
+            recorded.set()
+        return True
+
+    monkeypatch.setattr(checks, "_supervised", hold)
+    monkeypatch.setattr(checks, "_opts", replace(options, heartbeat_s=0.1))
+    monkeypatch.setattr(RunStore, "beat", record)
+    for check_id in ids:
+        checks._queue.put_nowait(check_id)
+
+    supervisor = asyncio.create_task(checks.run_supervisor())
+    try:
+        await asyncio.wait_for(recorded.wait(), timeout=3)
+        assert observed == [ids]
+    finally:
+        supervisor.cancel()
+        await asyncio.gather(supervisor, return_exceptions=True)
+    assert not running
 
 
 async def test_an_ended_run_cannot_be_stopped_again(

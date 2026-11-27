@@ -1,10 +1,11 @@
 """Queries over `check_runs`: the queue, the container turn and the heartbeat."""
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import delete, func, or_, select, text, update
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import BigInteger, any_, bindparam, delete, func, or_, select, text, update
+from sqlalchemy.dialects.postgresql import ARRAY, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from code_factory.checks.models import (
@@ -111,12 +112,13 @@ class RunStore:
         )
         return (await self._session.execute(statement)).first() is not None
 
-    async def beat(self, check_id: int, owner: str, now: datetime) -> bool:
-        """Beat a row `owner` holds; False when it no longer does."""
+    async def beat(self, check_ids: Sequence[int], owner: str, now: datetime) -> bool:
+        """Beat the active rows `owner` still holds, in one statement."""
+        ids = bindparam("check_ids", list(check_ids), type_=ARRAY(BigInteger))
         statement = (
             update(CheckRunRow)
             .where(
-                CheckRunRow.id == check_id,
+                CheckRunRow.id == any_(ids),
                 CheckRunRow.owner == owner,
                 CheckRunRow.state.in_(_ACTIVE),
             )
