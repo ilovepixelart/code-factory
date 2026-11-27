@@ -323,16 +323,19 @@ code-factory
 │       ├── GET /api/views
 │       ├── POST /api/views
 │       └── DELETE /api/views/{name}
-├── sample: Named sample data for the browser tests, loaded through the services.
-│   └── commands
-│       ├── sample-prepare: create and migrate the schema of a sample
-│       ├── sample-load: load a named sample into the prepared schema
-│       └── sample-drop: drop the schema of a sample
-└── factory: The `factory` module: what a cohort of work cost and how it went, from other modules' facts.
-    └── routes
-        ├── GET /api/factory/dashboard
-        ├── GET /api/factory/runs
-        ├── GET /api/factory/prs/expensive
-        ├── GET /api/factory/scorers
-        └── GET /api/factory/improvements
+├── factory: The `factory` module: what a cohort of work cost and how it went, from other modules' facts.
+│   ├── tables
+│   │   └── factory_owner_time
+│   └── routes
+│       ├── GET /api/factory/dashboard
+│       ├── PUT /api/factory/tickets/{ticket_id}/owner-time
+│       ├── GET /api/factory/runs
+│       ├── GET /api/factory/prs/expensive
+│       ├── GET /api/factory/scorers
+│       └── GET /api/factory/improvements
+└── sample: Named sample data for the browser tests, loaded through the services.
+    └── commands
+        ├── sample-prepare: create and migrate the schema of a sample
+        ├── sample-load: load a named sample into the prepared schema
+        └── sample-drop: drop the schema of a sample
 ```

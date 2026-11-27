@@ -5,6 +5,7 @@ from typing import Any
 
 from code_factory.factory.models import (
     Improvements,
+    OwnerTime,
     PullFact,
     RunCost,
     RunFact,
@@ -70,6 +71,13 @@ class FakePulls(_Fake):
             if p.merged_at is not None and since <= p.merged_at < until
         ]
 
+    async def known_merge(self, ticket: str, url: str) -> bool:
+        self._record("known_merge", ticket, url)
+        return any(
+            p.ticket_id == ticket and p.url == url and p.merged_at is not None
+            for p in _told("FakePulls", self.held)
+        )
+
 
 class FakeCosts(_Fake):
     def __init__(self) -> None:
@@ -113,3 +121,17 @@ class FakeImprovements(_Fake):
         self._record("newest", limit)
         held = _told("FakeImprovements", self.held)
         return Improvements(available=held.available, items=held.items[:limit])
+
+
+class FakeOwnerTime(_Fake):
+    def __init__(self) -> None:
+        super().__init__()
+        self.entries: dict[tuple[str, str], OwnerTime] = {}
+
+    async def record(self, ticket: str, entry: OwnerTime) -> None:
+        self._record("record", ticket, entry)
+        self.entries[ticket, entry.pull_url] = entry
+
+    async def recorded(self, tickets: list[str]) -> dict[tuple[str, str], OwnerTime]:
+        self._record("recorded", tuple(tickets))
+        return {key: entry for key, entry in self.entries.items() if key[0] in tickets}

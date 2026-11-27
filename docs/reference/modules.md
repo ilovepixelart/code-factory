@@ -37,8 +37,8 @@ listed after the modules it reads. The MCP tools each caller sees are pinned in
 | `push` | Push notifications of what waits on the owner, and the reply links they carry. | `push` |  | yes | `push_failures`<br>`push_sent`<br>`push_targets`<br>`reply_tokens` |
 | `commands` | Everyday commands: install the hooks, track repositories. | `install`<br>`uninstall`<br>`track`<br>`untrack` |  |  |  |
 | `board` | What the web app reads about the work as a whole: the board, a ticket's page, the archive. |  |  |  | `board_views` |
+| `factory` | The `factory` module: what a cohort of work cost and how it went, from other modules' facts. |  |  |  | `factory_owner_time` |
 | `sample` | Named sample data for the browser tests, loaded through the services. | `sample-prepare`<br>`sample-load`<br>`sample-drop` |  |  |  |
-| `factory` | The `factory` module: what a cohort of work cost and how it went, from other modules' facts. |  |  |  |  |
 
 ## about
 
@@ -199,6 +199,7 @@ listed after the modules it reads. The MCP tools each caller sees are pinned in
 ## factory
 
 - `GET /api/factory/dashboard`
+- `PUT /api/factory/tickets/{ticket_id}/owner-time`
 - `GET /api/factory/runs`
 - `GET /api/factory/prs/expensive`
 - `GET /api/factory/scorers`

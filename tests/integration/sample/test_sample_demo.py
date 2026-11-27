@@ -242,6 +242,8 @@ async def test_demo_analytics_has_populated_run_cost_review_and_response_section
     assert factory.prs.merged > 0
     assert factory.prs.closed == 1
     assert factory.cost.priced > 0
+    assert factory.merged_cost.owner_recorded == factory.merged_cost.priced == 2
+    assert factory.merged_cost.median is not None
     assert factory.expensive
     assert {row.role for row in factory.role_notes} == {"qa", "security", "tests"}
     assert sum(row.fixed for row in factory.role_notes) == 1

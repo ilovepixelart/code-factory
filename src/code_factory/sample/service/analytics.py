@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 
 from code_factory.delivery.models import Ci, PullReading
 from code_factory.delivery.service import DeliveryService
+from code_factory.factory.models import OwnerTime
+from code_factory.factory.service import FactoryService
 from code_factory.runs.models import Run
 from code_factory.runs.service import RunService
 from code_factory.sample.models.demo import DEMO_PULL_SIZES, DEMO_TICKETS, DemoTicket, Stage
@@ -17,6 +19,7 @@ from code_factory.tickets.service import ActivityService, ReviewService, TicketS
 CLOSED_PULL = "Checkout keeps the address after a failed payment"
 IDLE_PULL = "Search ranks in-stock products first"
 READY_PULL = "Issue a gift card code on purchase"
+OWNER_TIME_DEMO_DAYS = 7
 
 
 async def record_open_pull(
@@ -134,6 +137,24 @@ async def record_pull_history(
         )
         history.extend(_runs(spec, ticket, opened - timedelta(hours=2), head=head, failed=closed))
     await runs.import_completed(history)
+
+
+async def record_owner_time(factory: FactoryService, ids: Mapping[str, str]) -> None:
+    """Seed owner time for recent merges and leave older costs incomplete."""
+    for spec in DEMO_TICKETS:
+        if (
+            spec.stage in {Stage.MERGED, Stage.RELEASED}
+            and spec.merged_days_ago <= OWNER_TIME_DEMO_DAYS
+        ):
+            ticket = ids[spec.title]
+            await factory.record_owner_time(
+                ticket,
+                OwnerTime(
+                    pull_url=pull_url(spec.repository, ticket),
+                    active_minutes=spec.merged_days_ago + 5,
+                    hourly_rate_usd=90,
+                ),
+            )
 
 
 async def _record_stage_history(tickets: TicketService, ticket: str, merged: datetime) -> None:

@@ -13,4 +13,10 @@ async def test_the_factory_is_behind_the_sign_in_guard(offline_settings: Setting
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://127.0.0.1") as client:
         response = await client.get(f"/api/factory/dashboard?{RANGE}")
+        recorded = await client.put(
+            "/api/factory/tickets/CF-2/owner-time",
+            json={"pull_url": "url", "active_minutes": 0, "hourly_rate_usd": 0},
+            headers={"Authorization": "Bearer mcp-run-token"},
+        )
     assert response.status_code == 403
+    assert recorded.status_code == 403

@@ -76,6 +76,14 @@ export interface Cost {
   by_size: SizeCost[]
 }
 
+export interface MergedCost {
+  median: number | null
+  priced: number
+  owner_recorded: number
+  merged: number
+  estimated: boolean
+}
+
 export interface Expensive {
   url: string
   repository: string
@@ -136,6 +144,7 @@ export interface Dashboard {
   autonomy: { share: number | null; autonomous: number; assisted: number; unknown: number }
   cycle: Cycle
   cost: Cost
+  merged_cost?: MergedCost
   expensive: Expensive[]
   scorers: ScorerCards
   improvements: Improvements

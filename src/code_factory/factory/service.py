@@ -14,6 +14,8 @@ from code_factory.factory.models import (
     Dashboard,
     ExpensiveList,
     Improvements,
+    MergedCost,
+    OwnerTime,
     PullFact,
     RoleNoteOutcome,
     RunBreakdowns,
@@ -24,14 +26,22 @@ from code_factory.factory.models import (
 from code_factory.factory.ports import (
     CostPort,
     ImprovementPort,
+    OwnerTimePort,
     PullsPort,
     RepairsPort,
     RoleNotesPort,
     RunsPort,
     ScorerPort,
 )
+from code_factory.factory.repository import OwnerTimeRepository
 from code_factory.factory.rules.cohort import autonomy, cohort, is_merged
-from code_factory.factory.rules.cost import cost_summary, expensive, measurement_spend, pr_cost
+from code_factory.factory.rules.cost import (
+    cost_summary,
+    expensive,
+    measurement_spend,
+    merged_cost_summary,
+    pr_cost,
+)
 from code_factory.factory.rules.cycle import cycle, cycle_summary, kickoffs
 from code_factory.factory.rules.fixes import fix_outcomes
 from code_factory.factory.rules.period import period
@@ -39,6 +49,8 @@ from code_factory.factory.rules.runs import run_breakdowns
 from code_factory.factory.rules.scorers import scorer_views
 from code_factory.factory.rules.series import series
 from code_factory.factory.rules.stats import limit_of
+from code_factory.platform.db import UnitOfWork
+from code_factory.platform.errors import NotFoundError, UnavailableError
 
 EXPENSIVE_DEFAULT = 10
 EXPENSIVE_ON_DASHBOARD = 5
@@ -58,6 +70,7 @@ class FactoryPorts:
     improvements: ImprovementPort
     repairs: RepairsPort | None = None
     role_notes: RoleNotesPort | None = None
+    owner_time: OwnerTimePort | None = None
 
 
 @dataclass(frozen=True)
@@ -66,6 +79,23 @@ class _Ledger:
 
     by_ticket: dict[str, list[RunFact]]
     costs: dict[str, RunCost]
+
+
+class OwnerTimeService:
+    """Owner time is private to Factory's HTTP API and analytics."""
+
+    def __init__(self, uow: UnitOfWork) -> None:
+        self._uow = uow
+
+    async def record(self, ticket: str, entry: OwnerTime) -> None:
+        """Upsert the owner time recorded for one pull request."""
+        async with self._uow() as session:
+            await OwnerTimeRepository(session).record(ticket, entry)
+
+    async def recorded(self, tickets: list[str]) -> dict[tuple[str, str], OwnerTime]:
+        """Read every recorded owner entry of the named tickets in one query."""
+        async with self._uow() as session:
+            return await OwnerTimeRepository(session).recorded(tickets)
 
 
 class FactoryService:
@@ -85,7 +115,11 @@ class FactoryService:
         scorers = await ports.scorers.cards(span.from_, span.to)
         improvements = await ports.improvements.newest(IMPROVEMENTS_DEFAULT)
         group = cohort(opened, merged, span.from_, span.to, span.now)
-        ledger = await self._ledger(group.members, runs)
+        merged_in_period = {p.url: p for p in merged if is_merged(p, span.now)}
+        ledger = await self._ledger(
+            [*group.members, *merged_in_period.values()] if ports.owner_time else group.members,
+            runs,
+        )
         costed = [
             pr_cost(p, ledger.by_ticket.get(p.ticket_id or "", []), ledger.costs, span.now)
             for p in group.members
@@ -110,6 +144,7 @@ class FactoryService:
             autonomy=autonomy(members_merged),
             cycle=cycle_summary(cycles),
             cost=cost_summary(costed, measurement_spend(runs, ledger.costs)),
+            merged_cost=await self._merged_cost(merged_in_period, ledger, span.now),
             expensive=expensive(costed, EXPENSIVE_ON_DASHBOARD),
             scorers=scorer_views(scorers),
             improvements=improvements,
@@ -118,6 +153,33 @@ class FactoryService:
                 RoleNoteOutcome(role=role, notes=total, fixed=fixed)
                 for role, (total, fixed) in notes.items()
             ],
+        )
+
+    async def record_owner_time(self, ticket: str, entry: OwnerTime) -> None:
+        """Replace the owner's active time for one merged pull request."""
+        if self._ports.owner_time is None:
+            msg = "Recording owner time is unavailable."
+            raise UnavailableError(msg)
+        if not await self._ports.pulls.known_merge(ticket, entry.pull_url):
+            msg = "This ticket has no merged pull request with that URL."
+            raise NotFoundError(msg)
+        await self._ports.owner_time.record(ticket, entry)
+
+    async def _merged_cost(
+        self, merges: dict[str, PullFact], ledger: _Ledger, now: float
+    ) -> MergedCost:
+        owner_time = self._ports.owner_time
+        tickets = sorted({p.ticket_id for p in merges.values() if p.ticket_id is not None})
+        if owner_time is None or not tickets:
+            return MergedCost(
+                median=None, priced=0, owner_recorded=0, merged=len(merges), estimated=False
+            )
+        return merged_cost_summary(
+            [
+                pr_cost(p, ledger.by_ticket.get(p.ticket_id or "", []), ledger.costs, now)
+                for p in merges.values()
+            ],
+            await owner_time.recorded(tickets),
         )
 
     async def runs(self, from_: Instant, to: Instant) -> RunBreakdowns:
