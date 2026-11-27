@@ -1,5 +1,5 @@
 import { createSharedComposable, useIntervalFn, useTimestamp } from '@vueuse/core'
-import { STAGE_LABELS, type Card, type Pull } from './board'
+import { runStageLabel, type Card, type Pull } from './board'
 
 export const useDeliveryClock = createSharedComposable(() =>
   useTimestamp({ scheduler: (tick) => useIntervalFn(tick, 1000) }),
@@ -19,7 +19,7 @@ function runStatus(card: Card): DeliveryStatus | null {
   // An empty agent name falls through to the holder like a missing one.
   const agent = [run.agent, card.holder].find(Boolean) ?? 'Agent'
   return {
-    label: `${agent} · ${STAGE_LABELS[run.stage]}`,
+    label: `${agent} · ${runStageLabel(run.stage)}`,
     state: 'working',
     ...(run.started_at ? { since: run.started_at } : {}),
   }

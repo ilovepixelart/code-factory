@@ -2,7 +2,7 @@
 import { BotIcon, Clock01Icon, HelpCircleIcon, StopIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { computed } from 'vue'
-import { STAGE_LABELS, type Card } from '../lib/board'
+import { runStageLabel, type Card } from '../lib/board'
 import { haltWords, resumes, short } from '../lib/format'
 import StatusBadge from './StatusBadge.vue'
 import Subagent from './ai/Subagent/Subagent.vue'
@@ -59,7 +59,7 @@ const liveSessions = computed(() => card.sessions.filter((s) => s.state !== 'end
     >
     <StatusBadge v-for="run in card.runs" :key="run.id" tone="info"
       ><HugeiconsIcon :icon="BotIcon" data-icon="inline-start" aria-hidden="true" />Agent ·
-      {{ STAGE_LABELS[run.stage]
+      {{ runStageLabel(run.stage)
       }}<template v-if="run.attempt > 0"> · attempt {{ run.attempt }}</template> · iteration
       {{ run.iteration
       }}<template v-if="run.loop"> of {{ run.max_iterations }}</template></StatusBadge

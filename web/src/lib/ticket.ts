@@ -54,11 +54,11 @@ export interface TicketView {
   work_done: boolean
   runs: {
     id: string
-    stage: Stage
+    stage: string
     iteration: number
     loop: boolean
     started_at: number
-    progress: RunProgress
+    progress?: RunProgress | null
     /** The memory entries the run received and recall left out, by id; null when none (CF-1169). */
     memory: RunMemory | null
     /** When the owner's context it received became current, in epoch seconds (CF-1163). */
