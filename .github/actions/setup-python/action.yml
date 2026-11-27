@@ -7,7 +7,10 @@ runs:
       with:
         version: '0.13.9'
     # /tmp is shared by every user (sticky, written by all), so the board never trusts a program
-    # below it (platform/programs.py); the tests' fake programs live in the runner's own folder.
-    - name: Keep temporary files in the runner's own folder
+    # below it (platform/programs.py), and the settings tests need folders outside /home: the
+    # tests' temporary files go in a folder of the runner's own, under /opt.
+    - name: Keep temporary files in a folder of the runner's own
       shell: bash
-      run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
+      run: |
+        sudo install -d -o "$(id -u)" -g "$(id -g)" -m 0700 /opt/runner-tmp
+        echo "TMPDIR=/opt/runner-tmp" >> "$GITHUB_ENV"
