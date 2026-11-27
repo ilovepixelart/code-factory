@@ -136,7 +136,7 @@ class _InboxRead:
 
     async def _memory(self) -> list[Item]:
         entries = await self._services.get(MemoryService).list(MemoryFilter(status="proposed"))
-        keys = ("repository", "id", "kind", "statement", "why", "source", "guard")
+        keys = ("repository", "id", "kind", "statement", "why", "source", "guard", "scope")
         return [
             Item(
                 since=datetime.combine(e.date, datetime.min.time(), UTC).timestamp(),
