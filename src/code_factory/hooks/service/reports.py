@@ -54,7 +54,8 @@ class ReportMixin(Collaborators):
             created = await self._ports.tickets.create_bug(bug)
         except ConflictError:
             # A concurrent report filed it first: this one is a repeat.
-            if (known := await self._ports.tickets.by_source(repository, source)) is None:
+            known = await self._ports.tickets.by_source(repository, source)
+            if known is None:
                 raise
             return await self._counted(known.id, fields.message)
         return ErrorReported(ticket_id=created, count=1, created=True)

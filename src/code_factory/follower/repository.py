@@ -66,7 +66,7 @@ class Leader:
         try:
             return await self._lead()
         except Exception as error:
-            if not (isinstance(error, PoolTimeout) or connection_lost(error)):
+            if not isinstance(error, PoolTimeout) and not connection_lost(error):
                 raise
             raise DatabaseUnavailableError("the follower could not reach its database") from error
 
