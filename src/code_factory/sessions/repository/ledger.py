@@ -101,7 +101,7 @@ class LedgerRepository:
         rows = await self._session.execute(
             select(SessionSpoolProgressRow.spool, SessionSpoolProgressRow.byte_offset)
         )
-        return {spool: offset for spool, offset in rows}  # noqa: C416  # rows are pairs
+        return dict(rows.all())
 
     async def advance(self, spool: str, *, old: int, new: int) -> bool:
         """Move the spool's progress from `old` to `new`; False when another ingester moved it."""
@@ -223,7 +223,7 @@ class LedgerRepository:
             .where(SessionEventRow.session_id.in_(session_ids))
             .group_by(SessionEventRow.session_id)
         )
-        return {session_id: newest for session_id, newest in rows}  # noqa: C416  # rows are pairs
+        return dict(rows.all())
 
     async def spool_counts(self, spools: Sequence[str]) -> tuple[int, int]:
         """How many events and rejects the named spools hold."""

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from pydantic import ValidationError
-from sqlalchemy import and_, delete, exists, func, or_, select, update
+from sqlalchemy import ColumnElement, and_, delete, exists, func, not_, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -64,7 +64,7 @@ async def _readable(rows: Iterable[SessionViewRow]) -> list[StoredView]:
     return found
 
 
-def _live(cutoff: datetime) -> object:
+def _live(cutoff: datetime) -> ColumnElement[bool]:
     """Not ended by the clock: blocked, or working or idle with an event after `cutoff`."""
     return or_(
         SessionViewRow.state == SessionState.BLOCKED,
@@ -100,13 +100,13 @@ class ViewRepository:
 
     async def live(self, cutoff: datetime) -> list[SessionView]:
         """The views not ended by the clock as of `cutoff` (an hour before now)."""
-        rows = await self._session.scalars(select(SessionViewRow).where(_live(cutoff)))  # ty: ignore[invalid-argument-type]  # a SQL expression
+        rows = await self._session.scalars(select(SessionViewRow).where(_live(cutoff)))
         return [found.view for found in await _readable(rows)]
 
     async def count_ended(self, cutoff: datetime) -> int:
         """How many sessions `live` leaves out."""
         found = await self._session.scalar(
-            select(func.count()).select_from(SessionViewRow).where(~_live(cutoff))  # ty: ignore[unsupported-operator]  # a SQL expression
+            select(func.count()).select_from(SessionViewRow).where(not_(_live(cutoff)))
         )
         return found or 0
 
