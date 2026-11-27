@@ -22,6 +22,7 @@ async def test_the_document_lists_the_platform_routes_with_their_schemas(
         "/api/factory/dashboard",
         "/api/factory/runs",
         "/api/factory/prs/expensive",
+        "/api/factory/prs/series",
         "/api/factory/scorers",
         "/api/factory/improvements",
     }

@@ -292,3 +292,12 @@ async def test_a_large_cohort_is_answered_in_seven_calls_and_inside_the_budget()
         await world.service.dashboard("2026-11-01", "2026-11-08")
         elapsed.append(time.perf_counter() - begun)
     assert min(elapsed) < 0.15  # the best of five: a loaded machine slows a run, not the work
+
+
+async def test_pull_series_only_reads_delivery() -> None:
+    world = World()
+
+    got = await world.service.pull_series("2026-11-01", "2026-11-08")
+
+    assert got.model_dump() == json.loads(GOLDEN.read_text())["series"]
+    assert world.calls() == ["in_range"]

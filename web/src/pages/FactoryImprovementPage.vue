@@ -14,7 +14,8 @@ import { usePaged } from '../lib/paging'
 // The pull requests that propose self-improvements (`GET /api/factory/improvements`), 20 to a page.
 const PAGE_SIZE = 20
 const reads = useFactoryRead<Improvements>(
-  () => `/api/factory/improvements?limit=${String(PAGE_SIZE)}`,
+  `/api/factory/improvements?limit=${String(PAGE_SIZE)}`,
+  false,
 )
 const improvements = reads.data
 const paged = usePaged(() => improvements.value?.items ?? null, '', PAGE_SIZE)

@@ -2,6 +2,8 @@
 // that is polled, how often. A change invalidates by these keys; a channel that pushes changes
 // can turn a poll off here and invalidate or set the same keys instead.
 
+import type { RangeKey } from './analytics'
+
 /** The cache key of each read. A key's first part is its family: invalidating `['sessions']`
  *  reaches every session list and every session's timeline. */
 export const keys = {
@@ -26,7 +28,7 @@ export const keys = {
   ticket: (repository: string, id: string) => ['tickets', repository, id] as const,
   /** Under the ticket's key, so invalidating a ticket reaches its findings too. */
   findings: (repository: string, id: string) => ['tickets', repository, id, 'findings'] as const,
-  factory: (path: string) => ['factory', path] as const,
+  factory: (path: string, range: RangeKey | null) => ['factory', path, range] as const,
   flow: (range: string) => ['flow', range] as const,
   archive: (address: string) => ['archive', address] as const,
 }

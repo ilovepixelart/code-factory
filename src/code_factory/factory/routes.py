@@ -15,6 +15,7 @@ from code_factory.factory.models import (
     OwnerTime,
     RunBreakdowns,
     Scorers,
+    Series,
 )
 from code_factory.factory.service import FactoryService
 from code_factory.platform.web.dependencies import service_of
@@ -38,6 +39,12 @@ LimitQuery = Annotated[str | None, Query(description="How many to list, from 1 t
 async def dashboard(service: FactoryDep, from_: FromQuery = None, to: ToQuery = None) -> Dashboard:
     """Runs, pull requests, cycle time, cost, scorers and improvements in one answer."""
     return await service.dashboard(from_, to)
+
+
+@router.get("/prs/series", summary="Pull requests opened per bucket and their merge outcomes")
+async def pull_series(service: FactoryDep, from_: FromQuery = None, to: ToQuery = None) -> Series:
+    """The series of an opening cohort, read without the rest of the dashboard."""
+    return await service.pull_series(from_, to)
 
 
 @router.put("/tickets/{ticket_id}/owner-time", summary="Record active owner time on a merged PR")
