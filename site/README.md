@@ -35,3 +35,7 @@ is what a forgotten rebuild looks like. The theme tokens are the web app's
 
 The landing page describes the local board and shows tested command examples. Start the sample
 board with `sh scripts/demo.sh` from the repository root to try its interface.
+
+[GitHub Pages](https://ilovepixelart.github.io/code-factory/) deploys the static build when
+the landing page or project version changes on `main`. The workflow uses the committed
+stylesheet and the base path GitHub Pages reports.
