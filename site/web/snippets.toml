@@ -11,10 +11,10 @@
 label = "Quick start"
 lang = "shell"
 source = '''
-# Local mode · use Claude Code or Codex installed on your machine
+# Local mode · signed-in CLI
 sh scripts/start.sh --local
 
-# Server mode · run the app and PostgreSQL in Docker
+# Server mode · Docker Compose
 sh scripts/compose.sh
 '''
 

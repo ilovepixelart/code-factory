@@ -20,12 +20,12 @@
   {% if intro %}<p class="mt-2 text-muted-foreground max-w-[64ch]">{{ intro | safe }}</p>{% endif %}
 {% endmacro %}
 
-{% macro blurbs(items, measure='', columns='') %}
-  <dl class="grid gap-4 {{ columns }}">
+{% macro blurbs(items) %}
+  <dl class="grid gap-4">
     {% for term, body in items %}
       <div>
         <dt class="text-sm font-semibold">{{ term }}</dt>
-        <dd class="mt-1.5 text-sm text-muted-foreground {{ measure }}">{{ body | safe }}</dd>
+        <dd class="mt-1.5 text-sm text-muted-foreground max-w-[56ch]">{{ body | safe }}</dd>
       </div>
     {% endfor %}
   </dl>
@@ -115,7 +115,7 @@
           ('Permissions reach the running agent', 'When a permission request needs your decision, the hook waits for Allow or Deny and sends the answer back to the agent.'),
           ('Answers stay with the ticket', 'An agent can ask a focused question with choices and a recommendation. Your answer is available to the next run.'),
           ('Reply from your phone', 'Set up ntfy or a webhook to receive Inbox notifications with links for answering requests.'),
-        ], 'max-w-[56ch]') }}
+        ]) }}
       </div>
     </div>
     <div class="min-w-0">{{ codepane('ask') }}</div>
@@ -166,7 +166,7 @@
           ('Run fast and full checks', 'A passing fast check queues the required full check for the same commit. This repository can also run optional Semgrep and mutation scans that report warnings.'),
           ('Limit automatic repairs', 'A confirmed CI failure or merge conflict can queue a repair. The default is three automatic repair rounds per ticket. At the cap, the queue shows why the ticket is held so you can take over.'),
           ('Keep approval for higher-risk changes', 'Changes that touch sensitive paths or exceed the configured size limit require the owner to merge.'),
-        ], 'max-w-[56ch]') }}
+        ]) }}
         <a class="btn btn-outline mt-8" href="{{ repo }}/blob/main/docs/reference/config.md">Configuration reference</a>
       </div>
     </div>
