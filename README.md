@@ -270,8 +270,10 @@ The fast gate opens the test database only when it runs Python tests. Shared inp
 run. The delta uses the merge base with the default branch. On a checkout without a remote, use
 `--base REF` to check commits already made on `main` against an earlier revision.
 
-Added skips and deleted test cases fail the delta check. Lower assertion counts and instruction
-files over 100 lines produce warnings. The gate scans for secrets when Gitleaks is installed.
+Added skips, deleted test cases, and a net loss of assertion lines across changed test files
+fail the delta check. A drop in one file produces a warning when the total is preserved, as
+when tests move between files. Instruction files over 100 lines also produce warnings.
+The gate scans for secrets when Gitleaks is installed.
 Use `--secrets` to require Gitleaks, `--audit` to audit changed lockfiles, and
 `--diff-coverage` to require 90% coverage on changed executable lines. `--semgrep RULES`
 runs a local rules file and reports findings as warnings.

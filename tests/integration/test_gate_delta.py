@@ -86,18 +86,40 @@ def test_gate_delta_warns_on_assertion_reduction_without_blocking(tmp_path: Path
         repo,
         "Assert two properties",
         **{
-            "tests/test_feature.py": "def test_kept():\n    assert True\n    assert False\n",
+            "tests/test_feature.py": (
+                "def test_kept():\n    assert True\n\ndef test_moved():\n    assert False\n"
+            ),
         },
     )
     git(repo, "push", "origin", "main")
     write(repo, "tests/test_feature.py", "def test_kept():\n    assert True\n")
+    write(repo, "tests/test_moved.py", "def test_moved():\n    assert False\n")
     write(repo, "AGENTS.md", "Line\n" * 101)
 
     result = delta(repo)
 
     assert result.returncode == 0
-    assert "fewer assertion lines" in result.stdout
+    assert "Warning: 'tests/test_feature.py' has fewer assertion lines (2 to 1)." in result.stdout
     assert "AGENTS.md has 101 lines" in result.stdout
+
+
+def test_gate_delta_blocks_net_assertion_loss_without_a_deleted_test(tmp_path: Path) -> None:
+    repo = make_repo(tmp_path)
+    commit(
+        repo,
+        "Assert two properties",
+        **{
+            "tests/test_feature.py": "def test_kept():\n    assert True\n    assert False\n",
+        },
+    )
+    git(repo, "push", "origin", "main")
+    write(repo, "tests/test_feature.py", "def test_kept():\n    assert True\n")
+
+    result = delta(repo)
+
+    assert result.returncode == 1
+    assert "Test delta: the changed tests have fewer assertion lines (2 to 1)." in result.stdout
+    assert "was deleted" not in result.stdout
 
 
 def test_gate_delta_selects_module_tests_and_broadens_for_shared_inputs(tmp_path: Path) -> None:
