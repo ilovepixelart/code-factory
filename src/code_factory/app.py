@@ -163,9 +163,8 @@ class _GitTickets(TicketPort):
         if len(open_ones) != 1:
             return None
         parent = open_ones[0]
-        waiting = any(
-            [(await tickets.get(b)).column is not Column.MERGED for b in parent.blocked_by]
-        )
+        parent_blockers = [await tickets.get(b) for b in parent.blocked_by]
+        waiting = any(b.column is not Column.MERGED for b in parent_blockers)
         in_flight = parent.column in {Column.BUILD, Column.REVIEW}
         return parent.branch if in_flight and parent.branch and not waiting else None
 
