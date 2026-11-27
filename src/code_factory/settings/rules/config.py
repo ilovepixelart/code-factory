@@ -116,23 +116,28 @@ def _without(raw: dict[str, Any], found: list[Finding]) -> dict[str, Any]:
     kept = {table: value for table, value in raw.items() if isinstance(value, dict | list)}
     dropped_entries: dict[str, set[int]] = {}
     for item in found:
-        value = kept.get(item.table)
-        if item.index is None and isinstance(value, dict):
-            if item.key is None:
-                del kept[item.table]
-            else:
-                value.pop(item.key, None)
-        elif item.index is not None and isinstance(value, list):
-            if item.whole_entry:
-                dropped_entries.setdefault(item.table, set()).add(item.index)
-            elif item.key is not None:
-                value[item.index].pop(item.key, None)
-        elif item.key is None:
-            kept.pop(item.table, None)
+        _drop(kept, item, dropped_entries)
     for table, indexes in dropped_entries.items():
         if table in kept:
             kept[table] = [e for i, e in enumerate(kept[table]) if i not in indexes]
     return kept
+
+
+def _drop(kept: dict[str, Any], item: Finding, dropped_entries: dict[str, set[int]]) -> None:
+    """Removes what one finding names from `kept`, or notes a whole list entry to drop."""
+    value = kept.get(item.table)
+    if item.index is None and isinstance(value, dict):
+        if item.key is None:
+            del kept[item.table]
+        else:
+            value.pop(item.key, None)
+    elif item.index is not None and isinstance(value, list):
+        if item.whole_entry:
+            dropped_entries.setdefault(item.table, set()).add(item.index)
+        elif item.key is not None:
+            value[item.index].pop(item.key, None)
+    elif item.key is None:
+        kept.pop(item.table, None)
 
 
 def lenient_config(
