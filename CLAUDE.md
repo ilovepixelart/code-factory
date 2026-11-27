@@ -1,13 +1,16 @@
 # code-factory
 
 Python 3.14, async first: FastAPI (HTTP), FastMCP (MCP), PostgreSQL through SQLAlchemy asyncio and
-asyncpg, Alembic migrations, a Vue app in `web/` (pnpm, Node 26). The repository is local: no
-remote, no push. Version `0.y.z` until it is used in production.
+asyncpg, Alembic migrations, a Vue app in `web/` (pnpm, Node 26). Follow
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for branch verification and pull requests.
+Version `0.y.z` until it is used in production.
 
 ## Layout
 
 A modular monolith. The rules and their tests are in `docs/architecture.md`; the other `docs/`
 pages cover async, the UI, the ticket and memory store and the factory figures.
+Use the [design and performance review](docs/architecture.md#design-review) and
+[async diagnostics](docs/async.md#diagnosing-a-slow-or-stuck-service) for structural or speed changes.
 
 ```
 src/code_factory/
