@@ -68,7 +68,8 @@ def _review_time(review: object) -> datetime | None:
 def _first_review(reviews: object) -> datetime | None:
     if not isinstance(reviews, list):
         return None
-    return min((when for review in reviews if (when := _review_time(review))), default=None)
+    times = (_review_time(review) for review in reviews)
+    return min((when for when in times if when), default=None)
 
 
 def reduce_pull(answer: Mapping[str, Any]) -> PullReading:

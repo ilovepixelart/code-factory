@@ -2,7 +2,8 @@
 
 import logging
 import secrets
-from dataclasses import dataclass, field, replace
+from copy import copy
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from code_factory.platform.errors import (
@@ -144,7 +145,8 @@ class Starting(Reading):
         attempts = range(1, first.count + 1) if parallel else [options.attempt]
         runs: list[Run] = []
         for attempt in attempts:
-            begin: _Start = replace(first, options=options.model_copy(update={"attempt": attempt}))
+            begin = copy(first)
+            begin.options = options.model_copy(update={"attempt": attempt})
             try:
                 await self._begin(begin, agent)
                 runs.append(await self._launch(begin))

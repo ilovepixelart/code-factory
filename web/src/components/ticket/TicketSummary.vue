@@ -9,10 +9,9 @@ const lines = computed(() => {
   const short = (id: string) => id.slice(0, 7)
   const treeOf = (tree: string) => (tree ? `, tree ${tree}` : '')
   const gate = summary.gate
+  const held = gate?.held ? 'passed' : 'failed'
   const found = [
-    gate
-      ? `Gate ${gate.held ? 'passed' : 'failed'} on ${short(gate.commit)}${treeOf(gate.tree)}`
-      : 'Gate not run',
+    gate ? `Gate ${held} on ${short(gate.commit)}${treeOf(gate.tree)}` : 'Gate not run',
   ]
   if (summary.verdict) found.push(`Review verdict: ${summary.verdict}`)
   if (summary.capture) {
