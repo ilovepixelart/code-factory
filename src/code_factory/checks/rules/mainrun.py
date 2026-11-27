@@ -7,7 +7,7 @@ from code_factory.checks.models import MainRecord
 
 CAUSE_CHARS = 120
 BEFORE_ANY_STEP = "before any step"
-_TICKET = re.compile(r"(?<![A-Za-z0-9])CF-[0-9]+(?![0-9])")
+_TICKET = re.compile(r"(?<![A-Za-z\d])CF-\d+(?!\d)", re.ASCII)
 
 
 def main_due(recorded: MainRecord | None, tip: str) -> bool:

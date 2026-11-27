@@ -5,9 +5,9 @@ import re
 from datetime import timedelta
 
 DEFAULT_LIMIT = timedelta(seconds=3600)
-_OUTSIDE_A_NAME = re.compile(r"[^A-Za-z0-9_-]")
-_SECOND = re.compile(r"[0-9]+")
-_ANY_LOG = re.compile(r"[^/]+-(?:main|[A-Z][A-Z0-9]*-[0-9]+)-[0-9]+\.log")
+_OUTSIDE_A_NAME = re.compile(r"[^\w-]", re.ASCII)
+_SECOND = re.compile(r"\d+", re.ASCII)
+_ANY_LOG = re.compile(r"[^/]+-(?:main|[A-Z][A-Z\d]*-\d+)-\d+\.log", re.ASCII)
 
 
 def checks_limit(configured: int | None) -> timedelta | None:
