@@ -173,9 +173,10 @@ yourself after reviewing the result. For Factory's pull request and merge action
 remote, sign in with `gh`, and enable `ship` on that repository. The board waits for owner merge
 approval by default.
 
-See the
-[host checks example](../.code-factory/config.example.toml) for the fast and full commands used by
-this project. To explore the UI without using model quota, use the [sample board](#sample-boards).
+See the [host checks example](../.code-factory/config.example.toml) for the fast and full
+commands used by this project. For a network-disabled checks container, see the
+[runner setup](../README.md#development). To explore the UI without using model quota, use
+the [sample board](#sample-boards).
 
 ## Upgrade
 

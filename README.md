@@ -292,13 +292,16 @@ or a lockfile changes:
 docker build -f .code-factory/checks.Dockerfile -t code-factory-checks:local .
 ```
 
-The runner starts a fresh loopback PostgreSQL database inside each network-disabled container.
-Both gates require Gitleaks. A review fix runs the fast check first, then Factory queues the
-required full check. Activate the example as `.code-factory/config.toml` once the full suite
-passes on the runner. Factory's sandbox integration tests need a runner that supports the
-sandbox's own Linux user and mount namespaces. The
-[board check example](.code-factory/config.example.toml) also shows the commands for a
-provisioned host runner.
+The image build caches the locked dependencies and registry metadata used by pnpm's offline
+supply-chain checks. The runner starts a fresh loopback PostgreSQL database inside each
+network-disabled container. Both gates require Gitleaks. A review fix runs affected tests
+first. A passing fast check queues the required full check for the candidate. Changes to
+shared inputs make the fast gate run the full suite.
+
+Activate the example as `.code-factory/config.toml` once both gates pass on the runner.
+Factory's sandbox integration tests need a runner that supports the sandbox's own Linux
+user and mount namespaces. The [host runner example](.code-factory/config.example.toml)
+shows the commands for a provisioned host runner.
 
 For a Python check named by a spec, commit the test before Build and verify the expected red state
 from an owner-controlled checkout. Repeat `--check` for each named test. The gate checks the sealed
