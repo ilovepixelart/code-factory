@@ -14,6 +14,7 @@ from code_factory.app import build_services
 from code_factory.delivery.models import PullReading
 from code_factory.delivery.service import DeliveryService
 from code_factory.follower.models import Card
+from code_factory.follower.rules.queue import ready
 from code_factory.follower.service.neighbours import BoardAdapter, WorkAdapter
 from code_factory.platform.background import BackgroundTasks
 from code_factory.platform.config import Settings
@@ -30,6 +31,7 @@ from code_factory.runs.service import RunService
 from code_factory.runs.service.flow import FlowAdapter
 from code_factory.settings.service import SettingsService
 from code_factory.stages.service import Ports, StageService
+from code_factory.talk.models import Reply
 from code_factory.talk.service import TalkService
 from code_factory.tickets.models import (
     Finding,
@@ -168,6 +170,30 @@ async def test_a_ticket_in_review_is_due_a_review_after_its_build_and_not_after_
     assert reviewed.review_due is False
 
 
+async def test_an_owner_answer_exposes_the_same_build_requirements_when_work_is_eligible(
+    board: BoardAdapter, uow: UnitOfWork, tickets: TicketService
+) -> None:
+    made = await tickets.create(
+        NewTicket(repository="sample", title="Budgeted work", budget="10"), by=OWNER
+    )
+    ticket = await tickets.set_branch(made.id, "feat/budgeted", by=OWNER)
+    await _ended(
+        uow, ticket, "b00000000003", stage="build", started_at=datetime.now(UTC), cost=3.25
+    )
+    talk = TalkService(uow)
+    asked = await talk.ask(ticket.id, "Which item needs a change?", [], by="run:builder")
+
+    waiting = await _card(board, ticket)
+    await talk.answer(asked.question_id, Reply(text="The first item."), by=OWNER, channel="http")
+    eligible = await _card(board, ticket)
+
+    assert (waiting.stage, waiting.budget, waiting.spent) == ("build", 10.0, 3.25)
+    assert (waiting.unanswered, waiting.build_gaps) == (1, ())
+    assert (eligible.unanswered, eligible.spent) == (0, 3.25)
+    assert eligible.build_gaps == tuple(await DocumentService(uow).build_gaps(ticket.id))
+    assert eligible.build_gaps
+
+
 async def test_a_ticket_the_review_returned_is_due_a_fix_until_a_build_run_commits(
     board: BoardAdapter,
     uow: UnitOfWork,
@@ -185,6 +211,33 @@ async def test_a_ticket_the_review_returned_is_due_a_fix_until_a_build_run_commi
 
     assert (returned.stage, returned.fix_due) == ("build", True)
     assert fixed.fix_due is False
+
+
+async def test_a_later_owner_build_pin_does_not_queue_an_automatic_review_fix(
+    board: BoardAdapter,
+    stages: StageService,
+    reviews: ReviewService,
+    in_review: Ticket,
+) -> None:
+    await reviews.submit_review(in_review.id, CHANGES, by="run:r00000000001")
+    await stages.apply_review(in_review.id, "r00000000001", "h1")
+    returned = await _card(board, in_review)
+    assert (returned.stage, returned.work_done, returned.fix_due, ready(returned)) == (
+        "build",
+        True,
+        True,
+        True,
+    )
+
+    await stages.declare(in_review.id, "build", by=OWNER)
+    pinned = await _card(board, in_review)
+
+    assert (pinned.stage, pinned.work_done, pinned.fix_due, ready(pinned)) == (
+        "build",
+        True,
+        False,
+        False,
+    )
 
 
 @pytest.fixture

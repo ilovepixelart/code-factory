@@ -3,16 +3,17 @@
 import asyncio
 import uuid
 from collections.abc import Mapping
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
-from sqlalchemy import text
+from sqlalchemy import select, text
 
 from code_factory.follower.models import ActiveRunFact, Card
 from code_factory.follower.ports import FollowerPorts
 from code_factory.follower.repository import Leader
 from code_factory.follower.rules.queue import Rule
 from code_factory.follower.service import FollowerService, QueueService
+from code_factory.follower.tables import QueuePlanRow
 from code_factory.platform.config import Settings
 from code_factory.platform.db import UnitOfWork, create_engine
 from code_factory.platform.errors import ConflictError
@@ -172,6 +173,46 @@ async def test_a_ticket_no_longer_queued_leaves_the_plan(
     await follower.run_pass(("start_queued",))
 
     assert list(await QueueService(uow).plan()) == [ids[1]]
+
+
+async def test_queue_writes_keep_unchanged_timestamps_and_remove_departed_tickets(
+    uow: UnitOfWork, tickets: TicketService
+) -> None:
+    same, changed, departed, joined = [
+        await tickets.create(NewTicket(repository="sample", title=f"Queue {n}"), by="owner")
+        for n in range(4)
+    ]
+    queue = QueueService(uow)
+    await queue.write({same.id: "same", changed.id: "old", departed.id: "gone"}, NOW)
+
+    later = NOW + timedelta(minutes=1)
+    await queue.write({same.id: "same", changed.id: "", joined.id: "new"}, later)
+
+    async with uow() as session:
+        rows = await session.scalars(select(QueuePlanRow))
+        assert {row.ticket_number: (row.note, row.planned_at) for row in rows} == {
+            same.number: ("same", NOW),
+            changed.number: ("", later),
+            joined.number: ("new", later),
+        }
+
+
+async def test_an_empty_board_clears_old_notes_without_reading_scheduling_facts(
+    follower: FollowerService, fakes: Fakes, uow: UnitOfWork, ids: list[str]
+) -> None:
+    queue = QueueService(uow)
+    await queue.write({ids[0]: "was queued"}, NOW)
+    fakes.ids = []
+
+    async def unexpected() -> list[ActiveRunFact]:
+        pytest.fail("an empty board cannot use active-run facts")
+
+    fakes.active = unexpected
+
+    report = await follower.run_pass(("start_queued",))
+
+    assert report.steps["start_queued"] == "0 started of 0 planned"
+    assert await queue.plan() == {}
 
 
 async def test_a_recurring_entry_is_filed_once_per_period(

@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping
 from datetime import datetime
+from itertools import batched
 
 from sqlalchemy import delete, select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -14,6 +15,8 @@ from code_factory.platform.db.unit_of_work import connection_lost
 from code_factory.platform.errors import DatabaseUnavailableError
 
 PREFIX = "CF-"
+# Each upsert row uses three bind parameters. Leave room below the driver's limit.
+PLAN_BATCH = 1000
 # One leader per schema: advisory locks are database wide, so the key names the schema.
 LOCK_KEY = "hashtextextended(current_schema() || '/code-factory-follower-leader', 0)"
 
@@ -30,26 +33,31 @@ class QueueRepository:
 
     async def plan(self) -> dict[str, str]:
         """Every planned ticket's note."""
-        rows = await self._session.scalars(select(QueuePlanRow))
-        return {f"{PREFIX}{row.ticket_number}": row.note for row in rows}
+        rows = await self._session.execute(select(QueuePlanRow.ticket_number, QueuePlanRow.note))
+        return {f"{PREFIX}{number}": note for number, note in rows}
 
     async def replace(self, notes: Mapping[str, str], now: datetime) -> None:
         """Make the plan exactly `notes`: unchanged rows are left, others written or deleted."""
         held = await self.plan()
-        gone = [_number(i) for i in held if i not in notes]
-        if gone:
+        gone = (_number(ticket) for ticket in held if ticket not in notes)
+        for numbers in batched(gone, PLAN_BATCH, strict=False):
             await self._session.execute(
-                delete(QueuePlanRow).where(QueuePlanRow.ticket_number.in_(gone))
+                delete(QueuePlanRow).where(QueuePlanRow.ticket_number.in_(numbers))
             )
-        for ticket, note in notes.items():
-            if held.get(ticket) == note:
-                continue
+        changed = (
+            {"ticket_number": _number(ticket), "note": note, "planned_at": now}
+            for ticket, note in notes.items()
+            if held.get(ticket) != note
+        )
+        for values in batched(changed, PLAN_BATCH, strict=False):
+            statement = pg_insert(QueuePlanRow).values(values)
             await self._session.execute(
-                pg_insert(QueuePlanRow)
-                .values(ticket_number=_number(ticket), note=note, planned_at=now)
-                .on_conflict_do_update(
+                statement.on_conflict_do_update(
                     index_elements=[QueuePlanRow.ticket_number],
-                    set_={"note": note, "planned_at": now},
+                    set_={
+                        "note": statement.excluded.note,
+                        "planned_at": statement.excluded.planned_at,
+                    },
                 )
             )
 
