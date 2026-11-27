@@ -9,8 +9,8 @@ from code_factory.agents.models.agents import AgentDefinition
 from code_factory.agents.models.checks import ModelCheck
 from code_factory.agents.models.connections import (
     ConnectionDefinition,
+    ConnectionKind,
     Found,
-    Kind,
     Status,
 )
 
@@ -77,7 +77,7 @@ class ConnectionList(BaseModel):
     """The connections page."""
 
     connections: list[ConnectionView]
-    kinds: tuple[Kind, ...]
+    kinds: tuple[ConnectionKind, ...]
     problem: str = ""
 
     model_config = {"arbitrary_types_allowed": True}

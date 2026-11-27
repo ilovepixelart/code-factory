@@ -6,25 +6,33 @@ from dataclasses import dataclass
 from ada_url import URL
 
 from code_factory.agents.models.agents import AgentDefinition
-from code_factory.agents.models.connections import ConnectionChange, ConnectionDefinition, Kind
+from code_factory.agents.models.connections import (
+    ConnectionChange,
+    ConnectionDefinition,
+    ConnectionKind,
+)
 from code_factory.agents.models.constants import CODEX_LOGIN, KIND_NAMES, SECRET_VARIABLES
 from code_factory.agents.rules.names import check_name
 from code_factory.platform.errors import BadRequestError
 
 KINDS = (
-    Kind("anthropic", "Anthropic", "https://api.anthropic.com", "required", "api.anthropic.com"),
-    Kind("openrouter", "OpenRouter", "https://openrouter.ai/api", "required", "openrouter.ai"),
-    Kind(
+    ConnectionKind(
+        "anthropic", "Anthropic", "https://api.anthropic.com", "required", "api.anthropic.com"
+    ),
+    ConnectionKind(
+        "openrouter", "OpenRouter", "https://openrouter.ai/api", "required", "openrouter.ai"
+    ),
+    ConnectionKind(
         CODEX_LOGIN,
         "Codex login (ChatGPT)",
         "https://chatgpt.com/backend-api/codex",
         "login",
         "chatgpt.com",
     ),
-    Kind("lm-studio", "LM Studio", "http://localhost:1234", "none", "", "lmstudio"),
-    Kind("ollama", "Ollama", "http://localhost:11434", "none", "", "ollama"),
-    Kind("llama-cpp", "llama.cpp", "http://localhost:8080", "none", "", "llama-cpp"),
-    Kind("custom", "Custom", "", "none", "", "custom"),
+    ConnectionKind("lm-studio", "LM Studio", "http://localhost:1234", "none", "", "lmstudio"),
+    ConnectionKind("ollama", "Ollama", "http://localhost:11434", "none", "", "ollama"),
+    ConnectionKind("llama-cpp", "llama.cpp", "http://localhost:8080", "none", "", "llama-cpp"),
+    ConnectionKind("custom", "Custom", "", "none", "", "custom"),
 )
 
 CHARACTERS = (
@@ -52,7 +60,7 @@ _KEY_PREFIX = {"anthropic": "ANTHROPIC_", "openrouter": "OPENROUTER_"}
 _THIS_MACHINE = ("localhost", "127.0.0.1")
 
 
-def kind_of(kind: str) -> Kind | None:
+def kind_of(kind: str) -> ConnectionKind | None:
     """The kind named `kind`."""
     return next((known for known in KINDS if known.kind == kind), None)
 
@@ -123,7 +131,7 @@ def plain_address(text: str) -> Address:
 _PATHS = {"openrouter": ("", "/api"), CODEX_LOGIN: ("/backend-api/codex",), "custom": None}
 
 
-def _path_refusal(kind: Kind, path: str) -> str | None:
+def _path_refusal(kind: ConnectionKind, path: str) -> str | None:
     """Why the path does not suit the kind; a custom address may carry any."""
     path = path.rstrip("/")
     if kind.kind not in _PATHS:
@@ -170,7 +178,7 @@ def _is_key_variable(kind: str, name: str) -> bool:
     )
 
 
-def rules(connection: ConnectionDefinition) -> Kind:
+def rules(connection: ConnectionDefinition) -> ConnectionKind:
     """The kind of a connection that keeps the rules, else why not.
 
     Its address is taken; a keyed kind reads its key from a key variable of its provider, any

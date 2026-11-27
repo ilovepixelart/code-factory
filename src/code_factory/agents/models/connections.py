@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 @dataclass(frozen=True)
-class Kind:
+class ConnectionKind:
     """A kind of connection: its label, default address, key policy, host and local token.
 
     `host` is the one https host a keyed kind's requests and key go to; empty means this machine
