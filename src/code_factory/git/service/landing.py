@@ -61,8 +61,9 @@ class LandingMixin(MovesMixin):
             return Refused(why=str(error))
 
     async def _branch_of(self, repository: str, ticket_id: str, folders: TreeFolders) -> str:
+        ticket = await self._ports.tickets.ticket(repository, ticket_id)
         if folders.is_clone:
-            branch = (await self._ports.tickets.ticket(repository, ticket_id)).branch
+            branch = ticket.branch
             if not branch:
                 raise _Stop(Refused(why=f"{ticket_id} records no branch"))
             await self._on_ticket_branch(repository, folders, branch)

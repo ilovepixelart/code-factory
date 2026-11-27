@@ -1,11 +1,13 @@
 """Run clones and hand worktrees: start, validation against planted redirects, removal."""
 
 from pathlib import Path
+from typing import cast
 
 import anyio
 import pytest
+from fastapi import FastAPI
 
-from code_factory.git.models import HookOutcome, TreeKind, TreeRedirectedError
+from code_factory.git.models import HookOutcome, Refused, TreeKind, TreeRedirectedError
 from code_factory.git.service import GitService
 from code_factory.platform.db import UnitOfWork
 from code_factory.platform.errors import (
@@ -14,11 +16,83 @@ from code_factory.platform.errors import (
     NotFoundError,
     UnavailableError,
 )
+from code_factory.platform.services import Services
+from code_factory.repositories.service import RepositoryService
+from code_factory.tickets.models import NewTicket
+from code_factory.tickets.service import TicketService
 from git_support import Fakes, commit, git, make_repo, ticket_ref, write
 
 
 def tree_of(root: Path, name: str = "CF-1") -> Path:
     return root / ".code-factory/worktrees" / name
+
+
+async def test_start_refuses_a_ticket_from_another_tracked_checkout(
+    app: FastAPI, root: Path
+) -> None:
+    services = cast("Services", app.state.services)
+    repositories = services.get(RepositoryService)
+    await repositories.track(root)
+    other = await repositories.track(make_repo(root.parent, "other"))
+    tickets = services.get(TicketService)
+    ticket = await tickets.create(NewTicket(repository=other.name, title="Other"), by="alex")
+    worktrees = services.get(GitService)
+
+    with pytest.raises(NotFoundError, match="no such ticket"):
+        await worktrees.start_worktree(root.name, ticket.id, owner_by_hand=True)
+
+    assert not tree_of(root, ticket.id).exists()
+    assert (await tickets.get(ticket.id)).branch == ""
+
+
+async def test_save_and_land_refuse_a_legacy_tree_in_the_wrong_checkout(
+    app: FastAPI, root: Path, service: GitService, fakes: Fakes
+) -> None:
+    services = cast("Services", app.state.services)
+    repositories = services.get(RepositoryService)
+    await repositories.track(root)
+    other = await repositories.track(make_repo(root.parent, "other"))
+    ticket = await services.get(TicketService).create(
+        NewTicket(repository=other.name, title="Other"), by="alex"
+    )
+    fakes.tickets[ticket.id] = ticket_ref(ticket.id)
+    await service.start_worktree(root.name, ticket.id, owner_by_hand=True)
+    tree = tree_of(root, ticket.id)
+    before = git(tree, "rev-parse", "HEAD")
+    write(tree, "draft.txt", "Unfinished work\n")
+    worktrees = services.get(GitService)
+
+    with pytest.raises(NotFoundError, match="no such ticket"):
+        await worktrees.save_work(root.name, ticket.id)
+    assert await worktrees.land(root.name, ticket.id) == Refused(why="no such ticket")
+
+    assert git(tree, "rev-parse", "HEAD") == before
+    assert git(tree, "status", "--short") == "?? draft.txt"
+
+
+async def test_start_ignores_a_foreign_blockers_branch_with_the_same_name(
+    app: FastAPI, root: Path
+) -> None:
+    services = cast("Services", app.state.services)
+    repositories = services.get(RepositoryService)
+    await repositories.track(root)
+    other = await repositories.track(make_repo(root.parent, "other"))
+    tickets = services.get(TicketService)
+    blocker = await tickets.create(NewTicket(repository=other.name, title="Blocker"), by="alex")
+    branch = "shared-name"
+    await tickets.set_branch(blocker.id, branch, by="alex")
+    git(root, "checkout", "-q", "-b", branch)
+    commit(root, "Unrelated local branch", **{"unrelated.txt": "Unrelated\n"})
+    git(root, "checkout", "-q", "main")
+    child = await tickets.create(
+        NewTicket(repository=root.name, title="Dependent ticket", blocked_by=[blocker.id]),
+        by="alex",
+    )
+
+    info = await services.get(GitService).start_worktree(root.name, child.id, owner_by_hand=True)
+
+    assert git(Path(info.path), "rev-parse", "HEAD") == git(root, "rev-parse", "origin/main")
+    assert (await tickets.get(child.id)).branch == f"ticket/{child.id.lower()}"
 
 
 async def test_start_cuts_a_clone_from_origin_default_records_the_branch_and_the_row(
