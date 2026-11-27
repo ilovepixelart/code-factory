@@ -21,7 +21,8 @@ COPY pyproject.toml uv.lock .python-version ./
 COPY web/package.json web/pnpm-lock.yaml web/pnpm-workspace.yaml web/
 RUN uv python install && uv sync --locked --no-install-project && \
     uv pip install --python /opt/factory-venv/bin/python uv_build==0.13.9
-RUN pnpm --dir web fetch
+# The offline gate needs registry metadata for pnpm's lockfile policy checks as well as packages.
+RUN pnpm --dir web install --frozen-lockfile && rm -rf web/node_modules
 RUN apt-get update && apt-get install -y --no-install-recommends bubblewrap socat ripgrep && \
     rm -rf /var/lib/apt/lists/* && \
     node /usr/local/lib/node_modules/npm/bin/npm-cli.js install --global @anthropic-ai/sandbox-runtime@0.0.83
