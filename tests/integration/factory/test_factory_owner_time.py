@@ -57,3 +57,36 @@ async def test_the_owner_api_records_a_known_merge_without_ticket_activity(
     figures = await client.get("/api/factory/dashboard?from=2026-11-23&to=2026-11-24")
     assert figures.status_code == 200
     assert figures.json()["merged_cost"]["owner_recorded"] == 1
+
+
+async def test_replacing_the_current_pull_preserves_the_earlier_merge(
+    client: httpx.AsyncClient, uow: UnitOfWork, tickets: TicketService
+) -> None:
+    ticket = await tickets.create(NewTicket(repository="sample", title="Two pulls"), by=OWNER)
+    first, second = f"{PULLS}/1", f"{PULLS}/2"
+    async with uow() as session:
+        repo = DeliveryRepository(session)
+        await repo.record_pull(
+            ticket.id,
+            ticket.repository,
+            first,
+            PullReading(state="merged", created_on_host=NOW, merged_on_host=NOW),
+            NOW,
+        )
+        await repo.record_pull(ticket.id, ticket.repository, second, PullReading(state="open"), NOW)
+        assert (await repo.pulls([ticket.id]))[ticket.id].url == second
+
+    entry = {"pull_url": first, "active_minutes": 30, "hourly_rate_usd": 120}
+    recorded = await client.put(f"/api/factory/tickets/{ticket.id}/owner-time", json=entry)
+    assert recorded.status_code == 200
+    figures = await client.get("/api/factory/dashboard?from=2026-11-23&to=2026-11-24")
+    assert figures.status_code == 200
+    payload = figures.json()
+    assert payload["prs"] == {
+        "opened": 2,
+        "open": 1,
+        "closed": 0,
+        "merged": 1,
+        "merged_in_period": 1,
+    }
+    assert payload["merged_cost"]["owner_recorded"] == 1

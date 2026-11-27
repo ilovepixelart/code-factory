@@ -158,9 +158,16 @@ class ShipOutcome(Frozen):
 class PullHistory(Frozen):
     """A recorded pull request with when it opened and merged, as the factory measures them."""
 
-    pull: PullView
+    ticket_id: str
+    repository: str
+    url: str
+    state: PullState
     opened_at: datetime
     merged_at: datetime | None = None
+    closed_at: datetime | None = None
+    first_review_at: datetime | None = None
+    changed_lines: int | None = None
+    ticket_pulls: int = 1
 
 
 class PassReport(Frozen):

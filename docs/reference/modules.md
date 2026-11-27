@@ -29,7 +29,7 @@ listed after the modules it reads. The MCP tools each caller sees are pinned in
 | `broker` | The key broker. | `broker` |  | yes | `broker_tokens` |
 | `runs` | The runs module: agent runs, their processes, permission requests and previews. | `halt`<br>`resume`<br>`runs`<br>`run-agent` |  | yes | `agent_halt`<br>`permission_decisions`<br>`permission_requests`<br>`permission_reviews`<br>`permission_rules`<br>`run_previews`<br>`runs` |
 | `hooks` | The hooks module: what an agent runtime runs by itself, and the owner's small commands. | `sign-out`<br>`audit`<br>`error`<br>`recall` |  |  |  |
-| `delivery` | The delivery module: pull requests on GitHub, the board merge and issue intake. | `delivery` |  | yes | `delivery_events`<br>`delivery_intake`<br>`delivery_issue_status`<br>`delivery_polls`<br>`delivery_pulls` |
+| `delivery` | The delivery module: pull requests on GitHub, the board merge and issue intake. | `delivery` |  | yes | `delivery_events`<br>`delivery_intake`<br>`delivery_issue_status`<br>`delivery_polls`<br>`delivery_pull_history`<br>`delivery_pulls` |
 | `evals` | The evals module: eval suites, review evals, the judge, scorers and consolidation. | `eval` |  |  | `eval_judge_days`<br>`eval_judgements`<br>`eval_records`<br>`eval_task_runs` |
 | `follower` | The follower: the board loop that starts queued work and files the board's own tickets. | `follower` |  | yes | `follower_queue_plan` |
 | `screens` | A ui ticket's screens: captures waiting on the owner's approval, and their images. | `shoot` |  |  |  |

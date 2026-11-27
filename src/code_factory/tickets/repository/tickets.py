@@ -140,6 +140,15 @@ class TicketRepository(ActivityQueries):
         )
         return set(rows)
 
+    async def titles(self, numbers: list[int]) -> dict[int, str]:
+        """Visible ticket titles, without loading other ticket facts."""
+        rows = await self._session.execute(
+            select(TicketRow.number, TicketRow.title).where(
+                TicketRow.number.in_(numbers), TicketRow.trashed.is_(False)
+            )
+        )
+        return dict(rows.all())
+
     async def open_titles(self, repository: str) -> list[tuple[int, str]]:
         """`(number, title)` of each ticket of the repository neither archived nor merged."""
         merged_pull = select(TicketPullRequestRow.ticket_number).where(

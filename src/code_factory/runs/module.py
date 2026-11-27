@@ -77,7 +77,7 @@ class BoardRuns:
     async def for_tickets(self, ticket_ids: Sequence[str]) -> list[RunFact]:
         """Every run of the tickets."""
         runs = self._services.get(RunService)
-        return [_fact(r) for ticket in ticket_ids for r in await runs.runs_on_ticket(ticket)]
+        return [_fact(r) for r in await runs.runs_on_tickets(ticket_ids)]
 
 
 class RunCosts:

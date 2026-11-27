@@ -31,6 +31,10 @@ NULLABLE = {
     ("broker_tokens", "delete_claimed_at"),  # null until a sweep claims the deletion
     ("broker_tokens", "key_delete_failed_at"),  # null unless a deletion failed
     ("broker_tokens", "key_delete_error"),  # null unless a deletion failed
+    ("delivery_pull_history", "merged_at"),
+    ("delivery_pull_history", "closed_at"),
+    ("delivery_pull_history", "first_review_at"),
+    ("delivery_pull_history", "changed_lines"),
     ("delivery_events", "retry_at"),  # null: the failure is final
     ("delivery_pulls", "additions"),  # null: GitHub gave no count, or read before it was kept
     ("delivery_pulls", "deletions"),  # null: as additions
