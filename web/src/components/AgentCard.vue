@@ -127,8 +127,8 @@ async function testModel(): Promise<void> {
   try {
     await act('POST', `${address.value}/model-check`)
     emit('changed')
-  } catch (failure) {
-    error.value = refusalText(failure)
+  } catch (error_) {
+    error.value = refusalText(error_)
   }
   testing.value = false
 }
