@@ -82,11 +82,25 @@ class MergingMixin(Collaborators):
         async with lock:
             return await self._merge(ticket_id, by)
 
-    async def _merge(self, ticket_id: str, by: str) -> Merged:
+    async def land(self, ticket_id: str, url: str, head: str) -> Merged:
+        """Merge the exact pull and commit pushed by the owner's land command."""
+        lock = self._merging.setdefault(ticket_id, asyncio.Lock())
+        async with lock:
+            ticket = await self._ports.tickets.get(ticket_id)
+            pull = await self._read_pull(ticket_id, ticket.repository, url, shipped_head=head)
+            if pull is None:
+                raise NotReadyError("the pull request no longer holds the commit being landed")
+            return await self._merge(ticket_id, "owner:owner", landing=(url, head))
+
+    async def _merge(
+        self, ticket_id: str, by: str, *, landing: tuple[str, str] | None = None
+    ) -> Merged:
         facts = await self._facts(ticket_id, live=True)
         pull = facts.pull
         if pull is None:
             raise NotReadyError(merge_decision(facts).reason or NO_TICKET)
+        if landing is not None and (pull.url, pull.shipped_head) != landing:
+            raise NotReadyError("the recorded pull request changed during landing")
         if not by and not merge_due(facts, self._clock()):
             raise NotReadyError("a failed merge of this head waits before it is tried again")
         verdict = merge_decision(facts)

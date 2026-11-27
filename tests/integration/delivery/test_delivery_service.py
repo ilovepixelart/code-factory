@@ -7,10 +7,11 @@ from pydantic import SecretStr
 
 from code_factory.checks.models import PullHead
 from code_factory.delivery.models import MergeRefusedError, NotReadyError, Tracker, TrackerItem
-from code_factory.delivery.module import ChecksForge
+from code_factory.delivery.module import ChecksForge, GitForge
 from code_factory.delivery.ports import Candidate, DeliveryPorts, Switches
 from code_factory.delivery.service import DeliveryForge, DeliveryService
 from code_factory.platform.db import UnitOfWork
+from code_factory.platform.errors import ConflictError
 from code_factory.platform.services import Services
 from code_factory.stages.models import Hold
 from code_factory.tickets.models import Ticket
@@ -104,6 +105,72 @@ async def test_commits_pushed_onto_a_shipped_pull_request_have_their_checks_queu
     assert await delivery.ship_added(pull, fakes.ticket)
 
     assert fakes.queued[-1] == (fakes.ticket.id, "b" * 40)
+
+
+async def test_disabling_shipping_preserves_the_existing_pull_head(
+    delivery: DeliveryService, fakes: Fakes, gh: ScriptedGh
+) -> None:
+    _ready_to_ship(gh)
+    await delivery.ship(fakes.ticket.id)
+    fakes.local_tip = "b" * 40
+    fakes.switches = Switches(ship=False, merge_waits=True)
+
+    report = await delivery.run_pass(("ship_added",))
+
+    assert report.steps == {"ship_added": "0 pushed"}
+    assert fakes.pushed == [(TIP, "ticket/cf-1")]
+    assert fakes.queued == [(fakes.ticket.id, TIP)]
+
+
+async def test_manual_landing_uses_the_recorded_owner_merge(
+    delivery: DeliveryService, fakes: Fakes, gh: ScriptedGh, uow: UnitOfWork, ports: DeliveryPorts
+) -> None:
+    services = Services()
+    services.add(DeliveryService, delivery)
+    services.add(DeliveryForge, DeliveryForge(uow, ports, gh))
+    forge = GitForge(services)
+    gh.answer(("pr", "view"), pull_answer() | {"number": 9})
+    gh.answer(("pr", "merge"))
+    ref = await forge.open_pull("sample", branch="ticket/cf-1", head=TIP, base="main", title="Fix")
+
+    await forge.merge(fakes.ticket.id, ref, TIP)
+
+    pull = await delivery.pull(fakes.ticket.id)
+    assert pull is not None
+    assert pull.state == "merged"
+    events = (await delivery.events([fakes.ticket.id]))[fakes.ticket.id]
+    assert [(e.url, e.head) for e in events if e.kind == "merged_pull_request"] == [(URL, TIP)]
+
+
+async def test_landing_rejects_an_open_pull_to_another_base_before_adoption(
+    uow: UnitOfWork, ports: DeliveryPorts, gh: ScriptedGh
+) -> None:
+    gh.answer(("pr", "view"), pull_answer() | {"baseRefName": "release", "number": 9})
+    with pytest.raises(ConflictError, match="does not target main"):
+        await DeliveryForge(uow, ports, gh).open_pull(
+            "sample", branch="ticket/cf-1", head=TIP, base="main", title="Fix"
+        )
+    assert len(gh.calls) == 1
+
+
+async def test_manual_landing_refuses_a_retargeted_pull(
+    delivery: DeliveryService, fakes: Fakes, gh: ScriptedGh
+) -> None:
+    gh.answer(("pr", "view"), pull_answer() | {"baseRefName": "release"})
+
+    with pytest.raises(NotReadyError, match="default branch"):
+        await delivery.land(fakes.ticket.id, URL, TIP)
+
+    assert not any(call[:2] == ["pr", "merge"] for call in gh.calls)
+
+
+async def test_manual_landing_keeps_a_moved_head_out_of_shipped_evidence(
+    delivery: DeliveryService, fakes: Fakes, gh: ScriptedGh
+) -> None:
+    gh.answer(("pr", "view"), pull_answer(head="b" * 40))
+    with pytest.raises(NotReadyError, match="no longer holds"):
+        await delivery.land(fakes.ticket.id, URL, TIP)
+    assert await delivery.pull(fakes.ticket.id) is None
 
 
 async def test_a_shipped_ticket_is_not_shipped_again(

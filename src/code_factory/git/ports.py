@@ -51,16 +51,8 @@ class ForgePort(Protocol):
         """Open (or find) the pull request of `branch`."""
         ...
 
-    async def pull_state(self, ref: PullRef) -> str:
-        """The forge's merge state words."""
-        ...
-
-    def is_clean(self, state: str) -> bool:
-        """Whether `state` means the pull request can merge."""
-        ...
-
-    async def merge(self, ref: PullRef, head: str) -> None:
-        """Merge the pull request at `head`."""
+    async def merge(self, ticket_id: str, ref: PullRef, head: str) -> None:
+        """Land the ticket through Delivery's guarded owner merge."""
         ...
 
 

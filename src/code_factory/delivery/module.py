@@ -53,17 +53,9 @@ class GitForge:
             repository, branch=branch, head=head, base=base, title=title
         )
 
-    async def pull_state(self, ref: PullRef) -> str:
-        """GitHub's merge state of the pull request."""
-        return await self._forge().pull_state(ref)
-
-    def is_clean(self, state: str) -> bool:
-        """Whether the state merges."""
-        return self._forge().is_clean(state)
-
-    async def merge(self, ref: PullRef, head: str) -> None:
-        """Merge at exactly `head`."""
-        await self._forge().merge(ref, head)
+    async def merge(self, ticket_id: str, ref: PullRef, head: str) -> None:
+        """Record the pinned landing and use the board's owner merge."""
+        await self._services.get(DeliveryService).land(ticket_id, ref.url, head)
 
     async def held(self, repository: str, branch: str, base: str, new: str) -> str | None:
         """Why the push is held by the screen, or `None`."""

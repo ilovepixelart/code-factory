@@ -55,7 +55,9 @@ class DeliveryService(ReadingMixin, ShippingMixin, MergingMixin, IntakeMixin):
         pushed = 0
         for pull in await self.open_pulls():
             ticket = by_id.get(pull.ticket_id)
-            if ticket is not None and await self.ship_added(pull, ticket):
+            if ticket is None or not (await self._ports.places.switches(ticket.repository)).ship:
+                continue
+            if await self.ship_added(pull, ticket):
                 pushed += 1
         return pushed
 
