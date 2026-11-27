@@ -60,7 +60,7 @@ class RunProxyServer:
         """Close the listener and every tunnel."""
         if self._server is not None:
             self._server.close()
-        for task in list(self._live):
+        for task in self._live:
             task.cancel()
         await asyncio.gather(*self._live, return_exceptions=True)
         if self._server is not None:

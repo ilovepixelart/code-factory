@@ -316,7 +316,7 @@ class BrokerService:
         for ended in [e for events in self._streams.values() for e in events]:
             ended.set()
         await listener.stop()
-        for proxy in list(self._proxies):
+        for proxy in self._proxies:
             await proxy.stop()
         self._proxies.clear()
         await self.aclose()

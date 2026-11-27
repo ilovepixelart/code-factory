@@ -8,7 +8,7 @@ from code_factory.broker.models import Connect, ConnectRefusal
 MAX_HEAD = 8192
 _END = b"\r\n\r\n"
 _VERSION = re.compile(r"HTTP/1\.[01]")
-_PORT = re.compile(r"[1-9][0-9]{0,4}")
+_PORT = re.compile(r"[1-9]\d{0,4}", re.ASCII)
 _HOST = re.compile(r"[a-z0-9.-]+")
 MAX_PORT = 65535
 DROP = ConnectRefusal(0, "the request head is not one request line and headers")

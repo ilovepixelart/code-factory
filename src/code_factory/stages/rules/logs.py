@@ -32,7 +32,7 @@ _RUST_ENVIRONMENT = (
     "error: could not compile",
     "error: aborting due to",
 )
-_SECONDS = re.compile(r"[0-9]+")
+_SECONDS = re.compile(r"\d+", re.ASCII)
 
 
 def no_verdict(code: int) -> bool:
