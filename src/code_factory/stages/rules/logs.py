@@ -16,11 +16,11 @@ _STEP = re.compile(r"[A-Za-z0-9-]+")
 _FAILURE = re.compile(r"\b(fail|failed|error|panicked)\b", re.IGNORECASE)
 _LIBTEST_FAILED = re.compile(r"^\s*test (\S+) \.\.\. FAILED\s*$", re.MULTILINE)
 _PYTEST_FAILED = re.compile(r"^FAILED (\S+)", re.MULTILINE)
-_TEST_FAILED = re.compile(r"^(?:\s*FAIL(?:ED)?\b|.*\.\.\. FAILED\s*$)", re.MULTILINE)
+_TEST_FAILED = re.compile(r"^(?:\s*FAIL(?:ED)?\b|(?:.*\.\.\. FAILED\s*$))", re.MULTILINE)
 _RUST_ERROR = re.compile(
     r"^\s*(error\[E\d{4}\]|error: could not compile|error: linking with)", re.MULTILINE
 )
-_PYTHON_BUILD = re.compile(r"ERROR collecting |^E\s+SyntaxError", re.MULTILINE)
+_PYTHON_BUILD = re.compile(r"ERROR collecting |(?:^E\s+SyntaxError)", re.MULTILINE)
 _PYTHON_CAUSE = re.compile(r"^E\s+(\w*(?:Error|Exception))\b", re.MULTILINE)
 _RUST_ENVIRONMENT = (
     "error[E0463]",
