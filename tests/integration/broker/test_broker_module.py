@@ -62,6 +62,37 @@ async def test_the_module_registers_its_service_and_starts_the_listener_and_the_
         await resources.engine.dispose()
 
 
+async def test_the_listener_has_released_its_port_when_the_stop_hooks_return(
+    settings: Settings, tmp_path: Path
+) -> None:
+    """The task group cancels its tasks after the hooks: a port still held then is never closed."""
+    resources = build_resources(settings.model_copy(update={"state_dir": tmp_path}))
+    services = build_services(resources, [agents_module, sessions_module, module])
+    service = services.get(BrokerService)
+    assert module.background is not None
+    try:
+        async with resources.tasks.run():
+            module.background(services, resources.tasks)
+            async with asyncio.timeout(5):
+                while not (await service.status()).listening:  # noqa: ASYNC110  # polls a status
+                    await asyncio.sleep(0.01)
+            port = (await service.status()).port
+
+            await run_on_stop(resources)
+
+            try:
+                _, writer = await asyncio.open_connection("127.0.0.1", port)
+            except OSError:
+                refused = True
+            else:
+                refused = False
+                writer.close()
+                await writer.wait_closed()
+            assert refused, "the port still accepts connections after the stop hooks"
+    finally:
+        await resources.engine.dispose()
+
+
 async def test_the_main_app_answers_neither_the_telemetry_nor_the_proxy_paths(
     client: httpx.AsyncClient,
 ) -> None:

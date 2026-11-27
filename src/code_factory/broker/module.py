@@ -20,6 +20,7 @@ def _provide(services: Services, resources: Resources) -> None:
     )
     services.add(BrokerService, service)
     resources.on_stopping.append(service.shutdown)
+    resources.on_stop.append(service.released)
 
 
 def _background(services: Services, tasks: BackgroundTasks) -> None:

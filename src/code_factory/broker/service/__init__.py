@@ -4,6 +4,7 @@ Other modules import this package and `code_factory.broker.models`, nothing else
 """
 
 import asyncio
+import contextlib
 import hmac
 import json
 import logging
@@ -92,6 +93,7 @@ class BrokerService:
         self._proxies: set[RunProxyServer] = set()
         self._port: int | None = None
         self._stopped = False
+        self._released: asyncio.Event | None = None
         self._wake = asyncio.Event()
         self.stopping = asyncio.Event()
         self._keys = RunKeys(uow, self._key_api, connections, clock)
@@ -302,6 +304,7 @@ class BrokerService:
         )
         self._stopped = False
         self._port = await listener.start()
+        self._released = asyncio.Event()
         try:
             await stop.wait()
         finally:
@@ -317,10 +320,24 @@ class BrokerService:
             await proxy.stop()
         self._proxies.clear()
         await self.aclose()
+        if self._released is not None:
+            self._released.set()
 
     def shutdown(self) -> None:
         """Ask `serve` and `sweep_loop` to end: the app calls this when it stops."""
         self.stopping.set()
+
+    async def released(self) -> None:
+        """Wait, within the shutdown limit, until a serving listener has released its port.
+
+        The app's task group cancels its tasks once the stop hooks return; a listener still
+        closing then would never finish. Nothing to wait for when the listener never served.
+        """
+        if self._released is None:
+            return
+        with contextlib.suppress(TimeoutError):
+            async with asyncio.timeout(float(self._settings.shutdown_timeout_s) + 1):
+                await self._released.wait()
 
     async def aclose(self) -> None:
         """Close the provider client."""

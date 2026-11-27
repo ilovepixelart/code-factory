@@ -64,16 +64,22 @@ class RunListener:
         server = _Server(config)
         self._server, self._socket = server, sock
         self._task = asyncio.create_task(server.serve(sockets=[sock]), name="broker-listener-serve")
+        serving = False
         try:
             async with asyncio.timeout(self._start_timeout_s):
                 while not server.started:
                     if self._task.done():
                         self._task.result()
                     await asyncio.sleep(_POLL_S)
+            serving = True
         except TimeoutError:
-            await self.stop()
             msg = "the key broker's listener did not start: another program may hold its port"
             raise UnavailableError(msg) from None
+        finally:
+            # A start that ends any other way (timed out, failed, cancelled) releases the socket
+            # and ends the server; shielded so a cancellation cannot cut the release short.
+            if not serving:
+                await asyncio.shield(self.stop())
         port = int(sock.getsockname()[1])
         self.address = ("127.0.0.1", port)
         return port
