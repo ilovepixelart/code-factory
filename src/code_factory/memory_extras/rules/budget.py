@@ -34,8 +34,9 @@ def _rank(entry: MemoryEntry) -> int:
 
 def _in_load_order(entries: Sequence[MemoryEntry]) -> list[MemoryEntry]:
     """Core first, then rules and decisions, then lessons, each newest first by (date, id)."""
-    newest = sorted(entries, key=lambda e: (e.date, e.id), reverse=True)
-    return sorted(newest, key=_rank)
+    ordered = sorted(entries, key=lambda e: (e.date, e.id), reverse=True)
+    ordered.sort(key=_rank)
+    return ordered
 
 
 def within_budget(
