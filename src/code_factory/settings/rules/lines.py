@@ -6,7 +6,7 @@ whole file does.
 
 import re
 
-_HEADER = re.compile(r"(\[\[?)\s*([^\]]*?)\s*(\]\]?)\s*(?:#.*)?")
+_HEADER = re.compile(r"(\[\[?)([^\]]*)(\]\]?)\s*(?:#.*)?")
 
 
 def _header(line: str) -> tuple[bool, str] | None:
@@ -14,7 +14,7 @@ def _header(line: str) -> tuple[bool, str] | None:
     found = _HEADER.fullmatch(line)
     if found is None or len(found.group(1)) != len(found.group(3)):
         return None
-    return len(found.group(1)) == 2, str(found.group(2))  # noqa: PLR2004  # `[[`
+    return len(found.group(1)) == 2, str(found.group(2)).strip()  # noqa: PLR2004  # `[[`
 
 
 def _names(line: str, key: str) -> bool:
