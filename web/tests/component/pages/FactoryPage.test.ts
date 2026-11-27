@@ -45,15 +45,21 @@ describe('the read', () => {
   test('the_default_range_reads_the_last_7_days_with_today_inside', async () => {
     const { sent } = await show()
 
-    expect(sent.map((s) => s.url)).toEqual(['/api/factory/dashboard?from=2026-11-04&to=2026-11-11'])
+    expect(sent.map((s) => s.url)).toEqual([
+      '/api/factory/dashboard?from=2026-11-03T15:00:00.000Z&to=2026-11-10T15:00:00.000Z',
+    ])
   })
 
   test('the_address_names_a_longer_range_and_24_hours_reads_today', async () => {
     const { sent } = await show('/analytics/factory?range=30d')
     const day = await show('/analytics/factory?range=24h')
 
-    expect(sent.at(-1)?.url).toBe('/api/factory/dashboard?from=2026-10-12&to=2026-11-11')
-    expect(day.sent.at(-1)?.url).toBe('/api/factory/dashboard?from=2026-11-10&to=2026-11-11')
+    expect(sent.at(-1)?.url).toBe(
+      '/api/factory/dashboard?from=2026-10-11T15:00:00.000Z&to=2026-11-10T15:00:00.000Z',
+    )
+    expect(day.sent.at(-1)?.url).toBe(
+      '/api/factory/dashboard?from=2026-11-09T15:00:00.000Z&to=2026-11-10T15:00:00.000Z',
+    )
   })
 
   test('the_range_and_the_pages_are_links_and_the_current_ones_are_marked', async () => {
@@ -135,7 +141,7 @@ describe('the tiles', () => {
     expect(tileText('Cost per PR')).toBe('$1.75')
     expect(tileNote('Cost per PR')).toBe('median; 6 of 7 PRs priced')
     expect(tileText('Measurement spend')).toBe('$0.50')
-    expect(tileNote('Measurement spend')).toBe('judges and evals, not in PR cost')
+    expect(tileNote('Measurement spend')).toBe('Recorded judge, eval and benchmark costs')
   })
 
   test('an_estimated_cost_is_led_by_a_tilde', async () => {
@@ -168,7 +174,8 @@ describe('the tiles', () => {
     expect(tileText('PRs opened')).toBe('0')
     expect(tileText('Cost per PR')).toBe('No data')
     expect(tileNote('Cost per PR')).toBe('no pull requests opened in this range')
-    expect(tileText('Measurement spend')).toBe('$0.00')
+    expect(tileText('Measurement spend')).toBe('No data')
+    expect(tileNote('Measurement spend')).toBe('No measurement costs recorded')
   })
 })
 
@@ -260,7 +267,7 @@ describe('runs', () => {
       ['spec', '1', '8%'],
     ])
     expect(section('runs-heading')?.textContent).toContain(
-      'includes judge, eval and benchmark runs; more runs with the same PRs can mean retries or measurement',
+      'Board runs and any recorded measurement runs',
     )
   })
 

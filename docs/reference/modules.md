@@ -199,6 +199,7 @@ listed after the modules it reads. The MCP tools each caller sees are pinned in
 ## factory
 
 - `GET /api/factory/dashboard`
+- `GET /api/factory/prs/series`
 - `PUT /api/factory/tickets/{ticket_id}/owner-time`
 - `GET /api/factory/runs`
 - `GET /api/factory/prs/expensive`

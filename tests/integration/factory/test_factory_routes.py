@@ -198,3 +198,9 @@ async def test_an_empty_board_answers_the_other_routes_empty_with_the_default_ra
 ) -> None:
     response = await client.get(path)
     assert (response.status_code, response.json()) == (200, body)
+
+
+async def test_pull_series_has_its_own_dashboard_independent_route(fed: httpx.AsyncClient) -> None:
+    response = await fed.get(f"/api/factory/prs/series?{RANGE}")
+
+    assert (response.status_code, response.json()) == (200, golden("dashboard")["series"])

@@ -71,7 +71,7 @@ export interface Cost {
   of: number
   estimated: boolean
   /** Judges and evals: not in any pull request's cost. */
-  measurement: number
+  measurement: number | null
   by_component: Component[]
   by_size: SizeCost[]
 }
@@ -170,12 +170,12 @@ export { RANGES, rangeOf, type RangeKey } from './analytics'
 
 const DAY = 86_400_000
 
-/** The UTC dates a read sends: tomorrow's midnight, so today is inside, and `range` before it. */
+/** The same rolling UTC window used by the Flow and question-wait reports. */
 export function bounds(range: RangeKey, now: Date): { from: string; to: string } {
-  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  const days = RANGE_DAYS[range]
-  const date = (ms: number): string => new Date(ms).toISOString().slice(0, 10)
-  return { from: date(today + DAY - days * DAY), to: date(today + DAY) }
+  return {
+    from: new Date(now.getTime() - RANGE_DAYS[range] * DAY).toISOString(),
+    to: now.toISOString(),
+  }
 }
 
 /** A part of a total as a whole percent, or a dash while there is no total. */

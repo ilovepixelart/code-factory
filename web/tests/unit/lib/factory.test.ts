@@ -17,21 +17,30 @@ import {
 
 describe('the range', () => {
   test('a_range_runs_from_midnight_n_days_before_tomorrow_to_tomorrows_midnight_in_utc', () => {
-    // 2026-11-10 23:30 UTC: today is inside, so the end is Nov 11; 7 days back is Nov 4.
+    // A rolling range preserves the exact UTC clock time at both ends.
     const now = new Date('2026-11-10T23:30:00Z')
 
-    expect(bounds('7d', now)).toEqual({ from: '2026-11-04', to: '2026-11-11' })
-    expect(bounds('30d', now)).toEqual({ from: '2026-10-12', to: '2026-11-11' })
-    expect(bounds('90d', now)).toEqual({ from: '2026-08-13', to: '2026-11-11' })
+    expect(bounds('7d', now)).toEqual({
+      from: '2026-11-03T23:30:00.000Z',
+      to: '2026-11-10T23:30:00.000Z',
+    })
+    expect(bounds('30d', now)).toEqual({
+      from: '2026-10-11T23:30:00.000Z',
+      to: '2026-11-10T23:30:00.000Z',
+    })
+    expect(bounds('90d', now)).toEqual({
+      from: '2026-08-12T23:30:00.000Z',
+      to: '2026-11-10T23:30:00.000Z',
+    })
   })
 
   test('the_range_follows_utc_not_the_zone_of_the_browser', () => {
     // 2026-11-10 00:30 UTC is still Nov 9 evening in New York; the dates are UTC's.
-    expect(bounds('7d', new Date('2026-11-10T00:30:00Z')).to).toBe('2026-11-11')
-    // The last second of Dec 31 UTC: tomorrow crosses the year.
+    expect(bounds('7d', new Date('2026-11-10T00:30:00Z')).to).toBe('2026-11-10T00:30:00.000Z')
+    // A rolling range ends on Dec 31 even when the next midnight crosses the year.
     expect(bounds('7d', new Date('2026-12-31T23:59:59Z'))).toEqual({
-      from: '2026-12-25',
-      to: '2027-01-01',
+      from: '2026-12-24T23:59:59.000Z',
+      to: '2026-12-31T23:59:59.000Z',
     })
   })
 
@@ -168,5 +177,12 @@ describe('the chart points', () => {
     }
 
     expect(chartPoints(series)[1]?.tick).toBe('9')
+  })
+})
+
+test('the last 24 hours include yesterday when today is only eight hours old', () => {
+  expect(bounds('24h', new Date('2026-11-10T08:00:00Z'))).toEqual({
+    from: '2026-11-09T08:00:00.000Z',
+    to: '2026-11-10T08:00:00.000Z',
   })
 })

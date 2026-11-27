@@ -6,9 +6,7 @@ import { useFactoryRead } from '../lib/factoryRead'
 
 // Each scorer's results in the range the address names (`GET /api/factory/scorers`), with the
 // counts behind every pass rate.
-const reads = useFactoryRead<ScorerCards>(
-  ({ from, to }) => `/api/factory/scorers?from=${from}&to=${to}`,
-)
+const reads = useFactoryRead<ScorerCards>('/api/factory/scorers')
 </script>
 
 <template>

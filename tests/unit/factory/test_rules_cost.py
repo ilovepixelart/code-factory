@@ -253,3 +253,8 @@ def test_a_pull_request_with_no_recorded_size_lists_unknown() -> None:
     only = costed(pull(1, "CF-1", nov(2, 10), merged=nov(2, 14)))
     top = expensive([only], 1)[0]
     assert (top.changed_lines, top.size) == (None, Size.UNKNOWN)
+
+
+def test_measurement_spend_distinguishes_unknown_from_a_recorded_zero() -> None:
+    assert measurement_spend(RUNS, {}) is None
+    assert measurement_spend(RUNS, {"e01": RunCost(cost=0.0)}) == 0.0

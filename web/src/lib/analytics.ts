@@ -30,7 +30,7 @@ export const RANGES = [
 ] as const
 export type RangeKey = (typeof RANGES)[number][0]
 const DEFAULT_RANGE: RangeKey = '7d'
-/** Whole days a range covers, for the pages that read by date. */
+/** Days of elapsed time covered by each range. */
 export const RANGE_DAYS: Record<RangeKey, number> = { '24h': 1, '7d': 7, '30d': 30, '90d': 90 }
 
 /** The range an address names; anything but one of the four reads as the default. */

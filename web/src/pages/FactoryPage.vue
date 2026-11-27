@@ -23,9 +23,7 @@ import { span } from '../lib/format'
 // work moved (merges, lead and cycle times, autonomy) is the Flow page's:
 // `GET /api/factory/dashboard` for the range the address names, `7d`, `30d` or `90d`.
 const EXPENSIVE_SHOWN = 5
-const reads = useFactoryRead<Dashboard>(
-  ({ from, to }) => `/api/factory/dashboard?from=${from}&to=${to}`,
-)
+const reads = useFactoryRead<Dashboard>('/api/factory/dashboard')
 const dashboard = reads.data
 const expensive = computed(() => dashboard.value?.expensive.slice(0, EXPENSIVE_SHOWN) ?? [])
 const firstReview = computed(() =>
@@ -96,7 +94,7 @@ const closedShare = computed(() => {
         heading="runs-heading"
         title="Runs"
         :count="dashboard.runs.total"
-        description="includes judge, eval and benchmark runs; more runs with the same PRs can mean retries or measurement"
+        description="Board runs and any recorded measurement runs"
         :empty="!dashboard.runs.total"
       >
         <template #empty

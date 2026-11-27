@@ -247,7 +247,7 @@ class CostSummary(Frozen):
     priced: int
     of: int
     estimated: bool
-    measurement: float
+    measurement: float | None
     by_component: list[ComponentCost]
     by_size: list[SizeCost]
 

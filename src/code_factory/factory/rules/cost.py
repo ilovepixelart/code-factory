@@ -107,7 +107,7 @@ def _size_costs(costed: Sequence[PrCost]) -> list[SizeCost]:
     return rows
 
 
-def cost_summary(costed: Sequence[PrCost], measurement: float) -> CostSummary:
+def cost_summary(costed: Sequence[PrCost], measurement: float | None) -> CostSummary:
     """Median cost per priced pull request, by component and by size; `measurement` is carried."""
     priced = [c for c in costed if c.cost is not None]
     return CostSummary(
@@ -146,15 +146,16 @@ def merged_cost_summary(
     )
 
 
-def measurement_spend(runs: Sequence[RunFact], costs: Mapping[str, RunCost]) -> float:
-    """What runs that are not board work (judges, evals, benchmarks) cost, priced ones only."""
-    return math.fsum(
+def measurement_spend(runs: Sequence[RunFact], costs: Mapping[str, RunCost]) -> float | None:
+    """The recorded spend of priced measurement runs, unknown without any recorded cost."""
+    priced = [
         known.cost
         for run in runs
         if run.source != BOARD
         and (known := costs.get(run.id)) is not None
         and known.cost is not None
-    )
+    ]
+    return math.fsum(priced) if priced else None
 
 
 def expensive(costed: Sequence[PrCost], limit: int) -> list[ExpensivePr]:

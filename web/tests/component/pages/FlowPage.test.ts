@@ -41,7 +41,7 @@ async function pageAt(
   const sent = stubFetch((url) => {
     const override = extra(url)
     if (override) return override
-    if (url.startsWith('/api/factory/dashboard')) return answer(dashboard())
+    if (url.startsWith('/api/factory/prs/series')) return answer(dashboard().series)
     const query = url.split('?')[1] ?? ''
     const flow = flowFor(query === 'range=7d' ? '' : query)
     change(flow)
@@ -552,4 +552,23 @@ describe('the flow page', () => {
 
     expect(rows('merged-heading')).toHaveLength(4)
   })
+})
+
+test('the pull chart reports its own failed range and hides the stale series', async () => {
+  let refused = false
+  const { page, router } = await pageAt('/analytics', undefined, (url) => {
+    if (refused && url.startsWith('/api/factory/prs/series')) {
+      return answer({ detail: 'delivery unavailable' }, 503)
+    }
+    return undefined
+  })
+  expect(page.find('#shipped-heading').exists()).toBe(true)
+
+  refused = true
+  await router.push('/analytics?range=30d')
+  await flushPromises()
+
+  expect(page.find('#shipped-heading').exists()).toBe(false)
+  expect(page.get('[role="alert"]').text()).toContain('delivery unavailable')
+  expect(tile('Shipped')).toBe('1')
 })

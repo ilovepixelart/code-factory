@@ -22,7 +22,9 @@ const show = (address = '/analytics/scorers', answer = scorers()) =>
 test('the_page_reads_the_scorers_of_the_range_with_today_inside', async () => {
   const { sent } = await show('/analytics/scorers?range=7d')
 
-  expect(sent.map((s) => s.url)).toEqual(['/api/factory/scorers?from=2026-11-04&to=2026-11-11'])
+  expect(sent.map((s) => s.url)).toEqual([
+    '/api/factory/scorers?from=2026-11-03T15:00:00.000Z&to=2026-11-10T15:00:00.000Z',
+  ])
 })
 
 test('the_range_and_the_pages_are_links_and_this_page_is_current', async () => {

@@ -329,6 +329,7 @@ code-factory
 │   │   └── factory_owner_time
 │   └── routes
 │       ├── GET /api/factory/dashboard
+│       ├── GET /api/factory/prs/series
 │       ├── PUT /api/factory/tickets/{ticket_id}/owner-time
 │       ├── GET /api/factory/runs
 │       ├── GET /api/factory/prs/expensive

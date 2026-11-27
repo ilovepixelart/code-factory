@@ -77,9 +77,7 @@ const COLOR = [chartConfig.opened.color, chartConfig.merged.color]
             ><HugeiconsIcon :icon="Analytics01Icon" aria-hidden="true"
           /></EmptyMedia>
           <EmptyTitle>The board opened no pull request in this range</EmptyTitle>
-          <EmptyDescription
-            >Shipped counts every merge git recorded, opened by the board or not.</EmptyDescription
-          >
+          <EmptyDescription>Try a wider range to include earlier pull requests.</EmptyDescription>
         </EmptyHeader>
       </Empty>
       <ChartContainer
