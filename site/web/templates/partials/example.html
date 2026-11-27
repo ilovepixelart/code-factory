@@ -10,9 +10,9 @@
     <span class="ml-2 font-mono text-xs text-muted-foreground truncate">{{ examples[chosen].title }}</span>
   </div>
   <div class="grid sm:grid-cols-[minmax(0,200px)_minmax(0,1fr)] min-w-0">
-    <nav class="border-b sm:border-b-0 sm:border-r border-border bg-muted/30 p-2 flex sm:block gap-1 overflow-x-auto">
+    <nav aria-label="Code examples" class="border-b sm:border-b-0 sm:border-r border-border bg-muted/30 p-2 flex sm:block gap-1 overflow-x-auto">
       {% for key, entry in examples.items() %}
-        <button type="button"
+        <button type="button" id="example-{{ key }}" aria-pressed="{{ 'true' if key == chosen else 'false' }}"
                 hx-get="{{ root }}/examples/{{ key }}{{ '.html' if static | default(false) }}"
                 hx-target="#examples-window" hx-swap="outerHTML"
                 class="btn btn-sm w-auto sm:w-full justify-start whitespace-nowrap

@@ -21,6 +21,8 @@ PostgreSQL and is built with [FastAPI](https://fastapi.tiangolo.com/),
 [FastMCP](https://gofastmcp.com/) and [Vue](https://vuejs.org/). Version 0.1.0 is under development.
 See [Current limits](#current-limits).
 
+[Project site](https://ilovepixelart.github.io/code-factory/)
+
 ## Table of Contents
 
 - [How It Works](#how-it-works)

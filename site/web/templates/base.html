@@ -7,13 +7,14 @@
 {% set lede = "mt-8" %}
 {% set cols = "gap-12 xl:gap-20" %}
 {% set root = base | default('') %}
+{% set repo = "https://github.com/ilovepixelart/code-factory" %}
 <!doctype html>
 <html lang="en" class="[color-scheme:light] [&.dark]:[color-scheme:dark]">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="htmx-config" content='{"selfRequestsOnly": true, "historyCacheSize": 0, "allowEval": false, "allowScriptTags": false}' />
-  {% set summary = "A board that takes software work from a ticket to merged code. Coding agents work in worktrees of their own and reach the board through MCP tools and hooks; the owner decides what ships." %}
+  {% set summary = "A self-hosted delivery board for Claude Code and Codex. Run agents in separate Git worktrees, verify changes with repository checks, and review GitHub pull requests from one board." %}
   <title>{% block title %}code-factory: from ticket to merged code{% endblock %}</title>
   <meta name="description" content="{{ summary }}" />
   <meta property="og:type" content="website" />
@@ -58,15 +59,13 @@
       <div>
         <p class="text-sm font-medium">code-factory <span class="text-muted-foreground font-normal">&middot; from ticket to merged code</span></p>
         <p class="mt-1.5 text-sm text-muted-foreground max-w-[56ch]">
-          A board on one machine, over PostgreSQL. The documentation is in the repository:
-          start with <span class="font-mono text-xs text-foreground">README.md</span> and
-          <span class="font-mono text-xs text-foreground">docs/quickstart.md</span>.
+          Open source under the MIT License.
         </p>
       </div>
       <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        <a class="text-muted-foreground hover:text-foreground" href="#how">How it works</a>
-        <a class="text-muted-foreground hover:text-foreground" href="#examples">Examples</a>
-        <a class="text-muted-foreground hover:text-foreground" href="#start">Start</a>
+        <a class="text-muted-foreground hover:text-foreground" href="{{ repo }}">GitHub</a>
+        <a class="text-muted-foreground hover:text-foreground" href="{{ repo }}/blob/main/docs/quickstart.md">Setup guide</a>
+        <a class="text-muted-foreground hover:text-foreground" href="{{ repo }}/blob/main/LICENSE">License</a>
       </nav>
     </div>
   </footer>

@@ -11,10 +11,10 @@
 label = "Quick start"
 lang = "shell"
 source = '''
-# Local mode · use Claude Code or Codex installed on your machine
+# Local mode · signed-in CLI
 sh scripts/start.sh --local
 
-# Server mode · run the app and PostgreSQL in Docker
+# Server mode · Docker Compose
 sh scripts/compose.sh
 '''
 
@@ -48,10 +48,10 @@ fast = "sh scripts/gate.sh --fast --force --secrets"
 timeout = 1200                   # seconds a checks run may take
 
 [agents]
-# a head that touches these paths, or a change larger than
-# large_change, is the owner's to merge
 sensitive_paths = ["alembic/**", ".github/**"]
 large_change = 400
+fix_rounds = 3                   # automatic CI or conflict repairs
+review_rounds = 3                # separate cap for review returns
 '''
 
 # The example browser, in the order its sidebar lists them.
