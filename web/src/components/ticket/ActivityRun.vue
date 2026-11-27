@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import StatusBadge from '../StatusBadge.vue'
 import { computed } from 'vue'
-import { STAGE_LABELS, type Stage } from '../../lib/board'
+import { runStageLabel, type Stage } from '../../lib/board'
 import { count, span } from '../../lib/format'
 import type { ActivityEntry } from '../../lib/ticket'
 import { statusWord } from '../../lib/status_tone'
@@ -39,7 +39,7 @@ const meta = computed(() =>
       entry.model
     }}</span>
     <span class="text-muted-foreground inline-flex items-center gap-1.5 text-sm"
-      ><StageGlyph :stage="stage" decorative />{{ STAGE_LABELS[stage] ?? entry.stage
+      ><StageGlyph :stage="stage" decorative />{{ runStageLabel(stage)
       }}<template v-if="(entry.iteration ?? 1) > 1">
         · iteration {{ entry.iteration }}</template
       ></span

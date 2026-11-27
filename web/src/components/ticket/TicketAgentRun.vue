@@ -3,7 +3,8 @@ import { StopIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/vue'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { STAGE_LABELS } from '../../lib/board'
+import { computed } from 'vue'
+import { runStageLabel } from '../../lib/board'
 import { count, span } from '../../lib/format'
 import type { RunProgress, TicketView } from '../../lib/ticket'
 import RunMemory from './RunMemory.vue'
@@ -18,6 +19,16 @@ const { run, now, busy, stopping } = defineProps<{
   stopping: boolean
 }>()
 const emit = defineEmits<{ stop: [] }>()
+
+const UNKNOWN_PROGRESS: RunProgress = {
+  tool_calls: null,
+  reads: null,
+  changes: null,
+  files: null,
+  tokens: null,
+  last_activity: null,
+}
+const progress = computed(() => run.progress ?? UNKNOWN_PROGRESS)
 
 // A run's progress (CF-1036), a number its log cannot give in words: it is not 0.
 function progressLines(progress: RunProgress): string[] {
@@ -48,7 +59,7 @@ function namedFiles(progress: RunProgress): string {
 <template>
   <div class="flex flex-wrap items-center gap-3">
     <span class="flex items-center gap-2 text-sm"
-      ><Spinner />Iteration {{ run.iteration }} on {{ STAGE_LABELS[run.stage] }}, started
+      ><Spinner />Iteration {{ run.iteration }} on {{ runStageLabel(run.stage) }}, started
       {{ span(now - run.started_at) }} ago<template v-if="run.loop">, looping</template></span
     >
     <Button
@@ -63,9 +74,9 @@ function namedFiles(progress: RunProgress): string {
       agent
     </Button>
     <div aria-label="Run progress" class="text-muted-foreground w-full text-sm tabular-nums">
-      <p v-for="line in progressLines(run.progress)" :key="line">{{ line }}</p>
-      <p v-if="namedFiles(run.progress)" class="font-mono text-sm">
-        {{ namedFiles(run.progress) }}
+      <p v-for="line in progressLines(progress)" :key="line">{{ line }}</p>
+      <p v-if="namedFiles(progress)" class="font-mono text-sm">
+        {{ namedFiles(progress) }}
       </p>
     </div>
     <RunMemory :memory="run.memory" :context-at="run.context_at" :now="now" />
