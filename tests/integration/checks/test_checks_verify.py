@@ -8,6 +8,7 @@ import pytest
 
 from checks_support import REPO, Clock, write_config
 from code_factory.checks.service import CheckService
+from code_factory.platform.errors import ConflictError
 from code_factory.releases.service import ReleaseService
 from code_factory.tickets.models import TicketFilter
 from code_factory.tickets.service import TicketService
@@ -47,6 +48,9 @@ async def test_a_passing_verification_is_recorded_and_files_no_bug(
     record = await checks.verify(REPO, release)
     assert (record.release, record.exit_code, record.ticket) == (released, 0, "")
     assert await bugs(tickets) == []
+    with pytest.raises(ConflictError, match="no longer due"):
+        await checks.verify(REPO, release, scheduled=True)
+    assert await checks.verify_records(REPO) == [record]
 
 
 @pytest.mark.usefixtures("released")

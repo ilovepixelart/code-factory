@@ -9,6 +9,7 @@ reader. Its srt settings come from the agents kit's rules (`adapters/sandbox.py`
 
 import os
 from collections.abc import Callable, Sequence
+from functools import partial
 
 from code_factory.agents.service import AgentService
 from code_factory.board.models import CheckRecord
@@ -22,6 +23,7 @@ from code_factory.checks.routes import router
 from code_factory.checks.service import CheckDeps, CheckOptions, CheckService
 from code_factory.git.service import GitService
 from code_factory.platform.background import BackgroundTasks
+from code_factory.platform.db import try_session_lock
 from code_factory.platform.errors import SettingsError
 from code_factory.platform.module import Module, Resources
 from code_factory.platform.services import Services
@@ -149,6 +151,7 @@ def build_module(forge_of: Callable[[Services], ForgePort]) -> Module:
             forge=forge_of(services),
             sandbox=sandbox,
             denials=sandbox,
+            verify_claim=partial(try_session_lock, resources.engine),
         )
         options = CheckOptions(
             state_dir=resources.settings.state_dir,

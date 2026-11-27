@@ -116,6 +116,10 @@ These are read from the process environment only, not from the env files
 The database pool (`CODE_FACTORY_DB_POOL_*`) and the timeouts are ordinary settings, listed in the
 [README](../../README.md#configuration).
 
+Scheduled and manual release verification for a repository share a PostgreSQL session lock.
+PostgreSQL releases the claim when the session ends. An abrupt Factory process exit can leave
+its verification command running independently, so verification commands should tolerate retries.
+
 ## The key broker
 
 A run never holds a provider key. The broker serves a listener on `127.0.0.1` at a port the system

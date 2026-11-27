@@ -8,6 +8,7 @@ from code_factory.checks.models import ReleaseRef, VerifyRecord
 from code_factory.checks.rules import log_tail, verify_bug, verify_due
 from code_factory.checks.service.base import ACTOR
 from code_factory.checks.service.command import limit_seconds
+from code_factory.checks.service.config import RunConfig
 from code_factory.checks.service.mainchecks import MainMixin
 from code_factory.platform.errors import BadRequestError, ConflictError, NotFoundError
 from code_factory.platform.process import run_logged
@@ -26,7 +27,9 @@ class ReleasingMixin(MainMixin):
         """The newest release when its verification is due now and none of it is running."""
         if repository in self._verifying:
             return None
-        config = await self._config(repository)
+        return await self._due_verification(repository, await self._config(repository))
+
+    async def _due_verification(self, repository: str, config: RunConfig) -> ReleaseRef | None:
         if config.verify in (None, "") or config.watch_days == 0:
             return None
         newest = await self.newest_release(repository)
@@ -56,7 +59,9 @@ class ReleasingMixin(MainMixin):
         async with self._db() as store:
             return await store.records.verify_runs(repository, limit)
 
-    async def verify(self, repository: str, release: ReleaseRef) -> VerifyRecord:
+    async def verify(
+        self, repository: str, release: ReleaseRef, *, scheduled: bool = False
+    ) -> VerifyRecord:
         """Run `[release] verify` in the main checkout and record it.
 
         A failure files one bug per release, or counts on the open one of an earlier failure.
@@ -69,7 +74,16 @@ class ReleasingMixin(MainMixin):
             raise ConflictError(msg)
         self._verifying.add(repository)
         try:
-            async with self._slots:
+            async with (
+                self._slots,
+                self._deps.verify_claim(f"checks:release:{repository}") as acquired,
+            ):
+                if not acquired:
+                    msg = f"the verification of {repository} is running already"
+                    raise ConflictError(msg)
+                if scheduled and await self._due_verification(repository, config) != release:
+                    msg = f"the verification of {repository} is no longer due"
+                    raise ConflictError(msg)
                 return await self._verify(repository, release, config.verify, config.timeout)
         finally:
             self._verifying.discard(repository)
