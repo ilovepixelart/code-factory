@@ -72,11 +72,15 @@ def create_engine(
         )
     except ArgumentError, ValueError, TypeError:
         # Their messages quote the URL, which holds the password.
-        msg = (
-            f"the database engine cannot be created from {DATABASE_URL_VARIABLE}; "
-            "check the URL and the CODE_FACTORY_DB_* settings"
-        )
-        raise SettingsError(msg) from None
+        raise _engine_failed() from None
+
+
+def _engine_failed() -> SettingsError:
+    msg = (
+        f"the database engine cannot be created from {DATABASE_URL_VARIABLE}; "
+        "check the URL and the CODE_FACTORY_DB_* settings"
+    )
+    return SettingsError(msg)
 
 
 def create_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:

@@ -80,12 +80,16 @@ def _bind(settings: Settings) -> socket.socket:
         sock.close()
         if error.errno != errno.EADDRINUSE:
             raise
-        msg = (
-            f"{settings.base_url} is already in use. If Factory is already running, open that "
-            "board. To start on a free port, rerun with CODE_FACTORY_PORT=0."
-        )
-        raise ConflictError(msg) from None
+        raise _in_use(settings) from None
     return sock
+
+
+def _in_use(settings: Settings) -> ConflictError:
+    msg = (
+        f"{settings.base_url} is already in use. If Factory is already running, open that "
+        "board. To start on a free port, rerun with CODE_FACTORY_PORT=0."
+    )
+    return ConflictError(msg)
 
 
 def _bound(settings: Settings) -> Served:

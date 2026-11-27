@@ -55,6 +55,14 @@ def create_migration_engine(settings: Settings) -> AsyncEngine:
     )
 
 
+def _unknown_revision(revision: str) -> SchemaMismatchError:
+    msg = (
+        f"the database is at revision {revision}, which this build does not know; "
+        "install the build that wrote the database, or restore it from a backup"
+    )
+    return SchemaMismatchError(msg)
+
+
 def upgrade(revision: str = "head") -> None:
     """Run `alembic upgrade`. Blocking: Alembic's env.py starts its own event loop."""
     settings = load_settings()
@@ -65,11 +73,7 @@ def upgrade(revision: str = "head") -> None:
         unknown = _UNKNOWN_REVISION.search(str(error))
         if unknown is None:
             raise
-        msg = (
-            f"the database is at revision {unknown.group(1)}, which this build does not know; "
-            "install the build that wrote the database, or restore it from a backup"
-        )
-        raise SchemaMismatchError(msg) from error
+        raise _unknown_revision(unknown.group(1)) from error
     except DBAPIError as error:
         busy = _busy(error)
         if busy is None:
