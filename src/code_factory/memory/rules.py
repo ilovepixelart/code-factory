@@ -37,7 +37,7 @@ ARCHIVE = "archive"
 REVIEW_DAYS = 90
 STALE_DAYS = 30
 BUDGET = 8_000
-_DAY = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+_DAY = re.compile(r"\d{4}-\d{2}-\d{2}", re.ASCII)
 
 
 def terms(scope: str) -> list[str]:

@@ -9,7 +9,7 @@ _THIS_REVERTS = re.compile(r"This reverts commit ([0-9a-fA-F]+)")
 _REVERT_MERGE = re.compile(r"Revert merge ([0-9a-fA-F]+)")
 # A word starting with r or R, not preceded by a letter or digit: `unreverts #9` and `step#12`
 # are no revert of a pull request, `Reverts o/repo#7` and `reverts #7` are.
-_REVERTS_PULL = re.compile(r"(?<![A-Za-z0-9])[rR]everts +([^\s#]*)#([0-9]+)")
+_REVERTS_PULL = re.compile(r"(?<![A-Za-z0-9])[rR]everts +([^\s#]*)#(\d+)", re.ASCII)
 
 
 def _brought_in(commits: dict[str, Commit], line: list[str]) -> dict[str, str]:

@@ -15,7 +15,7 @@ LOG_FORMAT = "--format=%H%x1f%P%x1f%ct%x1f%B%x1e"
 WALK_LIMIT = 10_000
 FILING = "tickets/"  # a branch that only files tickets ships no work
 _SUBJECT = re.compile(r"Merge pull request #(?P<pull>[^ ]*) from (?P<from>.+)")
-_TICKET = re.compile(r"(?P<prefix>[A-Za-z]+)-(?P<digits>[0-9]+)")
+_TICKET = re.compile(r"(?P<prefix>[A-Za-z]+)-(?P<digits>\d+)", re.ASCII)
 
 
 @dataclass(frozen=True)
