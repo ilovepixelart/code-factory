@@ -40,6 +40,23 @@ _STATES = {
 }
 
 
+def _row_leads(row: CheckRun, newest_at: datetime | None) -> bool:
+    """Whether the run row, not the newest record, tells the state."""
+    ended = row.finished_at
+    return (
+        newest_at is None
+        or row.state in {RunState.QUEUED, RunState.RUNNING}
+        or (ended is not None and ended >= newest_at)
+    )
+
+
+def _row_state(row: CheckRun) -> ViewState:
+    """The state a run row stands for."""
+    if row.state is RunState.LOST:
+        return ViewState.NO_VERDICT
+    return ViewState(row.state.value) if row.verdict is None else _STATES[row.verdict]
+
+
 def _code(data: Mapping[str, Any]) -> int | None:
     code = data.get("exit_code")
     return code if isinstance(code, int) and not isinstance(code, bool) else None
@@ -283,17 +300,9 @@ class QueryMixin(ConcludeMixin):
     async def _view(self, ticket: Ticket, row: CheckRun | None, records: list[Any]) -> ChecksView:
         """The state, commit, code and reasons of the newer of the row and the record."""
         newest = records[0] if records else None
-        ended = None if row is None else row.finished_at
-        if row is not None and (
-            newest is None
-            or row.state in {RunState.QUEUED, RunState.RUNNING}
-            or (ended is not None and ended >= newest.at)
-        ):
+        if row is not None and _row_leads(row, None if newest is None else newest.at):
             commit, code, log = row.commit, row.exit_code, row.log_path
-            if row.state is RunState.LOST:
-                state = ViewState.NO_VERDICT
-            else:
-                state = ViewState(row.state.value) if row.verdict is None else _STATES[row.verdict]
+            state = _row_state(row)
             at, check_id = row.finished_at, row.id
         elif newest is not None:
             commit, code, log = (
@@ -301,15 +310,7 @@ class QueryMixin(ConcludeMixin):
                 _code(newest.data),
                 str(newest.data.get("log", "")),
             )
-            state = (
-                ViewState.PASSED
-                if code == 0
-                else (
-                    ViewState.NO_VERDICT if self._deps.stages.no_verdict(code) else ViewState.FAILED
-                )
-                if code is not None
-                else ViewState.NO_VERDICT
-            )
+            state = self._record_state(code)
             at, check_id = newest.at, None
         else:
             return ChecksView(state=ViewState.NONE)
@@ -329,6 +330,14 @@ class QueryMixin(ConcludeMixin):
             finished_at=at,
             log_tail=log,
         )
+
+    def _record_state(self, code: int | None) -> ViewState:
+        """The state a recorded exit `code` stands for."""
+        if code is None:
+            return ViewState.NO_VERDICT
+        if code == 0:
+            return ViewState.PASSED
+        return ViewState.NO_VERDICT if self._deps.stages.no_verdict(code) else ViewState.FAILED
 
     async def _paged(self, ticket: Ticket, view: ChecksView, offset: int, chars: int) -> ChecksView:
         """`view` with a page of its log: only a log of this ticket right in the logs folder."""
