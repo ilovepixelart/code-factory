@@ -3,7 +3,7 @@
 from collections.abc import Callable, Mapping
 from datetime import datetime, timedelta
 
-from code_factory.delivery.models import PullReading
+from code_factory.delivery.models import Ci, PullReading
 from code_factory.delivery.service import DeliveryService
 from code_factory.runs.models import Run
 from code_factory.runs.service import RunService
@@ -32,7 +32,7 @@ async def record_open_pull(
         pull_url(spec.repository, ticket),
         PullReading(
             state="open",
-            ci="pending" if idle else "failed" if spec.repository == "infra" else "passed",
+            ci=_open_ci(spec, idle=idle),
             head=head,
             base="main",
             additions=additions,
@@ -81,6 +81,30 @@ def _runs(
     return rows
 
 
+def _open_ci(spec: DemoTicket, *, idle: bool) -> Ci:
+    if idle:
+        return "pending"
+    return "failed" if spec.repository == "infra" else "passed"
+
+
+def _history_reading(
+    number: int, merged: datetime | None, opened: datetime, now: datetime
+) -> PullReading:
+    """A merged PR, or a closed one when `merged` is None."""
+    closed = merged is None
+    return PullReading(
+        state="closed" if closed else "merged",
+        ci="failed" if closed else "passed",
+        additions=36 + (number % 5) ** 3 * 18,
+        deletions=12 + number,
+        changed_files=2 + number % 8,
+        created_on_host=opened,
+        updated_on_host=merged or now,
+        merged_on_host=merged,
+        first_review_at=opened + timedelta(hours=3 + number % 8),
+    )
+
+
 async def record_pull_history(
     delivery: DeliveryService,
     runs: RunService,
@@ -106,17 +130,7 @@ async def record_pull_history(
             ticket,
             spec.repository,
             pull_url(spec.repository, ticket),
-            PullReading(
-                state="closed" if closed else "merged",
-                ci="failed" if closed else "passed",
-                additions=36 + (number % 5) ** 3 * 18,
-                deletions=12 + number,
-                changed_files=2 + number % 8,
-                created_on_host=opened,
-                updated_on_host=merged or now,
-                merged_on_host=merged,
-                first_review_at=opened + timedelta(hours=3 + number % 8),
-            ),
+            _history_reading(number, merged, opened, now),
         )
         history.extend(_runs(spec, ticket, opened - timedelta(hours=2), head=head, failed=closed))
     await runs.import_completed(history)
