@@ -80,6 +80,7 @@ sequenceDiagram
 - The process wrapper enforces `max_seconds` or the repository's `run_timeout` (3600 seconds by default). It records the timeout and ends the process group even if the board is offline. The run token gets 300 seconds of grace.
 - `looping` is recorded on the run row; nothing restarts a run because of it.
 - The wrapper reads an output redaction file named by `CODE_FACTORY_OWNER_CONTEXT`, but `RunLauncher` strips every `CODE_FACTORY_` variable from the run's environment and nothing writes the patterns file, so the output is copied unredacted.
+- Both launchers then set `CODE_FACTORY_RUNS_DIR` to the exit file's folder. The wrapper writes the exit file only when its resolved path is a `<run id>.exit` directly in that folder, and removes the variable before the agent starts.
 - A stop (`POST /api/runs/{run_id}/stop`) sends SIGTERM to the group and SIGKILL after 3 s; `POST /api/agents/stop` holds every start and stops every active run. A spawn that does not start in 10 s is an `UnavailableError`.
 - A row with no pid after 60 s is ended with `the run never recorded a process, so the board ended it`. The keeper never signals a run on its own: runs outlive the board, and the first pass after a restart collects what ended meanwhile.
 - Each settle step is safe to repeat; a settle that fails is retried on the next pass (`unsettled`).

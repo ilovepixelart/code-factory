@@ -20,6 +20,7 @@ from code_factory.platform.errors import CodeFactoryError, UnavailableError
 from code_factory.platform.served import Served
 from code_factory.platform.services import Services
 from code_factory.repositories.service import RepositoryService
+from code_factory.runs.adapters.runner.wrapper import RUNS_VARIABLE
 from code_factory.runs.ports import Given, HookCommandSource, Launch, LaunchPlan
 from code_factory.runs.service.codex import CODEX_CONNECTION, CodexLauncher
 from code_factory.runs.service.permissions import PermissionService
@@ -199,4 +200,5 @@ class RunLauncher:
                     env[name] = value.get_secret_value()
         env[MCP_TOKEN_VARIABLE] = plan.token
         env[URL_VARIABLE] = self._services.get(Served).base_url
+        env[RUNS_VARIABLE] = str(plan.exit_file.parent)
         return env

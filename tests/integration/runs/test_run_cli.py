@@ -98,7 +98,7 @@ async def test_run_agent_records_the_agents_exit_and_returns_it(tmp_path: Path) 
         "sh",
         "-c",
         "exit 3",
-        env={"PATH": "/usr/bin:/bin"},
+        env={"PATH": "/usr/bin:/bin", "CODE_FACTORY_RUNS_DIR": str(tmp_path)},
         stdout=asyncio.subprocess.DEVNULL,
         stderr=asyncio.subprocess.DEVNULL,
     )

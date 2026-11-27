@@ -119,7 +119,9 @@ const placeholderOf = (row: Row): string => {
 // A written code value carries all of it as its tooltip; an empty one says what it takes.
 const titleOf = (row: Row): string => {
   const value = model.value[row.key] ?? ''
-  return row.code && value ? value : (row.hint ?? (mode === 'create' ? row.newHint : '') ?? '')
+  if (row.code && value) return value
+  const fresh = mode === 'create' ? row.newHint : ''
+  return row.hint ?? fresh ?? ''
 }
 // Being edited, a row is quiet until it is changed (PropertyShown); a new ticket shows its controls.
 const Bare: FunctionalComponent = (_, { slots }) => slots.default?.()

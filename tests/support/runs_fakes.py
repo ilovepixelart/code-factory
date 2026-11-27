@@ -195,6 +195,7 @@ class FakeAgents:
             wrapper = (sys.executable, "-m", "code_factory.runs.adapters.runner")
             argv = (*wrapper, str(plan.exit_file), "--", "/bin/sh", "-c", self.script)
             env["PYTHONPATH"] = os.pathsep.join(sys.path)
+            env["CODE_FACTORY_RUNS_DIR"] = str(plan.exit_file.parent)
         return Launch(argv=argv, env=env, digest="d1d1d1d1d1d1")
 
     async def log_usage(self, log: Path) -> LogUsage:  # noqa: ARG002
