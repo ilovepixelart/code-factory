@@ -14,7 +14,13 @@ from pathlib import Path
 import anyio
 import anyio.to_thread
 
-from code_factory.checks.rules import counts_as_holder, holder_name, holder_pid, next_move
+from code_factory.checks.rules import (
+    HeavyMove,
+    counts_as_holder,
+    holder_name,
+    holder_pid,
+    next_move,
+)
 from code_factory.platform.errors import UnavailableError
 from code_factory.platform.process import run_process
 
@@ -111,6 +117,16 @@ class HeavyLockFile:
         """The text the lock holds now: `<pid> <step> in <tree> on <branch>`; None when free."""
         return await anyio.to_thread.run_sync(_read, self._link, limiter=_files)
 
+    async def _move_for(self, held: str, asked: float, bound: float) -> HeavyMove:
+        """What to do about the holder `held`, waited for since `asked`."""
+        pid = holder_pid(held)
+        running = pid is not None and process_runs(pid, self._kill)
+        command = await _command_of(pid) if pid is not None and running else None
+        counts = running and counts_as_holder(held, command)
+        return next_move(
+            held, running=running, counts=counts, waited=time.monotonic() - asked, bound=bound
+        )
+
     async def take(self, text: str, bound: float, say: Say) -> HeavyHold:
         """Take the lock for `text`, waiting for its holder as a gate does.
 
@@ -128,13 +144,7 @@ class HeavyLockFile:
                 return HeavyHold(self._link, None)
             if not held:
                 continue
-            pid = holder_pid(held)
-            running = pid is not None and process_runs(pid, self._kill)
-            command = await _command_of(pid) if pid is not None and running else None
-            counts = running and counts_as_holder(held, command)
-            move = next_move(
-                held, running=running, counts=counts, waited=time.monotonic() - asked, bound=bound
-            )
+            move = await self._move_for(held, asked, bound)
             if move.kind == "release":
                 await anyio.to_thread.run_sync(_release, self._link, held, limiter=_files)
             elif move.kind == "go_on":
