@@ -1,4 +1,4 @@
-# Verify the runner can execute Factory's sandbox integration tests before activating this config.
+# Copy to .code-factory/config.toml after the runner passes both gates.
 [checks]
 container = "code-factory-checks:local"
 command = "sh scripts/gate.sh --force --secrets"
