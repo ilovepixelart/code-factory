@@ -2,7 +2,7 @@
 
 from datetime import date, datetime, timedelta
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, union_all, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +17,7 @@ from code_factory.evals.models import (
     TaskRun,
 )
 from code_factory.evals.tables import EvalRecordRow, EvalTaskRunRow, JudgeDayRow, JudgementRow
+from code_factory.platform.errors import ConflictError
 
 STALE_CLAIM = timedelta(hours=2)
 
@@ -47,6 +48,7 @@ def _record(row: EvalRecordRow, runs: list[EvalTaskRunRow]) -> EvalRecord:
         failed=row.failed,
         cost=row.cost,
         tokens=row.tokens,
+        receipt=row.receipt,
         task_runs=tuple(
             TaskRun(
                 task_id=r.task_id,
@@ -67,15 +69,64 @@ class EvalRepository:
         self._session = session
 
     async def add_record(self, record: EvalRecord) -> int:
-        """Store a suite run with its task runs; its id."""
+        """Store a suite run with its tasks, or return the id of the same receipt."""
         values = record.model_dump(exclude={"id", "setup", "task_runs"}) | record.setup.model_dump()
-        row = EvalRecordRow(**values)
-        self._session.add(row)
-        await self._session.flush()
+        table = EvalRecordRow
+        insert = pg_insert(table).values(**values)
+        if record.receipt is not None:
+            insert = insert.on_conflict_do_nothing(
+                index_elements=[table.repository, table.receipt],
+                index_where=table.receipt.is_not(None),
+            )
+        record_id = await self._session.scalar(insert.returning(table.id))
+        if record_id is None:
+            return await self._same_receipt(record)
         for run in record.task_runs:
-            self._session.add(EvalTaskRunRow(record_id=row.id, **run.model_dump()))
+            self._session.add(EvalTaskRunRow(record_id=record_id, **run.model_dump()))
         await self._session.flush()
-        return row.id
+        return record_id
+
+    async def _same_receipt(self, record: EvalRecord) -> int:
+        table = EvalRecordRow
+        stored = (
+            await self._session.scalars(
+                select(table).where(
+                    table.repository == record.repository, table.receipt == record.receipt
+                )
+            )
+        ).one()
+        runs = list(
+            await self._session.scalars(
+                select(EvalTaskRunRow)
+                .where(EvalTaskRunRow.record_id == stored.id)
+                .order_by(EvalTaskRunRow.task_id, EvalTaskRunRow.run_no)
+            )
+        )
+        tasks = tuple(sorted(record.task_runs, key=lambda result: (result.task_id, result.run_no)))
+        if _record(stored, runs) != record.model_copy(update={"id": stored.id, "task_runs": tasks}):
+            msg = f"evaluation receipt {record.receipt!r} already identifies a different result"
+            raise ConflictError(msg)
+        return stored.id
+
+    async def measurement_spend(self, since: datetime, until: datetime) -> float | None:
+        """Sum measured evaluations and judgements in the window, unknown without a known cost."""
+        suite, judge = EvalRecordRow, JudgementRow
+        rows = union_all(
+            select(suite.cost).where(
+                suite.recorded_at >= since,
+                suite.recorded_at < until,
+                suite.cost.is_not(None),
+                suite.cost < float("inf"),
+            ),
+            select(judge.cost).where(
+                judge.at >= since,
+                judge.at < until,
+                judge.cost.is_not(None),
+                judge.cost < float("inf"),
+            ),
+        ).subquery()
+        spent = await self._session.scalar(select(func.sum(rows.c.cost)))
+        return float(spent) if spent is not None else None
 
     async def records(self, repository: str, set_name: str) -> list[EvalRecord]:
         """The set's records, oldest first, each with its task runs."""
@@ -97,7 +148,7 @@ class EvalRepository:
         return [_record(row, by_record.get(row.id, [])) for row in rows]
 
     async def add_answer(  # one row's columns
-        self, repository: str, row: AnswerRow, *, log: str, cost: float, by: StartedBy
+        self, repository: str, row: AnswerRow, *, log: str, cost: float | None, by: StartedBy
     ) -> None:
         """Store a scorer's answer about a session."""
         self._session.add(
@@ -125,7 +176,7 @@ class EvalRepository:
         at: datetime,
         *,
         log: str,
-        cost: float,
+        cost: float | None,
         by: StartedBy,
     ) -> None:
         """Store the judge's score of a session."""

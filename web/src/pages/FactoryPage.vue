@@ -94,7 +94,7 @@ const closedShare = computed(() => {
         heading="runs-heading"
         title="Runs"
         :count="dashboard.runs.total"
-        description="Board runs and any recorded measurement runs"
+        description="Runs recorded in the board ledger"
         :empty="!dashboard.runs.total"
       >
         <template #empty

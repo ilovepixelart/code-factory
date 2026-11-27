@@ -97,6 +97,45 @@ and reversed arm order where provider timing may matter. Synthetic cases verify 
 and isolation only. Changing the default needs real runs with measurable outcomes and costs
 under both caps. The current default is three.
 
+## Recording a completed evaluation
+
+After the runner completes a suite, save its actual result as a JSON receipt. Use a stable
+identifier from the runner, such as its CI run and job ID, and the actual completion time with
+a timezone. Import it on the machine that hosts the board:
+
+```sh
+code-factory eval record smoke --repository my-project --input completed.json
+code-factory eval report smoke --repository my-project
+```
+
+Use the tracked repository name and the suite name on the command line. A build receipt has
+these fields:
+
+```json
+{
+  "receipt": "ci/8214/build",
+  "recorded_at": "2026-11-20T12:00:00Z",
+  "kind": "build",
+  "setup": {"stage": "build", "runtime": "codex", "model": "measured-model"},
+  "runs": 1,
+  "pass_at_1": 1.0,
+  "pass_k": 1.0,
+  "pass_at_k": 1.0,
+  "cost": 2.5
+}
+```
+
+Replace the sample values with the runner's results. Rates are fractions from 0 to 1.
+A review receipt uses `kind: "review"` and `caught`, `false_findings` and `failed` for
+its rate, mean and failure count. You can include `tokens` and `task_runs` when you have
+them. Report cost in USD from measured execution. Omit it or send `null` when unavailable.
+Supply `0` only for a measured zero. Reimporting the same result gives the same stored ID.
+The same receipt ID with different data is refused within a repository.
+
+The dashboard totals recorded eval suite and judge costs inside the selected UTC window. The
+receipt covers the suite's execution, and separately recorded judges contribute their own costs.
+The import reads completed results; it does not start an evaluation or run a judge.
+
 ## State
 
 | Table | Holds |

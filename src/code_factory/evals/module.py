@@ -44,6 +44,17 @@ class ScorerAnswers:
         )
 
 
+class RecordedMeasurementSpend:
+    """Factory spend over the persisted Eval records and judge ledger."""
+
+    def __init__(self, services: Services) -> None:
+        self._services = services
+
+    async def recorded_spend(self, since: float, until: float) -> float | None:
+        """Sum recorded measurement costs in `[since, until)`."""
+        return await self._services.get(EvalService).measurement_spend(_at(since), _at(until))
+
+
 def _provide(services: Services, resources: Resources) -> None:
     services.add(EvalService, EvalService(resources.uow))
     services.add(

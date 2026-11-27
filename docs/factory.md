@@ -29,8 +29,10 @@ opened. A provider failure returns HTTP 503 with the reason.
 - A pull request's cost is its ticket's priced runs started before it ended, divided by the
   ticket's number of recorded pull requests. A closed pull request stops accumulating cost and
   repair requests at its first observed closure. A run with no recorded cost is unpriced.
-  An explicit 0.0 is priced. Measurement spend covers recorded judge, eval and benchmark
-  runs with a recorded cost. If no such cost is available, the answer is null.
+  An explicit 0.0 is priced. Measurement spend covers recorded suite and judge costs. It totals
+  the known portion when some measurements are unpriced and returns null when none are priced.
+  Older default zeros had no evidence of measurement and are migrated to unknown. See
+  [Recording a completed evaluation](agents.md#recording-a-completed-evaluation).
 - A negative duration is dropped, never clamped to zero.
 - Medians, not means; stage medians do not add up to the total median.
 

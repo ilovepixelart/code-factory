@@ -18,7 +18,7 @@ from code_factory.evals.models import (
 )
 from code_factory.evals.service import EvalService, JudgeService
 from code_factory.platform.db import UnitOfWork
-from code_factory.platform.errors import BadRequestError
+from code_factory.platform.errors import BadRequestError, ConflictError
 
 NOW = datetime(2026, 11, 20, 12, tzinfo=UTC)
 
@@ -136,3 +136,38 @@ async def test_scheduled_spend_counts_only_this_months_scheduled_rows(judge: Jud
 async def test_a_score_outside_one_to_five_is_refused(judge: JudgeService) -> None:
     with pytest.raises(BadRequestError, match="1 to 5, not 6"):
         await judge.record_score("sample", "s1", 6, [])
+
+
+async def test_an_eval_receipt_is_idempotent_and_its_cost_is_counted_once(
+    uow: UnitOfWork, judge: JudgeService
+) -> None:
+    evals = EvalService(uow)
+    raw = {
+        "repository": "sample",
+        "set_name": "smoke",
+        "kind": "build",
+        "recorded_at": NOW,
+        "setup": {"runtime": "codex", "model": "review-model"},
+        "runs": 1,
+        "pass_at_1": 1.0,
+        "pass_k": 1.0,
+        "pass_at_k": 1.0,
+        "receipt": "run-2026-11-20-001",
+        "cost": 0.0,
+    }
+    receipt = EvalRecord.model_validate(raw)
+    start, end = NOW, NOW + timedelta(days=1)
+    stored_id = await evals.record(receipt)
+    replay_id = await evals.record(receipt)
+    assert replay_id == stored_id
+    assert [entry.id for entry in await evals.records("sample", "smoke")] == [stored_id]
+    assert await evals.measurement_spend(start, end) == 0.0
+
+    altered = receipt.model_copy(update={"cost": 2.0})
+    with pytest.raises(ConflictError, match="different result"):
+        await evals.record(altered)
+
+    await judge.record_score("sample", "s1", 4, [], cost=1.25)
+    await judge.record_score("sample", "s2", 4, [])
+    assert await evals.measurement_spend(start, end) == 1.25
+    assert await evals.measurement_spend(start - timedelta(days=1), start) is None
