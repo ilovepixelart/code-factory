@@ -153,7 +153,7 @@ const counted = (shown: number | null, all: number): number | string =>
       <Alert v-if="series.failed.value" role="alert">
         <AlertTitle>Could not read the pull request chart. {{ series.failed.value }}</AlertTitle>
         <AlertAction>
-          <Button variant="outline" size="sm" @click="void series.refresh()"
+          <Button type="button" variant="outline" size="sm" @click="void series.refresh()"
             >Read chart again</Button
           >
         </AlertAction>
