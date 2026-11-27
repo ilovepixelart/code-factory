@@ -56,10 +56,7 @@ def walk_realpath(
         if name in {"", "."}:
             continue
         if name == "..":
-            if missing:
-                # No parent of a missing name exists; a textual one could skip a link.
-                raise FileNotFoundError(errno.ENOENT, "no parent of a missing name", path)
-            resolved = resolved.parent
+            resolved = _parent(resolved, missing=missing, path=path)
             continue
         candidate = resolved / name
         if refuse(candidate):
@@ -73,12 +70,27 @@ def walk_realpath(
             folder = stat.S_ISDIR(mode)
             continue
         links += 1
-        if links > MAX_LINKS:
-            raise OSError(errno.ELOOP, "Too many levels of symbolic links", path)
-        target = readlink(str(candidate))
-        resolved = _ROOT if target.startswith("/") else candidate.parent
-        pending.extendleft(reversed(target.split("/")))
+        resolved, names = _follow(candidate, links, path, readlink)
+        pending.extendleft(reversed(names))
     return str(resolved)
+
+
+def _parent(resolved: PurePosixPath, *, missing: bool, path: str) -> PurePosixPath:
+    """The folder `..` leads to from `resolved`; refused below a missing name."""
+    if missing:
+        # No parent of a missing name exists; a textual one could skip a link.
+        raise FileNotFoundError(errno.ENOENT, "no parent of a missing name", path)
+    return resolved.parent
+
+
+def _follow(
+    link: PurePosixPath, links: int, path: str, readlink: Callable[[str], str]
+) -> tuple[PurePosixPath, list[str]]:
+    """Where the walk goes on from `link`, the `links`-th link of `path`, and the names to walk."""
+    if links > MAX_LINKS:
+        raise OSError(errno.ELOOP, "Too many levels of symbolic links", path)
+    target = readlink(str(link))
+    return (_ROOT if target.startswith("/") else link.parent), target.split("/")
 
 
 def _mode_of(path: PurePosixPath, lstat: Callable[[str], os.stat_result]) -> int | None:
