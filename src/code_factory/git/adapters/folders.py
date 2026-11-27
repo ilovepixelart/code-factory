@@ -40,9 +40,8 @@ def _read_below(root: str, relative: str, limit: int) -> str | None:
     except FileNotFoundError:
         return None
     except OSError as error:
-        msg = (
-            f"{relative} cannot be read below {root}: a link or unreadable part ({error.strerror})"
-        )
+        why = error.strerror
+        msg = f"{relative} cannot be read below {root}: a link or unreadable part ({why})"
         raise BadRequestError(msg) from None
     finally:
         for fd in fds:
