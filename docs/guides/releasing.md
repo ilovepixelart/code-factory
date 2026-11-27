@@ -9,13 +9,13 @@ repository whose merge policy permits merge commits.
    Confirm sign-in, the sample board, repository tracking and a first agent run. Keep the sandbox
    and merge approval enabled. Run `python3 scripts/check_compose.py` to verify Server mode
    sign-in and persistence. **Verify** also runs this smoke test separately on Ubuntu.
-2. Pass the full gate and the dependency audits. The **Verify** workflow runs each part of the
-   gate as its own job on native Ubuntu x64 runners (`scripts/gate.sh --part`), each test job with
-   its own PostgreSQL instance; a last job combines their coverage, checks the floor once and
-   sends it to SonarCloud. It also scans all reachable commits; the local gate covers macOS and
-   arm64. Run the browser tests by hand before a release
-   (`pnpm --dir web e2e`): they are not in the gate or CI. Use passing jobs before claiming
-   support for an additional platform.
+2. Pass the full gate and the dependency audits. The **Verify** workflow runs each part of the gate
+   as its own job on native Ubuntu x64 runners (`scripts/gate.sh --part`), each test job with its
+   own PostgreSQL instance and the integration tests in two halves (`--shard`); a last job combines
+   their coverage, checks the floor once and sends it to SonarCloud. It also scans all reachable
+   commits; the local gate covers macOS and arm64. Run the browser tests by hand before a release
+   (`pnpm --dir web e2e`): they are not in the gate or CI. Use passing jobs before claiming support
+   for an additional platform.
    Ubuntu's real sandbox tests must start Bubblewrap with seccomp enabled. A runner that reaches
    the [nested user namespace failure](https://github.com/anthropics/sandbox-runtime/issues/428)
    is an open compatibility issue. Keep the sandbox enabled while investigating.
