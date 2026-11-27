@@ -328,6 +328,14 @@ uv run --no-sync python scripts/gate_spec_lock.py seal /owner/spec-receipt.json 
   --manifest /owner/spec-checks.toml
 ```
 
+For Factory-managed checks, place the receipt at `spec-locks/CF-<n>.json` in the board's state
+directory before Build. Keep the agent sandbox enabled to protect that directory. Factory compares
+the candidate's locked files with the sealed commit before the checks command and before accepting
+a passing verdict for merge. Changes to the locked files block the candidate even if the checks
+command passed earlier. Other test runners can supply the same receipt format. The `commit`
+field names the sealed Git commit and the `files` object maps repository-relative paths to
+their SHA-256 digests.
+
 To keep acceptance cases private until QA, put them in `qa-holdouts/CF-<n>.md` inside the board's
 state directory. Enable the `qa` review role and use the board's normal agent sandbox, which
 blocks Build's access to that directory. The QA run can read only its own ticket's cases through
