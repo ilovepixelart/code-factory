@@ -8,7 +8,7 @@ from code_factory.checks.models import Containment, Scope
 from code_factory.platform.errors import BadRequestError
 
 if TYPE_CHECKING:  # the models module is not a layer another module may import at run time
-    from code_factory.settings.models.config import RepositoryConfig
+    from code_factory.settings.models.config import AgentsTable, RepositoryConfig
 
 DEFAULT_SETUP_LIMIT_S = 600
 CONFIG_FILE = ".code-factory/config.toml"
@@ -47,6 +47,14 @@ class RunConfig:
         return Containment.CONTAINER if self.containerised else Containment.SRT
 
 
+def _setup_of(agents: AgentsTable | None) -> Setup | None:
+    """The setup command of `[agents]` with its time limit; None when it has none."""
+    if agents is None or agents.setup is None:
+        return None
+    limit = agents.setup_timeout if agents.setup_timeout is not None else DEFAULT_SETUP_LIMIT_S
+    return Setup(command=agents.setup, limit_s=float(limit))
+
+
 def run_config(config: RepositoryConfig) -> RunConfig:
     """`config` read for a run."""
     checks, agents, release = config.checks, config.agents, config.release
@@ -56,10 +64,6 @@ def run_config(config: RepositoryConfig) -> RunConfig:
         file=checks.container_file if checks else None,
         mounts=tuple(checks.container_mounts or ()) if checks else (),
     )
-    setup = None
-    if agents is not None and agents.setup is not None:
-        limit = agents.setup_timeout if agents.setup_timeout is not None else DEFAULT_SETUP_LIMIT_S
-        setup = Setup(command=agents.setup, limit_s=float(limit))
     return RunConfig(
         commands={
             Scope.REACHED: checks.command if checks else None,
@@ -71,7 +75,7 @@ def run_config(config: RepositoryConfig) -> RunConfig:
         containerised=spec.image is not None or spec.file is not None,
         slots=checks.container_slots if checks and checks.container_slots is not None else 1,
         sandboxed=agents is None or agents.sandbox is not False,
-        setup=setup,
+        setup=_setup_of(agents),
         verify=release.verify if release else None,
         watch_days=release.watch_days if release else None,
     )
