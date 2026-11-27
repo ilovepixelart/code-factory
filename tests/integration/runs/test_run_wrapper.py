@@ -29,7 +29,7 @@ async def run_wrapper(
             *timeout_args,
             "--",
             *command,
-            env=ENV | (extra or {}),
+            env=ENV | {wrapper.RUNS_VARIABLE: str(tmp_path)} | (extra or {}),
             cwd=tmp_path,
             stdout=sink,
             stderr=sink,
@@ -210,6 +210,7 @@ def _entries(folder: Path) -> list[str]:
         "{tmp}/AB12CD34EF56.exit",
         "{tmp}/ab12cd34ef5.exit",
         "{tmp}/sub/../ab12cd34ef56.exit",
+        "{tmp}/sub/ab12cd34ef56.exit",  # below the runs folder, not in it
     ],
 )
 async def test_an_exit_file_the_board_would_not_name_is_refused_before_anything_starts(
@@ -219,13 +220,17 @@ async def test_an_exit_file_the_board_would_not_name_is_refused_before_anything_
     named = exit_file.format(tmp=tmp_path)
     process = await asyncio.create_subprocess_exec(
         *WRAPPER, named, "--", "/bin/sh", "-c", f"touch {marker}",
-        cwd=tmp_path, env=ENV, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
+        cwd=tmp_path, env=ENV | {wrapper.RUNS_VARIABLE: str(tmp_path)},
+        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
     )  # fmt: skip
     out, _ = await asyncio.wait_for(process.communicate(), 30)
 
     assert (process.returncode, out.decode()) == (
         2,
-        f"the exit file must be an absolute path ending in <12 hex digits>.exit, not {named}\n",
+        (
+            "the exit file must be an absolute path to <12 hex digits>.exit in the folder "
+            f"CODE_FACTORY_RUNS_DIR names, not {named}\n"
+        ),
     )
     assert _entries(tmp_path) == []  # nothing started, no exit file written
 
@@ -234,7 +239,10 @@ async def test_an_exit_file_the_board_would_not_name_is_refused_before_anything_
     ("text", "named"),
     [
         ("/runs/ab12cd34ef56.exit", True),
-        ("/a/b/0123456789ab.exit", True),
+        ("/runs/0123456789ab.exit", True),
+        ("/a/b/0123456789ab.exit", False),  # another folder
+        ("/runs/sub/0123456789ab.exit", False),  # below the runs folder
+        ("/runsx/0123456789ab.exit", False),  # a folder that only starts like it
         ("ab12cd34ef56.exit", False),
         ("/runs/ab12cd34ef56.log", False),
         ("/runs/ab12cd34ef56.exit.tmp", False),
@@ -242,8 +250,34 @@ async def test_an_exit_file_the_board_would_not_name_is_refused_before_anything_
     ],
 )
 def test_the_exit_file_is_one_the_board_would_name(text: str, *, named: bool) -> None:
-    assert (wrapper.exit_file(text) == Path(text)) is named
-    assert (wrapper.exit_file(text) is None) is not named
+    assert (wrapper.exit_file(text, "/runs") == Path(text)) is named
+    assert (wrapper.exit_file(text, "/runs") is None) is not named
+
+
+@pytest.mark.parametrize("runs", [None, ""])
+def test_an_exit_file_is_refused_when_no_runs_folder_is_named(runs: str | None) -> None:
+    assert wrapper.exit_file("/runs/ab12cd34ef56.exit", runs) is None
+
+
+def test_a_link_in_the_runs_folder_cannot_lead_the_exit_file_out_of_it(tmp_path: Path) -> None:
+    runs, outside = tmp_path / "runs", tmp_path / "outside"
+    runs.mkdir()
+    outside.mkdir()
+    (runs / "ab12cd34ef56.exit").symlink_to(outside / "ab12cd34ef56.exit")
+
+    assert wrapper.exit_file(str(runs / "ab12cd34ef56.exit"), str(runs)) is None
+
+
+def test_an_exit_file_in_a_runs_folder_reached_through_a_link_is_its_resolved_path(
+    tmp_path: Path,
+) -> None:
+    real = tmp_path / "real"
+    real.mkdir()
+    (tmp_path / "linked").symlink_to(real)
+
+    named = wrapper.exit_file(str(tmp_path / "linked" / "ab12cd34ef56.exit"), str(real))
+
+    assert named == real.resolve() / "ab12cd34ef56.exit"
 
 
 def test_main_refuses_an_exit_file_the_board_would_not_name_in_process(
@@ -251,7 +285,8 @@ def test_main_refuses_an_exit_file_the_board_would_not_name_in_process(
 ) -> None:
     assert wrapper.main(["notes.txt", "--", "/bin/true"]) == wrapper.USAGE_STATUS
     assert capsys.readouterr().err == (
-        "the exit file must be an absolute path ending in <12 hex digits>.exit, not notes.txt\n"
+        "the exit file must be an absolute path to <12 hex digits>.exit in the folder "
+        "CODE_FACTORY_RUNS_DIR names, not notes.txt\n"
     )
 
 
@@ -262,8 +297,12 @@ def test_main_runs_the_command_and_records_its_exit_in_process(
     # The test process keeps its own SIGTERM handling; the wrapper's handler is only recorded.
     monkeypatch.setattr(wrapper.signal, "signal", lambda number, _handler: handlers.append(number))
     exit_path = tmp_path / "ab12cd34ef56.exit"
+    monkeypatch.setenv(wrapper.RUNS_VARIABLE, str(tmp_path))
+    seen = tmp_path / "seen"
+    script = f'printf %s "${{{wrapper.RUNS_VARIABLE}-unset}}" > {seen}; exit 3'
 
-    assert wrapper.main([str(exit_path), "--", "/bin/sh", "-c", "exit 3"]) == 3
+    assert wrapper.main([str(exit_path), "--", "/bin/sh", "-c", script]) == 3
 
     assert exit_path.read_text() == "3\n"
+    assert seen.read_text() == "unset"  # the agent does not inherit the runs folder
     assert handlers[0] == signal.SIGTERM  # asyncio.run adds its own SIGINT handler after it

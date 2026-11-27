@@ -114,6 +114,7 @@ async def test_the_run_gets_its_token_and_never_the_boards_settings(
     env = (await _launcher(app).launch(await _plan(app, tmp_path))).env
 
     assert (env["CODE_FACTORY_MCP_TOKEN"], env["CODE_FACTORY_URL"]) == ("run-token", BOARD)
+    assert env["CODE_FACTORY_RUNS_DIR"] == str(tmp_path)  # the folder of the exit file
     assert "CODE_FACTORY_DATABASE_URL" not in env
     assert "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB" not in env
     assert env["SOME_TOOL_SETTING"] == "kept"
@@ -168,6 +169,7 @@ async def test_codex_uses_a_private_home_and_the_board_mcp_inside_the_sandbox(
     assert "codex exec --json --ephemeral" in launch.argv[-1]
     assert "run-token" not in " ".join(launch.argv)
     assert "OPENAI_API_KEY" not in launch.env
+    assert launch.env["CODE_FACTORY_RUNS_DIR"] == str(tmp_path)
     assert settings["mcp_servers"]["code-factory"] == {
         "url": f"{BOARD}/mcp/",
         "bearer_token_env_var": "CODE_FACTORY_MCP_TOKEN",

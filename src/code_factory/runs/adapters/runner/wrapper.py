@@ -15,6 +15,8 @@ from code_factory.runs.rules.stream import OutputRedaction
 
 USAGE = "usage: runner <exit file> [--timeout-seconds <seconds>] -- <command> [args...]"
 CONTEXT_VARIABLE = "CODE_FACTORY_OWNER_CONTEXT"
+# The folder of the board's run files; the exit file is written there and nowhere else.
+RUNS_VARIABLE = "CODE_FACTORY_RUNS_DIR"
 NOT_FOUND = 127
 CHUNK = 64 * 1024
 USAGE_STATUS = 2
@@ -56,12 +58,19 @@ def load_redaction(reference: str | None) -> OutputRedaction | None:
     return OutputRedaction([(str(found), str(stand_in)) for found, stand_in in said["patterns"]])
 
 
-def exit_file(text: str) -> Path | None:
-    """The exit file `text` names, or None unless it is absolute, has no `..` and is a run's."""
+def exit_file(text: str, runs: str | None) -> Path | None:
+    """The exit file `text` names, or None unless it is a run's, by its absolute path in `runs`.
+
+    Both are resolved first, so a link cannot lead the write out of the runs folder.
+    """
     path = Path(text)
-    if not path.is_absolute() or ".." in path.parts or _EXIT_NAME.fullmatch(path.name) is None:
+    if runs is None or runs == "" or not path.is_absolute() or ".." in path.parts:
         return None
-    return path
+    folder = os.path.realpath(runs)
+    resolved = os.path.realpath(text)
+    if not resolved.startswith(folder + os.sep) or Path(resolved).parent != Path(folder):
+        return None
+    return Path(resolved) if _EXIT_NAME.fullmatch(Path(resolved).name) else None
 
 
 def record_exit(path: Path, code: int) -> None:
@@ -144,11 +153,12 @@ def main(argv: Sequence[str]) -> int:
     if timeout_s is not None and (timeout_s < 0 or os.getpgrp() != os.getpid()):
         sys.stderr.write("a run deadline requires positive seconds and its own process group\n")
         return USAGE_STATUS
-    recorded = exit_file(argv[0])
+    # Taken out, so the agent the wrapper starts does not inherit it.
+    recorded = exit_file(argv[0], os.environ.pop(RUNS_VARIABLE, None))
     if recorded is None:
         sys.stderr.write(
-            "the exit file must be an absolute path ending in <12 hex digits>.exit, "
-            f"not {argv[0]}\n"
+            "the exit file must be an absolute path to <12 hex digits>.exit in the folder "
+            f"{RUNS_VARIABLE} names, not {argv[0]}\n"
         )
         return USAGE_STATUS
     signal.signal(signal.SIGTERM, _request_stop)  # a handler: an ignored signal survives exec
