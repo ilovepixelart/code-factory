@@ -12,7 +12,7 @@ from pathlib import Path
 
 from code_factory.platform.errors import UnavailableError
 from code_factory.platform.process import MIB, run_process
-from code_factory.platform.programs import TEMPORARY_FOLDERS, child_environment, find_program
+from code_factory.platform.programs import child_environment, find_program
 
 TIMEOUT_S = 30.0
 OUTPUT_CAP = 8 * MIB
@@ -51,7 +51,7 @@ class GitRunner:
     async def _git(self) -> Path | None:
         """The git to start, found once in a folder only root or the user can write."""
         if self._program is None:
-            self._program = await find_program("git", TEMPORARY_FOLDERS)
+            self._program = await find_program("git", ())
         return self._program
 
     async def run(self, root: Path, *args: str) -> GitResult | None:

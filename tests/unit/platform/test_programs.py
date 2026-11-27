@@ -301,6 +301,14 @@ def test_a_sticky_folder_others_can_write_holds_safely_only_for_root_or_the_user
     assert _holds_safely(Path("/tmp")) is expected  # noqa: S108  # never read: stat is replaced
 
 
+def test_a_program_below_a_folder_everyone_may_write_is_never_trusted(tmp_path: Path) -> None:
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    shared.chmod(0o1777)
+    make_program(shared / "bin")
+    assert trusted_program("tool", [], search_path=str(shared / "bin")) is None
+
+
 def test_digits_outside_ascii_pin_nothing(tmp_path: Path) -> None:
     folder = tmp_path / "home" / ".nvm" / "versions" / "node" / "v\uff12\uff12" / "bin"
     folder.mkdir(parents=True)

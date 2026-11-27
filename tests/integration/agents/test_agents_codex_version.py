@@ -13,10 +13,14 @@ def _codex(folder: Path, says: str) -> None:
     program.chmod(0o755)
 
 
+def _share(folder: Path) -> None:
+    """Make `folder` a shared temporary folder: sticky and written by everyone, as /tmp is."""
+    folder.chmod(0o1777)
+
+
 @pytest.fixture
 def bin_folder(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """A trusted PATH folder; the temporary folders hold tmp_path on Linux, so none is excluded."""
-    monkeypatch.setattr(probe, "TEMPORARY_FOLDERS", ())
+    """The only PATH folder, one only the user can write."""
     folder = tmp_path / "bin"
     folder.mkdir(mode=0o755)
     monkeypatch.setenv("PATH", str(folder))
@@ -45,10 +49,10 @@ async def test_no_codex_on_the_path_is_no_version() -> None:
     assert await probe.codex_version() == ""
 
 
-async def test_a_codex_in_a_temporary_folder_is_never_started(
-    bin_folder: Path, monkeypatch: pytest.MonkeyPatch
+async def test_a_codex_below_a_folder_everyone_may_write_is_never_started(
+    bin_folder: Path,
 ) -> None:
     _codex(bin_folder, "codex-cli 0.123.0")
-    monkeypatch.setattr(probe, "TEMPORARY_FOLDERS", (bin_folder.parent,))
+    _share(bin_folder.parent)
 
     assert await probe.codex_version() == ""

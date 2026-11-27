@@ -19,7 +19,7 @@ from code_factory.metrics.rules.merges import LOG_FORMAT, github_web
 from code_factory.metrics.rules.stages import utc_stamp
 from code_factory.platform.errors import UnavailableError
 from code_factory.platform.process import MIB, ProcessResult, run_process
-from code_factory.platform.programs import TEMPORARY_FOLDERS, child_environment, find_program
+from code_factory.platform.programs import child_environment, find_program
 
 CONCURRENCY = 4
 NO_SUCH_REMOTE = 2  # `git remote get-url` of a remote that is not configured
@@ -58,7 +58,7 @@ class GitReader:
         self,
         program: str = "git",
         *,
-        places: Sequence[Path] = TEMPORARY_FOLDERS,
+        places: Sequence[Path] = (),
         log_timeout_s: float = LOG_TIMEOUT_S,
         read_timeout_s: float = READ_TIMEOUT_S,
         origin_timeout_s: float = ORIGIN_TIMEOUT_S,

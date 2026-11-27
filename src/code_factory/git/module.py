@@ -8,7 +8,6 @@ from code_factory.git.cli import COMMANDS
 from code_factory.git.service import GitPorts, GitService
 from code_factory.platform.background import BackgroundTasks
 from code_factory.platform.module import Module, Resources
-from code_factory.platform.programs import TEMPORARY_FOLDERS
 from code_factory.platform.services import Services
 
 
@@ -16,7 +15,7 @@ def build_module(ports_of: Callable[[Services], GitPorts]) -> Module:
     """The module over the ports `ports_of` builds from the registry (`code_factory.app`)."""
 
     def provide(services: Services, resources: Resources) -> None:
-        service = GitService(resources.uow, GitRunner(TEMPORARY_FOLDERS), ports_of(services))
+        service = GitService(resources.uow, GitRunner(()), ports_of(services))
         services.add(GitService, service)
 
     def background(services: Services, tasks: BackgroundTasks) -> None:

@@ -8,7 +8,7 @@ import anyio
 from pydantic import SecretStr
 
 from code_factory.platform.errors import BadRequestError, UnavailableError
-from code_factory.platform.programs import TEMPORARY_FOLDERS, find_program
+from code_factory.platform.programs import find_program
 from code_factory.screens.rules import image_stem
 
 SCRIPT = Path(__file__).with_name("shoot.cjs")
@@ -21,7 +21,7 @@ NOT_INSTALLED = 3
 
 async def tree_of(root: Path, ref: str) -> str:
     """The tree id of `ref` in the repository at `root`."""
-    git = await find_program("git", TEMPORARY_FOLDERS)
+    git = await find_program("git", ())
     if git is None:
         msg = "git is not on PATH"
         raise UnavailableError(msg)
@@ -43,7 +43,7 @@ async def tree_of(root: Path, ref: str) -> str:
 
 async def capture(board: str, folder: Path, pages: list[str], session: SecretStr) -> None:
     """Write each page's light and dark image into `folder` as the signed-in owner."""
-    node = await find_program("node", TEMPORARY_FOLDERS)
+    node = await find_program("node", ())
     if node is None:
         msg = "the capture tool needs Node: install Node 26 or later"
         raise UnavailableError(msg)

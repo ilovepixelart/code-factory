@@ -6,3 +6,8 @@ runs:
     - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       with:
         version: '0.13.9'
+    # /tmp is shared by every user (sticky, written by all), so the board never trusts a program
+    # below it (platform/programs.py); the tests' fake programs live in the runner's own folder.
+    - name: Keep temporary files in the runner's own folder
+      shell: bash
+      run: echo "TMPDIR=$RUNNER_TEMP" >> "$GITHUB_ENV"
