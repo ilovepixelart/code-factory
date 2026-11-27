@@ -118,6 +118,13 @@ async function send(path: string, line: number): Promise<void> {
         {{ file.path || REMOVED }}
       </h3>
       <table class="w-full font-mono text-sm" :aria-label="file.path">
+        <thead class="sr-only">
+          <tr>
+            <th scope="col">Line</th>
+            <th scope="col">Change</th>
+            <th scope="col">Text</th>
+          </tr>
+        </thead>
         <tbody>
           <Collapsible
             v-for="(line, l) in file.lines"

@@ -100,7 +100,7 @@ describe('the changes', () => {
     const wrapper = await shown(SAMPLE)
     const rows = wrapper
       .get('table[aria-label="src/app.ts"]')
-      .findAll('tr')
+      .findAll('tbody tr')
       .map((tr) => {
         const [number, mark, text] = tr.findAll('td')
         return [

@@ -41,11 +41,10 @@ const sentence = computed(() => {
         </CardHeader>
         <CardContent class="grid gap-4">
           <p class="text-sm">Run one of these commands from your terminal.</p>
-          <div
+          <fieldset
             v-for="method in METHODS"
             :key="method.command"
-            class="grid gap-2"
-            role="group"
+            class="grid min-w-0 gap-2"
             :aria-label="method.name"
           >
             <p class="font-medium">{{ method.name }}</p>
@@ -58,7 +57,7 @@ const sentence = computed(() => {
             <p v-if="'detail' in method" class="text-sm text-muted-foreground">
               {{ method.detail }}
             </p>
-          </div>
+          </fieldset>
         </CardContent>
       </Card>
     </div>

@@ -66,10 +66,9 @@ const rest = computed(() =>
 </script>
 
 <template>
-  <div
+  <section
     :id="`stage-${stage}`"
     size="sm"
-    role="region"
     :aria-labelledby="`column-${stage}`"
     :data-js-column="stage"
     :data-count="cards.length"
@@ -169,5 +168,5 @@ const rest = computed(() =>
         </ul>
       </ScrollArea>
     </div>
-  </div>
+  </section>
 </template>

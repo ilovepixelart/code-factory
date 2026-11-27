@@ -200,7 +200,7 @@ async function add(draft: AgentDraft): Promise<void> {
       <HugeiconsIcon :icon="PlusSignIcon" data-icon="inline-start" aria-hidden="true" />New agent
     </Button>
   </Teleport>
-  <p role="status" aria-live="polite" class="sr-only">{{ said }}</p>
+  <output aria-label="Agent activity" aria-live="polite" class="sr-only">{{ said }}</output>
   <div v-if="read" class="page-wide grid grid-cols-1 gap-6">
     <FieldError v-if="list?.problem" key="problem">{{ list.problem }}</FieldError>
     <FieldError v-if="checkRefusal" key="check">{{ checkFailed }}</FieldError>

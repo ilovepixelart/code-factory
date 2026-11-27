@@ -43,11 +43,7 @@ const near = computed(() => loaded >= ceiling * NEAR || left.value.length > 0 ||
 
 <template>
   <div
-    role="meter"
-    aria-label="Loaded into every agent session"
-    aria-valuemin="0"
-    :aria-valuenow="loaded"
-    :aria-valuemax="ceiling"
+    data-memory-meter
     data-section
     class="flex min-w-0 flex-col gap-3 rounded-lg bg-muted p-4"
   >
@@ -58,7 +54,14 @@ const near = computed(() => loaded >= ceiling * NEAR || left.value.length > 0 ||
       <div v-if="$slots.default" class="shrink-0"><slot /></div>
     </div>
     <div class="grid gap-1.5 text-sm">
-      <!-- The meter around it carries the value; the bar only draws it. -->
+      <meter
+        class="sr-only"
+        aria-label="Loaded into every agent session"
+        min="0"
+        :value="loaded"
+        :max="ceiling"
+      />
+      <!-- The meter beside it carries the value; the bar only draws it. -->
       <Progress
         class="bg-border"
         :model-value="Math.min(100, (loaded / ceiling) * 100)"

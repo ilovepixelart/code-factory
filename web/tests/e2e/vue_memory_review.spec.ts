@@ -52,7 +52,7 @@ test('e2e_a_memory_entry_is_added_from_the_page', async ({ served, writesBoard }
     .getByRole('region', { name: /^Core\b/ })
     .getByRole('listitem', { name: 'Keep every rule small' })
     .waitFor({ timeout: TIMEOUT })
-  const before = Number(await meter.getAttribute('aria-valuenow'))
+  const before = Number(await meter.getAttribute('value'))
   await writesBoard.getByRole('button', { name: 'Add an entry' }).click()
   const form = writesBoard.getByRole('form', { name: 'Add an entry' })
   await form.getByRole('group', { name: 'Kind' }).getByRole('button', { name: 'Decision' }).click()
@@ -70,9 +70,9 @@ test('e2e_a_memory_entry_is_added_from_the_page', async ({ served, writesBoard }
 
   await expect(added.getByText('Why: Parallel tickets collided')).toBeVisible()
   await expect
-    .poll(async () => Number(await meter.getAttribute('aria-valuenow')))
+    .poll(async () => Number(await meter.getAttribute('value')))
     .toBeGreaterThan(before)
-  await expect(meter).toHaveAttribute('aria-valuemax', '8000')
+  await expect(meter).toHaveAttribute('max', '8000')
 })
 
 const EARLIER =

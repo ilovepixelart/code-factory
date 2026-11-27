@@ -298,8 +298,8 @@ async function opened(held: Memory) {
 /** The page's parts in order: each section's title, and `meter` for the meter. */
 const parts = (page: Awaited<ReturnType<typeof opened>>) =>
   page
-    .findAll('h2[data-slot="section-title"], [data-slot="card-title"] h2, [role="meter"]')
-    .map((n) => (n.attributes('role') === 'meter' ? 'meter' : n.text().replace(/, \d+$/, '')))
+    .findAll('h2[data-slot="section-title"], [data-slot="card-title"] h2, [data-memory-meter]')
+    .map((n) => ('data-memory-meter' in n.attributes() ? 'meter' : n.text().replace(/, \d+$/, '')))
 
 const regionOf = (page: Awaited<ReturnType<typeof opened>>, title: string) =>
   present(
@@ -525,8 +525,9 @@ test('the_meter_is_a_flat_section_of_its_sentence_and_bar_while_the_store_is_sma
     ceiling: 4000,
   })
 
-  const meter = page.get('[role="meter"]')
-  expect([meter.attributes('aria-valuenow'), meter.attributes('aria-valuemax')]).toStrictEqual([
+  const meter = page.get('[data-memory-meter]')
+  const value = meter.get('meter')
+  expect([value.attributes('value'), value.attributes('max')]).toStrictEqual([
     '1500',
     '4000',
   ])
@@ -543,11 +544,11 @@ test('the_meter_is_a_flat_section_of_its_sentence_and_bar_while_the_store_is_sma
 // CF-1195: the box returns at 80 percent of the budget, with what each role adds.
 test('the_meter_opens_into_its_box_near_the_budget', async () => {
   const below = await opened({ ...memory(SIZED, []), loaded_chars: 3199, ceiling: 4000 })
-  const belowBox = below.get('[role="meter"]').text().includes('Nothing is left out.')
+  const belowBox = below.get('[data-memory-meter]').text().includes('Nothing is left out.')
   below.unmount()
   const page = await opened({ ...memory(SIZED, []), loaded_chars: 3200, ceiling: 4000 })
 
-  const meter = page.get('[role="meter"]')
+  const meter = page.get('[data-memory-meter]')
   expect(belowBox).toBe(false)
   expect(meter.text()).toContain('Every session loads 3,200 of 4,000 characters')
   expect(meter.text()).toContain(
@@ -563,11 +564,11 @@ test('the_meter_opens_into_its_box_near_the_budget', async () => {
 test('the_meter_turns_error_above_the_ceiling', async () => {
   const at = await opened({ ...memory([rec('one')], []), loaded_chars: 4000, ceiling: 4000 })
   const above = 'Above the ceiling: retire or merge entries.'
-  const atError = at.get('[role="meter"]').text().includes(above)
+  const atError = at.get('[data-memory-meter]').text().includes(above)
   at.unmount()
   const over = await opened({ ...memory([rec('one')], []), loaded_chars: 4001, ceiling: 4000 })
 
-  const meter = over.get('[role="meter"]')
+  const meter = over.get('[data-memory-meter]')
   expect([
     atError,
     meter.get('[data-slot="progress"]').attributes('aria-valuenow'),
@@ -579,11 +580,11 @@ test('the_meter_turns_error_above_the_ceiling', async () => {
 // CF-1400
 test('the_meter_says_when_rules_and_decisions_exceed_the_budget', async () => {
   const fits = await opened({ ...memory([rec('one')], []), rules_over: 0 })
-  const fitsText = fits.get('[role="meter"]').text()
+  const fitsText = fits.get('[data-memory-meter]').text()
   fits.unmount()
   const over = await opened({ ...memory([rec('one')], []), rules_over: 1500 })
 
-  const said = over.get('[role="meter"] .text-destructive').text()
+  const said = over.get('[data-memory-meter] .text-destructive').text()
 
   expect(fitsText).not.toContain('over the budget')
   expect(said).toBe(
@@ -604,7 +605,7 @@ test('the_meter_names_what_the_budget_leaves_out', async () => {
     ceiling: 4000,
   })
 
-  const meter = page.get('[role="meter"]')
+  const meter = page.get('[data-memory-meter]')
   const links = meter.findAll('a[href^="#"]').map((a) => [a.text(), a.attributes('href')])
   expect([
     links,
@@ -807,7 +808,7 @@ test('a_failed_read_shows_why_and_reads_again', async () => {
   await again.trigger('click')
   await flushPromises()
 
-  expect([said, page.find('[role="meter"]').exists()]).toStrictEqual([true, true])
+  expect([said, page.find('[data-memory-meter]').exists()]).toStrictEqual([true, true])
   page.unmount()
 })
 
@@ -842,12 +843,12 @@ test('the_entries_without_a_why_are_counted_and_listed_alone_on_request', async 
     [],
   )
   const all = await at('/memory', held)
-  const count = all.page.get('[role="meter"] a')
+  const count = all.page.get('[data-memory-meter] a')
   const shown = [count.text(), count.attributes('aria-pressed'), ids(all.page, 'Core')]
   const rowPills = all.page.get('[role="listitem"][aria-label="bare one"] summary').text()
   all.page.unmount()
   const only = await at('/memory?why=none', held)
-  const pressed = only.page.get('[role="meter"] a')
+  const pressed = only.page.get('[data-memory-meter] a')
 
   expect(shown).toStrictEqual(['2 without a why', 'false', ['bare one', 'said', 'bare two']])
   expect(rowPills).not.toContain('no why')
@@ -863,7 +864,7 @@ test('the_entries_without_a_why_are_counted_and_listed_alone_on_request', async 
 test('no_count_shows_while_every_entry_says_why', async () => {
   const { page } = await at('/memory', memory([rec('said', { why: 'it broke' })], []))
 
-  expect(page.find('[role="meter"] a').exists()).toBe(false)
+  expect(page.find('[data-memory-meter] a').exists()).toBe(false)
   page.unmount()
 })
 

@@ -102,7 +102,7 @@ const SIZES = ['xs', 'sm', 'default', 'lg'] as const
           /></Button>
           <Button as-child variant="outline"><a href="/design">A link</a></Button>
         </div>
-        <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Disabled buttons">
+        <fieldset class="flex min-w-0 flex-wrap items-center gap-2" aria-label="Disabled buttons">
           <Button
             v-for="variant in VARIANTS"
             :key="variant"
@@ -111,7 +111,7 @@ const SIZES = ['xs', 'sm', 'default', 'lg'] as const
             disabled
             >{{ variant }}</Button
           >
-        </div>
+        </fieldset>
         <ButtonGroup aria-label="A button group">
           <ButtonGroupText>2 selected</ButtonGroupText>
           <Button type="button" variant="outline">Move</Button>
