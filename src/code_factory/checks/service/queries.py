@@ -269,7 +269,13 @@ class QueryMixin(ConcludeMixin):
         """`passed`, `failed` or `missing` for `head`, on the tree it names."""
         tree_id = await self._deps.git.tree_id(repository, head)
         items = await self._newest_records(ticket_id)
-        return verdict_for([item.data for item in items], head, tree_id)
+        verdict = verdict_for([item.data for item in items], head, tree_id)
+        if (
+            verdict == "passed"
+            and (await self._spec_refusal(repository, ticket_id, head)) is not None
+        ):
+            return "failed"
+        return verdict
 
     async def latest(
         self, ticket_id: str, log_offset: int = 0, log_chars: int = 4000

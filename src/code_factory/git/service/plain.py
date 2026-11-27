@@ -1,6 +1,7 @@
 """Small reads other modules ask of git: one command each, always through the runner."""
 
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
 
 from code_factory.git.adapters.folders import common_dir_of, read_text_below, threaded
@@ -83,6 +84,40 @@ class PlainMixin(ReadsMixin):
         root = await self._root(repository)
         done = await self._runner.run(root, ["show", f"{commit}:{path}"])
         return done.stdout if done.ok else None
+
+    async def changed_files(
+        self, repository: str, sealed: str, head: str, paths: Sequence[str]
+    ) -> list[str]:
+        """Which named regular files are missing or have a different Git tree entry."""
+        root = await self._root(repository)
+
+        async def entries(commit: str) -> dict[str, str]:
+            done = await self._runner.run(
+                root,
+                [
+                    "--literal-pathspecs",
+                    "ls-tree",
+                    "--full-tree",
+                    "-z",
+                    "--end-of-options",
+                    commit,
+                    "--",
+                    *paths,
+                ],
+            )
+            if not done.ok or done.truncated:
+                msg = f"git could not read the locked files at {commit}"
+                raise UnavailableError(msg)
+            found = {}
+            for line in done.stdout.split("\0"):
+                entry, _, path = line.partition("\t")
+                if entry.startswith(("100644 blob ", "100755 blob ")):
+                    found[path] = entry
+            return found
+
+        before = await entries(sealed)
+        after = await entries(head)
+        return [path for path in paths if path not in before or before[path] != after.get(path)]
 
     async def subject(self, repository: str, commit: str) -> str | None:
         """The subject line of `commit`."""
