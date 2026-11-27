@@ -6,6 +6,8 @@ import httpx
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from code_factory.memory.models import NewMemory
+from code_factory.memory.service import MemoryService
 from code_factory.runs.models import PermissionRequest
 from code_factory.runs.repository.permissions import PermissionRepository
 from code_factory.talk.service import TalkService
@@ -62,6 +64,22 @@ async def test_an_unchanged_inbox_answers_304_to_its_own_tag(client: httpx.Async
 
     assert (again.status_code, again.content) == (304, b"")
     assert stale.status_code == 200
+
+
+async def test_the_inbox_keeps_the_scope_of_a_memory_proposal(
+    client: httpx.AsyncClient, app: FastAPI
+) -> None:
+    stored = await app.state.services.get(MemoryService).propose(
+        NewMemory(repository="sample", kind="rule", statement="Measure first", scope="build"),
+        by="run:agent",
+    )
+
+    response = await client.get("/api/inbox")
+
+    assert response.status_code == 200
+    [item] = response.json()["memory"]
+    assert item["memory"]["id"] == stored.id
+    assert item["memory"]["scope"] == "build"
 
 
 async def test_allowing_a_request_answers_its_notice_and_a_second_answer_conflicts(

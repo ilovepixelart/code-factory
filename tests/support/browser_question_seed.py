@@ -13,6 +13,8 @@ from app_lifespan import IDLE_MODULES
 from code_factory.app import build_resources, build_services
 from code_factory.delivery.models import PullReading
 from code_factory.delivery.service import DeliveryService
+from code_factory.memory.models import NewMemory
+from code_factory.memory.service import MemoryService
 from code_factory.platform.config import Settings
 from code_factory.platform.runtime import running
 from code_factory.push.service import PushService
@@ -64,6 +66,11 @@ async def main() -> None:
                         **permission,
                     )
                 )
+        if proposal := seed.get("memoryProposal"):
+            await services.get(MemoryService).propose(
+                NewMemory(repository="sample", kind="rule", source="agent", **proposal),
+                by="run:browser-test",
+            )
 
 
 if __name__ == "__main__":

@@ -136,6 +136,7 @@ interface MemoryProposalItem {
   why: string
   source: string
   guard: string
+  scope: string
 }
 
 export const SECTIONS = [
