@@ -62,6 +62,28 @@ them and the diff is read), and `tests/integration/platform/test_mcp_surface.py`
 follows. A listener may accept only some roles (`Access.roles`): the runner's address takes run
 tokens only.
 
+## Design review
+
+- Start with the user behavior and the reason it changes. Give each transition or invariant a
+  clear owner. Let other modules consume the result through that owner's service. Keep
+  presentation rules with the consumer. [Parnas on module boundaries](https://www.cs.lafayette.edu/~gexia/cs301/resources/parnas.html)
+- Keep pure decisions in ordinary functions with explicit inputs. Use a dataclass for an
+  internal value that needs named fields, and a narrow protocol when a consumer needs an
+  interchangeable dependency. A forwarding layer earns its place when it protects a boundary or
+  hides a decision callers can ignore. Check which state, I/O, and policy a layer actually owns
+  before adding, removing, or splitting it. [Python typing protocols](https://typing.python.org/en/latest/reference/protocols.html)
+- Share code when it represents the same rule and changes for the same reason. Trace a real
+  use case and its failure path before combining similar code. Review how many places a future
+  change would touch and how many calls a reader must follow. Use line count, complexity and
+  Git co-change to locate candidates. [The Wrong Abstraction](https://sandimetz.com/blog/2016/1/20/the-wrong-abstraction)
+- Use the existing service and unit-of-work boundaries for use cases that need persistence.
+  Keep repository-specific commands and tools behind their existing configuration or adapters.
+  Verify a pipeline change with a project fixture independent of Factory's own language and
+  tooling. [Architecture Patterns with Python](https://www.cosmicpython.com/book/chapter_04_service_layer.html)
+
+For Python idioms and resource management, use [Effective Python, third edition](https://effectivepython.com/).
+It covers through Python 3.13. Check runtime behavior against the version in `.python-version`.
+
 ## The registration interface
 
 A module's `module.py` builds one `platform.module.Module`; every field but `name` is optional.
@@ -118,6 +140,27 @@ class TicketService:
 
 Never hold the block open across a subprocess or an HTTP call (docs/async.md rule 20): read, leave
 the block, do the slow work, open a second block to write the result.
+
+## Query performance
+
+1. Reproduce the slow user action with representative data on an isolated test database. Compare
+   the same workload before and after. Record endpoint latency, SQL calls, rows returned, and
+   the cost of converting rows into the response. Use enough history to reveal work that grows
+   with every poll. [SQLAlchemy profiling guide](https://docs.sqlalchemy.org/en/21/faq/performance.html)
+2. Trace the result each caller needs. For a board card, fetch the check for the requested head.
+   Keep cursor pagination for history and give summaries an explicit query shape when justified.
+   Preserve the distinctions between a fast check, a required verdict, and a check that stopped
+   before judging the code.
+3. Inspect expensive reads with `EXPLAIN (ANALYZE, BUFFERS)` and representative parameters.
+   `ANALYZE` executes the statement. Use a disposable database for statements that write.
+   Check row estimates, actual rows and loops, and sort or buffer work. Use `pg_stat_statements`
+   for aggregate query cost when it is already configured. [PostgreSQL 18 query plans](https://www.postgresql.org/docs/18/using-explain.html)
+4. Match any proposed index to the query's predicates, order, and limit. Compare plans and the
+   cost of extra index maintenance on writes. For a frequently filtered JSONB key, consider a
+   typed column or a targeted expression index after measuring. [PostgreSQL 18 indexes](https://www.postgresql.org/docs/18/indexes-multicolumn.html)
+
+[The Art of PostgreSQL, 2026 edition](https://theartofpostgresql.com/book/updates/) and
+[Use The Index, Luke](https://use-the-index-luke.com/) provide worked query and indexing examples.
 
 ## Import contracts
 
@@ -203,6 +246,13 @@ recipe in the Alembic cookbook, "Using asyncio with Alembic"
 `EXPECTED_REVISION` in `platform/db/schema.py` is the head the app expects; `test_history_is_one_line_...`
 fails when it drifts from the script directory. A migration that changes a persisted format
 raises `DATA_FORMAT_VERSION` and updates `schema_info` in the same revision.
+
+For a backfill, a new constraint on existing data, or a change to a large table, rehearse the
+upgrade from a populated previous revision. Check lock duration, which earlier revisions remain
+applied after a failure, and the repair procedure. A failed concurrent index build can leave an
+invalid index. Verify its cleanup or retry before deploying the migration.
+[Alembic autogeneration](https://alembic.sqlalchemy.org/en/latest/autogenerate.html)
+[PostgreSQL 18 concurrent index builds](https://www.postgresql.org/docs/18/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY)
 
 `code-factory db` loads `alembic.ini` and the revisions from `src/code_factory/platform/db/` in
 a source checkout, or from the installed package. The root `alembic.ini` and `alembic/` links

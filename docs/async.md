@@ -110,6 +110,22 @@ its source page.
 27. Loop policies are deprecated (removal planned for 3.16): configure a loop with
     `loop_factory`, never with a policy.
 
+## Diagnosing a slow or stuck service
+
+- On Python 3.14, `python -m asyncio ps PID` lists tasks and their awaiters, and
+  `python -m asyncio pstree PID` shows their parent and child relationships. Use the interpreter
+  and attach permissions appropriate to the process. Name long-lived tasks and capture the tree
+  while the symptom is present. [Python 3.14 task introspection](https://docs.python.org/3.14/whatsnew/3.14.html#asyncio-introspection-capabilities)
+- Measure durable backlog, in-flight tasks, execution slots, and database pool wait separately.
+  A bounded queue can still feed an unbounded number of tasks waiting on a semaphore. When
+  changing admission or batching, prove the order for waiting work and verify cancellation,
+  recovery after restart, and the behavior of stale or stopped rows.
+- Audit cancellation at the boundary between asyncio and AnyIO. Keep shielded cleanup short and
+  bounded. A cancelled await on an abandoned worker thread can leave the underlying operation
+  running. Avoid scheduling conflicting work until the worker has really stopped.
+  [AnyIO cancellation](https://anyio.readthedocs.io/en/stable/cancellation.html)
+  [AnyIO worker threads](https://anyio.readthedocs.io/en/stable/threads.html)
+
 ## What holds these rules in this repository
 
 | Rule | Held by |

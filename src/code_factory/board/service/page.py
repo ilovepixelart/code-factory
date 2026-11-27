@@ -120,7 +120,13 @@ class PageReader:
     async def summary(self, ticket: Ticket) -> dict[str, Any]:
         """What the ticket proved: for the pull request body as well as the page."""
         history = await self._sources.activity.entries(ticket.id)
-        _, requirements = await self._documents(ticket)
+        try:
+            document = await self._sources.documents.get_document(
+                ticket.id, DocumentName.REQUIREMENTS
+            )
+            requirements = document.body
+        except NotFoundError:
+            requirements = ""
         return await self._summary(ticket, history, requirements)
 
     async def _summary(
@@ -165,17 +171,18 @@ class PageReader:
         }
 
     async def _documents(self, ticket: Ticket) -> tuple[list[dict[str, Any]], str]:
+        names = tuple(
+            name
+            for name in _PAGE_DOCUMENTS
+            if name is not DocumentName.MOCK or "ui" in ticket.labels
+        )
+        try:
+            texts = await self._sources.documents.document_bodies(ticket.id, names)
+        except NotFoundError:
+            texts = {}
         shown: list[dict[str, Any]] = []
-        requirements = ""
-        for name in _PAGE_DOCUMENTS:
-            if name is DocumentName.MOCK and "ui" not in ticket.labels:
-                continue
-            try:
-                text = (await self._sources.documents.get_document(ticket.id, name)).body
-            except NotFoundError:
-                text = ""
-            if name is DocumentName.REQUIREMENTS:
-                requirements = text
+        for name in names:
+            text = texts.get(name, "")
             item: dict[str, Any] = {
                 "stage": name.value,
                 "html": await html_of(text) if text.strip() else None,
@@ -184,7 +191,7 @@ class PageReader:
                 files = await self._sources.documents.list_mock_files(ticket.id)
                 item["files"] = [f.name for f in files]
             shown.append(item)
-        return shown, requirements
+        return shown, texts.get(DocumentName.REQUIREMENTS, "")
 
     async def _talk(self, ticket_id: str) -> list[ActivityEntry]:
         lines: list[ActivityEntry] = []
