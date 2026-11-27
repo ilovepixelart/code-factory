@@ -78,7 +78,7 @@ class MainMixin(RemoteMixin):
         if row is None:
             msg = "main's run is already queued"
             raise ConflictError(msg)
-        self._enqueue(row.id)
+        self._wake.set()
         return row.id
 
     async def blame_ticket(self, repository: str, merge: str) -> str:

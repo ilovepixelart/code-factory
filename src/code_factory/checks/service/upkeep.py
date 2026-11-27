@@ -52,7 +52,7 @@ class UpkeepMixin(PipelineMixin):
         await self.reconcile()
         async with self._db() as store:
             await store.remote.sweep(self._now())
-        await self._requeue()
+        self._wake.set()
         for record in await self._deps.repositories.list():
             await self._start_due(record.name)
 
@@ -85,36 +85,47 @@ class UpkeepMixin(PipelineMixin):
         except Exception:
             logger.exception("a check task failed")
 
-    async def _requeue(self) -> None:
-        """Queue the rows this process owns that no task has picked up."""
-        if self._group is None:
-            return
-        async with self._db() as store:
-            active = await store.runs.active()
-        for row in active:
-            if row.owner == self._owner and row.state is RunState.QUEUED:
-                self._enqueue(row.id)
-
     async def run_supervisor(self) -> None:
-        """Run the checks this process queued, each in a task of its own under the semaphore.
-
-        Rows queued before it ran are picked up by the keeper's next pass.
-        """
+        """Admit an owner's oldest queued checks up to the process limit."""
         async with asyncio.TaskGroup() as group:
             self._group = group
             group.create_task(self._beat(), name="check-heartbeats")
+            self._wake.set()
             try:
                 while True:
-                    check_id = await self._queue.get()
-                    group.create_task(self._supervised(check_id), name=f"check-{check_id}")
+                    await self._wake.wait()
+                    self._wake.clear()
+                    slots = self._admission_limit - len(self._admitted)
+                    if slots > 0:
+                        await self._admit(group, slots)
             finally:
                 self._group = None
+
+    async def _admit(self, group: asyncio.TaskGroup, slots: int) -> None:
+        try:
+            async with self._db() as store:
+                ready = await store.runs.queued(
+                    self._owner, self._admitted | self._running.keys(), slots
+                )
+        except Exception:
+            logger.exception("queued checks could not be read")
+            return  # the keeper wakes the supervisor after its next pass
+        for check_id in ready:
+            self._admitted.add(check_id)
+            group.create_task(self._supervised(check_id), name=f"check-{check_id}")
 
     async def _supervised(self, check_id: int) -> None:
         try:
             await self.execute(check_id)
+        except asyncio.CancelledError:
+            self._wake.set()
+            raise
         except Exception:
             logger.exception("check %s failed", check_id)
+        else:
+            self._wake.set()
+        finally:
+            self._admitted.discard(check_id)
 
     async def run_keeper(
         self, interval: float = KEEPER_INTERVAL_S, first_pass_after: float = FIRST_PASS_S

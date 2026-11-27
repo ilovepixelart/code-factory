@@ -89,10 +89,34 @@ async def test_heartbeat_batch_refreshes_only_active_rows_of_its_owner(
         assert (row.state, row.beat_at) == (RunState.LOST, original)
 
 
-async def test_the_supervisor_batches_a_burst_into_one_heartbeat(
-    checks: CheckService, options: CheckOptions, monkeypatch: pytest.MonkeyPatch
+async def test_a_live_supervisor_keeps_its_waiting_rows_alive_until_it_disappears(
+    checks: CheckService, uow: UnitOfWork, clock: Clock
 ) -> None:
-    ids = list(range(1, 33))
+    waiting = await insert(uow, "CF-1", clock)
+    abandoned = await insert(uow, "CF-2", clock, owner="dead-process")
+    clock.after(seconds=50)
+    async with uow() as session:
+        assert await CheckStore(session).runs.beat([], "me", clock.now, queued=True)
+    clock.after(seconds=11)
+    assert await checks.reconcile() == 1
+    assert (await checks.get(waiting)).state is RunState.QUEUED
+    assert (await checks.get(abandoned)).state is RunState.LOST
+    clock.after(seconds=50)
+    assert await checks.reconcile() == 1
+    assert (await checks.get(waiting)).state is RunState.LOST
+
+
+async def test_the_supervisor_batches_a_burst_into_one_heartbeat(
+    checks: CheckService,
+    options: CheckOptions,
+    uow: UnitOfWork,
+    clock: Clock,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ids = [
+        await insert(uow, f"CF-{number + 1}", clock, owner=checks._owner)
+        for number in range(options.concurrency)
+    ]
     observed: list[list[int]] = []
     recorded = asyncio.Event()
     parked = asyncio.Event()
@@ -107,18 +131,18 @@ async def test_the_supervisor_batches_a_burst_into_one_heartbeat(
         finally:
             del running[check_id]
 
-    async def record(_store: RunStore, check_ids: list[int], _owner: str, _now: datetime) -> bool:
+    async def record(
+        _store: RunStore, check_ids: list[int], _owner: str, _now: datetime, *, queued: bool = False
+    ) -> bool:
+        assert queued
         if not recorded.is_set():
             observed.append(check_ids)
             recorded.set()
         return True
 
-    monkeypatch.setattr(checks, "_supervised", hold)
+    monkeypatch.setattr(checks, "execute", hold)
     monkeypatch.setattr(checks, "_opts", replace(options, heartbeat_s=0.1))
     monkeypatch.setattr(RunStore, "beat", record)
-    for check_id in ids:
-        checks._queue.put_nowait(check_id)
-
     supervisor = asyncio.create_task(checks.run_supervisor())
     try:
         await asyncio.wait_for(recorded.wait(), timeout=3)
@@ -127,6 +151,53 @@ async def test_the_supervisor_batches_a_burst_into_one_heartbeat(
         supervisor.cancel()
         await asyncio.gather(supervisor, return_exceptions=True)
     assert not running
+
+
+async def test_a_queued_burst_stays_in_the_database_until_there_is_capacity(
+    checks: CheckService, uow: UnitOfWork, clock: Clock, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    limit = checks._opts.concurrency
+    ids = [
+        await insert(uow, f"CF-{number + 1}", clock, owner=checks._owner)
+        for number in range(limit + 3)
+    ]
+    admitted: list[int] = []
+    filled = asyncio.Event()
+    next_started = asyncio.Event()
+    park = asyncio.Event()
+
+    async def hold(check_id: int) -> None:
+        task = asyncio.current_task()
+        assert task is not None
+        checks._running[check_id] = task
+        admitted.append(check_id)
+        if len(admitted) == limit:
+            filled.set()
+        if len(admitted) == limit + 1:
+            next_started.set()
+        try:
+            await park.wait()
+        except asyncio.CancelledError:
+            if check_id == ids[0]:
+                await checks._lose(check_id)
+            raise
+        finally:
+            del checks._running[check_id]
+
+    monkeypatch.setattr(checks, "execute", hold)
+    supervisor = asyncio.create_task(checks.run_supervisor())
+    try:
+        await asyncio.wait_for(filled.wait(), timeout=3)
+        await checks.tick()
+        assert admitted == ids[:limit]
+        assert (await checks.get(ids[-1])).state is RunState.QUEUED
+        await checks.stop(ids[0])
+        await asyncio.wait_for(next_started.wait(), timeout=3)
+        assert admitted == ids[: limit + 1]
+        assert (await checks.get(ids[0])).state is RunState.LOST
+    finally:
+        supervisor.cancel()
+        await asyncio.gather(supervisor, return_exceptions=True)
 
 
 async def test_an_ended_run_cannot_be_stopped_again(

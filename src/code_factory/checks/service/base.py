@@ -114,11 +114,12 @@ class CheckBase:
         )
         locks = state.with_name(f"{state.name}-locks")
         self._heavy = HeavyLockFile(locks / LOCK_FILE)
-        self._slots = asyncio.Semaphore(max(options.concurrency, 1))
-        self._queue: asyncio.Queue[int] = asyncio.Queue(maxsize=64)
+        self._admission_limit = max(options.concurrency, 1)
+        self._slots = asyncio.Semaphore(self._admission_limit)
+        self._wake = asyncio.Event()
+        self._admitted: set[int] = set()
         self._group: asyncio.TaskGroup | None = None
         self._running: dict[int, asyncio.Task[object]] = {}
-        self._known: set[int] = set()
         self._permits: dict[int, Permit] = {}
         self._trees: dict[int, str] = {}
         self._verifying: set[str] = set()
