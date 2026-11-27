@@ -311,6 +311,20 @@ uv run --no-sync python scripts/gate_spec_lock.py seal /owner/spec-receipt.json 
 sh scripts/gate.sh --spec-lock /owner/spec-receipt.json
 ```
 
+A trusted runner can also supply all expected failures in a TOML manifest outside the checkout.
+Give each case its own entry with the exact expected assertion message.
+
+```toml
+[[checks]]
+node = "tests/test_example.py::test_new_behaviour"
+reason = "the new behaviour is required"
+```
+
+```sh
+uv run --no-sync python scripts/gate_spec_lock.py seal /owner/spec-receipt.json \
+  --manifest /owner/spec-checks.toml
+```
+
 To keep acceptance cases private until QA, put them in `qa-holdouts/CF-<n>.md` inside the board's
 state directory. Enable the `qa` review role and use the board's normal agent sandbox, which
 blocks Build's access to that directory. The QA run can read only its own ticket's cases through

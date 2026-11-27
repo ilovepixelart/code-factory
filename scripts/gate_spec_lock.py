@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import tomllib
 from pathlib import Path, PurePosixPath
 from xml.etree import ElementTree as ET
 
@@ -38,6 +39,30 @@ def source(node: str) -> str:
 def digest(data: bytes) -> str:
     """The content identifier recorded by the trusted runner."""
     return hashlib.sha256(data).hexdigest()
+
+
+def manifest_checks(root: Path, manifest: Path) -> list[tuple[str, str]]:
+    """Read the trusted runner's expected assertion checks."""
+    if manifest.resolve().is_relative_to(root):
+        msg = "keep the spec checks manifest outside the project checkout"
+        raise ValueError(msg)
+    with manifest.open("rb") as file:
+        data = tomllib.load(file)
+    entries = data.get("checks")
+    if data.keys() != {"checks"} or not isinstance(entries, list) or not entries:
+        msg = "the manifest must contain at least one [[checks]] entry"
+        raise ValueError(msg)
+    checks = []
+    for number, entry in enumerate(entries, start=1):
+        if not isinstance(entry, dict) or entry.keys() != {"node", "reason"}:
+            msg = f"checks[{number}] must contain node and reason"
+            raise ValueError(msg)
+        node, reason = entry["node"], entry["reason"]
+        if not isinstance(node, str) or not isinstance(reason, str):
+            msg = f"checks[{number}] must give node and reason as strings"
+            raise TypeError(msg)
+        checks.append((node, reason))
+    return checks
 
 
 def checked_file(root: Path, path: str) -> bytes:
@@ -92,11 +117,15 @@ def seal(root: Path, receipt: Path, checks: list[tuple[str, str]]) -> int:
     files: dict[str, str] = {}
     for node, reason in checks:
         path = source(node)
-        if not reason or "\n" in reason:
+        if not reason.strip() or "\n" in reason or "\r" in reason:
             msg = "the expected assertion message must be one nonempty line"
             raise ValueError(msg)
         files[path] = digest(git("show", f"{head}:{path}").stdout)
-        if digest(checked_file(root, path)) != files[path] or not expected_assertion(node, reason):
+    if any(digest(checked_file(root, path)) != value for path, value in files.items()):
+        msg = "a named test file differs from the committed spec"
+        raise ValueError(msg)
+    for node, reason in checks:
+        if not expected_assertion(node, reason):
             print(f"Spec lock refused {node}. The expected assertion did not fail.")
             return 1
     if any(digest(checked_file(root, path)) != value for path, value in files.items()):
@@ -147,17 +176,19 @@ def main() -> int:
     actions = parser.add_subparsers(dest="action", required=True)
     sealing = actions.add_parser("seal")
     sealing.add_argument("receipt", type=Path)
-    sealing.add_argument(
-        "--check", nargs=2, metavar=("NODE", "REASON"), action="append", required=True
-    )
+    inputs = sealing.add_mutually_exclusive_group(required=True)
+    inputs.add_argument("--check", nargs=2, metavar=("NODE", "REASON"), action="append")
+    inputs.add_argument("--manifest", type=Path)
     actions.add_parser("verify").add_argument("receipt", type=Path)
     args = parser.parse_args()
     try:
         root = Path(git("rev-parse", "--show-toplevel").stdout.decode().strip()).resolve()
         receipt = args.receipt.absolute()
+        manifest = args.manifest.absolute() if args.action == "seal" and args.manifest else None
         os.chdir(root)
         if args.action == "seal":
-            return seal(root, receipt, args.check)
+            checks = manifest_checks(root, manifest) if manifest is not None else args.check
+            return seal(root, receipt, checks)
         return verify(root, receipt)
     except (
         OSError,
