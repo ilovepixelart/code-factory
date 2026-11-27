@@ -36,6 +36,25 @@ def _hold_alternates(tree: Path) -> None:
         return
 
 
+async def reserve_clone(root: Path, tree: Path) -> None:
+    """Reserve a new clone's folder without following a link or reusing someone else's tree."""
+
+    def reserve() -> None:
+        msg = f"{tree} is not directly in {root}'s folder of board trees, reached by no link"
+        if tree.parent.parent.is_symlink():
+            raise ConflictError(msg)
+        tree.parent.mkdir(parents=True, exist_ok=True)
+        if not _directly_in_trees(root, tree):
+            raise ConflictError(msg)
+        try:
+            tree.mkdir()
+        except FileExistsError:
+            msg = f"{tree} exists with no record, so the board neither uses nor deletes it"
+            raise ConflictError(msg) from None
+
+    await threaded(reserve)
+
+
 async def make_clone(runner: GitRunner, root: Path, tree: Path, start: str, token: str) -> None:
     """A repository of its own holding the main repository's refs, checked out at `start`.
 

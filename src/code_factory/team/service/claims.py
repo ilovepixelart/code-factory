@@ -90,8 +90,8 @@ class Claims(ServiceBase):
             decided = await self._decide(
                 await repo.all(), ticket_id, stage, now, flags=(other_model, escalate)
             )
-            await repo.replace(number, decided.agent.name if decided.agent else "", now)
-            return decided
+            lease_id = await repo.replace(number, decided.agent.name if decided.agent else "", now)
+            return decided.model_copy(update={"lease_id": lease_id})
 
     async def start_refusal(
         self, ticket_id: str, stage: str, *, other_model: bool = False, escalate: bool = False
@@ -107,15 +107,30 @@ class Claims(ServiceBase):
             return str(refused)
         return None
 
-    async def attach_run(self, ticket_id: str, run_id: str) -> None:
+    async def beat_start(self, ticket_id: str, lease_id: int) -> bool:
+        """Keep the exact starting claim while it still holds."""
+        number = rules.claim_number(ticket_id)
+        async with self._exclusive() as repo:
+            if await repo.id_for(number) != lease_id:
+                return False
+            leases = await repo.all([number])
+            now = self._seconds(None)
+            if not rules.holds(leases[ticket_id], await self._lease_runs(leases), now):
+                return False
+            await repo.beat([number], now)
+            return True
+
+    async def attach_run(self, ticket_id: str, run_id: str, *, lease_id: int | None = None) -> None:
         """Record a run under the ticket's claim; `NotFoundError` when it has no claim."""
         number = rules.claim_number(ticket_id)
         async with self._exclusive() as repo:
-            if not await repo.attach(number, run_id):
+            if not await repo.attach(number, run_id, expected=lease_id):
                 msg = f"{ticket_id} has no claim to record run {run_id} under; claim it first"
                 raise NotFoundError(msg)
 
-    async def end_claim(self, ticket_id: str, *, run_id: str | None = None) -> None:
+    async def end_claim(
+        self, ticket_id: str, *, run_id: str | None = None, lease_id: int | None = None
+    ) -> None:
         """Delete the ticket's claim; `NotFoundError` when it has none.
 
         With `run_id`, only a claim that run is recorded under: a run that ends after its claim was
@@ -123,6 +138,8 @@ class Claims(ServiceBase):
         """
         number = rules.claim_number(ticket_id)
         async with self._exclusive() as repo:
+            if lease_id is not None and await repo.id_for(number) != lease_id:
+                raise ConflictError("the ticket's starting claim changed")
             lease = (await repo.all([number])).get(ticket_id)
             if lease is None:
                 raise NotFoundError(f"{ticket_id} has no claim")

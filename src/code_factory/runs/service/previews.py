@@ -102,9 +102,11 @@ class PreviewService:
         facts = await self._ports.tickets.facts(ticket_id)
         settings = await self._ports.config.settings(facts.repository)
         record = await self._live(facts.number)
+        configured = settings.preview_command is not None
         return PreviewStatus(
-            configured=settings.preview_command is not None,
+            configured=configured,
             running=record is not None,
+            unavailable_reason=self._setup.unavailable_reason() if configured else None,
             port=None if record is None else record.port,
             address=None if record is None else preview_address(self._board, record.port),
             started=None if record is None else record.started_at,
@@ -121,6 +123,8 @@ class PreviewService:
         settings = await self._ports.config.settings(facts.repository)
         if settings.preview_command is None:
             raise ConflictError(NO_COMMAND)
+        if (reason := self._setup.unavailable_reason()) is not None:
+            raise UnavailableError(reason)
         tree = await self._setup.tree_of(facts.repository, ticket_id)
         if tree is None:
             msg = f"{ticket_id} has no worktree to preview"

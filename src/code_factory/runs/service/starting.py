@@ -1,10 +1,13 @@
 """Starting a run: guards, the claim, the checks, the tree, the row, the process."""
 
+import asyncio
 import logging
 import secrets
 from copy import copy
 from dataclasses import dataclass, field
 from pathlib import Path
+
+import anyio
 
 from code_factory.platform.errors import (
     BadRequestError,
@@ -36,6 +39,7 @@ SETTINGS_CHANGED = (
 )
 STAGES_WITH_NO_AGENT = ("merged",)
 TOKEN_GRACE_S = 300
+START_BEAT_S = 10.0
 UNKNOWN = -1
 
 
@@ -62,6 +66,7 @@ class _Start:
     spawned: Spawned | None = None
     attached: bool = False
     reserving_repair: bool = False
+    lease_id: int | None = None
     count: int = 1
 
     def made(self) -> tuple[Run, Tree, Given]:
@@ -157,7 +162,31 @@ class Starting(Reading):
         claimed = await self._ports.teams.claim_for_run(ticket_id, begin.stage, begin.settings)
         if repair is None:
             begin.count = budget_rules.attempt_count(facts.parallel, begin.settings.attempts)
-        return Started(runs=await self._start_attempts(begin, claimed.agent))
+        begin.lease_id = claimed.lease_id
+        if claimed.lease_id is None:
+            return Started(runs=await self._start_attempts(begin, claimed.agent))
+        with anyio.CancelScope() as preparing:
+            beat = asyncio.create_task(self._keep_start(ticket_id, claimed.lease_id, preparing))
+            try:
+                return Started(runs=await self._start_attempts(begin, claimed.agent))
+            finally:
+                beat.cancel()
+                with anyio.CancelScope(shield=True):
+                    await asyncio.gather(beat, return_exceptions=True)
+        raise ConflictError("the ticket's starting claim changed")
+
+    async def _keep_start(
+        self, ticket_id: str, lease_id: int, preparing: anyio.CancelScope
+    ) -> None:
+        """Refresh the starting claim until its run is attached, or cancel a displaced start."""
+        try:
+            while True:
+                await asyncio.sleep(START_BEAT_S)
+                if not await self._ports.teams.beat_start(ticket_id, lease_id):
+                    break
+        except Exception:
+            logger.exception("could not refresh the starting claim of %s", ticket_id)
+        preparing.cancel()
 
     async def _start_attempts(self, first: _Start, agent: str) -> list[Run]:
         """One run, or a build's parallel attempts one after the other under the one claim.
@@ -175,7 +204,8 @@ class Starting(Reading):
                 await self._begin(begin, agent)
                 runs.append(await self._launch(begin))
             except BaseException as failure:
-                await self._abandon(begin, failure, release_claim=not runs)
+                with anyio.CancelScope(shield=True):
+                    await self._abandon(begin, failure, release_claim=not runs)
                 raise
             first.given = begin.given  # one probe for every attempt
         return runs
@@ -265,7 +295,7 @@ class Starting(Reading):
             if not await repo.set_pid(run.id, spawned.pid, spawned.started_at):
                 raise ConflictError(HALTED)  # a halt ended the row while the process started
             await repo.change(run.id, instructions=launch.digest, memory_digest=digest)
-        await self._ports.teams.attach_run(facts.id, run.id)
+        await self._ports.teams.attach_run(facts.id, run.id, lease_id=begin.lease_id)
         begin.attached = True
         await self._ports.tickets.record_event(
             facts.id,
@@ -303,7 +333,7 @@ class Starting(Reading):
             await self._remove_made(begin)
         if release_claim:
             under = run.id if run is not None and begin.attached else None
-            await self._ports.teams.end_claim(begin.facts.id, under)
+            await self._ports.teams.end_claim(begin.facts.id, under, lease_id=begin.lease_id)
 
     async def _remove_made(self, begin: _Start) -> None:
         """Remove the tree the start made, and the branch it gave the ticket on its first attempt.

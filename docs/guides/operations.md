@@ -76,6 +76,23 @@ uv run code-factory serve 2>>~/.local/state/code-factory/serve.log   # the link 
 The password never appears in a log, an error or a `repr`: the database target in messages is
 `host:port/database`.
 
+## Agent worktree setup
+
+Set `[agents] setup` and optionally `setup_timeout` in the main checkout's
+`.code-factory/config.toml`. The command runs once when Factory creates a new agent clone.
+Its default time limit is 600 seconds. It uses the repository's agent sandbox policy and its permitted package hosts. It must exit
+successfully before the clone can be used. On failure Factory removes the incomplete clone
+and keeps the setup log. An owner's linked worktree is prepared by the owner. The follower
+budgets two minutes for a scheduling step, including the starts it attempts in that step.
+Use a short setup for repositories the follower starts automatically.
+The `[agents] teardown` key is reserved. Clone removal does not execute it.
+
+## Ticket previews
+
+`[preview] command` configures a preview on the ticket page. The board requires an isolated
+preview runtime with its own listener and routing before it can start that command. The
+current deployment reports this requirement on the ticket page and in the preview API.
+
 ## Files outside the database
 
 Everything below lives under `CODE_FACTORY_STATE_DIR`. The default for plain `serve` is
@@ -86,6 +103,7 @@ by default, and Server mode uses `/data/state` in its named volume.
 |---|---|---|
 | `runs/<run>.log` | a run's output, streamed by its process | `runs/service/base.py` |
 | `runs/<run>.exit`, `runs/<run>.patterns.json` | the exit code the run wrapper writes; the patterns it redacts output with | `runs/service/base.py` |
+| `hooks/<tree>.setup.log` | output of the repository setup for a new agent clone | `checks/service/__init__.py` |
 | `previews/<ticket>.log` | a ticket preview's output | `runs/service/previews.py` |
 | `checks/` | the checks command's logs, read back in the Inbox and on a ticket | `checks/adapters/logs.py` |
 | `captures/` | screen captures waiting on the owner (`code-factory shoot`) | `screens/module.py` |

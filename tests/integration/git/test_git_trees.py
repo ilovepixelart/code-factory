@@ -364,3 +364,16 @@ async def test_reconcile_drops_rows_of_gone_folders_and_names_unrecorded_ones(
     shutil.rmtree(clone)
     assert await service.reconcile_trees("sample") == ["stray"]
     assert [t.name for t in await service.list_trees("sample")] == ["stray"]
+
+
+async def test_a_new_agent_clone_does_not_create_folders_through_a_link(
+    service: GitService, root: Path, tmp_path: Path
+) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (root / ".code-factory").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(ConflictError, match="reached by no link"):
+        await service.start_worktree("sample", "CF-1")
+
+    assert list(outside.iterdir()) == []
