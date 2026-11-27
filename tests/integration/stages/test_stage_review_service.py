@@ -6,11 +6,15 @@ implementation's (`Review before merge: ...`).
 
 from datetime import timedelta
 from pathlib import Path
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
+from code_factory.checks.service import CheckService
 from code_factory.platform.errors import ConflictError, UnavailableError
+from code_factory.platform.services import Services
 from code_factory.repositories.service import RepositoryService
+from code_factory.runs.service.flow import FlowAdapter
 from code_factory.stages.service import StageService
 from code_factory.tickets.models import (
     Finding,
@@ -143,16 +147,27 @@ async def _in_review(tickets: TicketService, started: Ticket) -> None:
     await tickets.set_pull_request(started.id, pull, by=OWNER)
 
 
+def _flow(stages: StageService) -> tuple[FlowAdapter, AsyncMock]:
+    services = Services()
+    services.add(StageService, stages)
+    queue = AsyncMock()
+    services.add(CheckService, Mock(spec=CheckService, queue_head=queue))
+    return FlowAdapter(services), queue
+
+
 async def test_a_returned_ticket_whose_fix_committed_goes_back_to_review(
     stages: StageService, reviews: ReviewService, tickets: TicketService, started: Ticket
 ) -> None:
     await _in_review(tickets, started)
     await reviews.submit_review(started.id, CHANGES, by=RUN)
     await stages.apply_review(started.id, RUN, "h1")
+    await stages.record_review_skipped(started.id, "h2", "small", "safe change")
     assert await stages.repair_requests([started.id]) == {started.id: [NOW.timestamp()]}
+    flow, queue = _flow(stages)
 
-    await stages.fix_committed(started.id)
+    await flow.build_ended(started.id, "h2")
 
+    queue.assert_awaited_once_with(started.id, "h2", review_fix=True)
     found = await stages.assess(started.id)
     assert (found.declared, found.stage) == ("", "review")
 
@@ -162,23 +177,29 @@ async def test_a_ticket_the_owner_pinned_to_build_keeps_its_pin_after_a_commit(
 ) -> None:
     await _in_review(tickets, started)
     await stages.declare(started.id, "build", OWNER)
+    flow, queue = _flow(stages)
 
-    await stages.fix_committed(started.id)
+    await flow.build_ended(started.id, "h2")
 
+    queue.assert_awaited_once_with(started.id, "h2", review_fix=False)
     assert (await stages.assess(started.id)).declared == "build"
 
 
+@pytest.mark.parametrize("pin", ["spec", "build"])
 async def test_a_pin_set_after_the_review_returned_the_ticket_is_kept(
-    stages: StageService, reviews: ReviewService, tickets: TicketService, started: Ticket
+    stages: StageService, reviews: ReviewService, tickets: TicketService, started: Ticket, pin: str
 ) -> None:
     await _in_review(tickets, started)
     await reviews.submit_review(started.id, CHANGES, by=RUN)
     await stages.apply_review(started.id, RUN, "h1")
-    await stages.declare(started.id, "spec", OWNER)
+    returned_at = await stages.review_return_at(started.id)
+    assert returned_at == NOW
+    await stages.declare(started.id, pin, OWNER)
+    assert await stages.review_return_at(started.id) is None
 
-    await stages.fix_committed(started.id)
+    await stages.fix_committed(started.id, returned_at=returned_at)
 
-    assert (await stages.assess(started.id)).declared == "spec"
+    assert (await stages.assess(started.id)).declared == pin
 
 
 async def test_the_review_stops_returning_the_ticket_at_its_round_cap_and_tells_the_owner(

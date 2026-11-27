@@ -271,6 +271,37 @@ class StageRepository:
             for r in rows
         ]
 
+    async def review_return_at(self, number: int, by: str) -> datetime | None:
+        """The latest effective review's timestamp while its Build declaration still holds."""
+        verdict, pin = ReviewVerdictRow, StageDeclarationRow
+        latest = (
+            select(verdict.outcome, verdict.at)
+            .where(verdict.ticket_number == number, verdict.outcome != "skipped")
+            .order_by(verdict.id.desc())
+            .limit(1)
+            .subquery()
+        )
+        return await self._session.scalar(
+            select(pin.at)
+            .join(latest, pin.at == latest.c.at)
+            .where(
+                pin.ticket_number == number,
+                pin.stage == "build",
+                pin.by == by,
+                latest.c.outcome == "returned",
+            )
+        )
+
+    async def clear_review_return(self, number: int, by: str, at: datetime) -> bool:
+        """Clear only the Build declaration made by the observed review return."""
+        pin = StageDeclarationRow
+        removed = await self._session.execute(
+            delete(pin).where(
+                pin.ticket_number == number, pin.stage == "build", pin.by == by, pin.at == at
+            )
+        )
+        return _one(removed)
+
     async def add_verdict(  # noqa: PLR0913  # one row's columns
         self,
         number: int,
