@@ -39,7 +39,7 @@ function fixed(value: number, places: number): string {
   const [whole = '0', fraction = ''] = exact.split('.')
   const kept = fraction.slice(0, places)
   const rest = fraction.slice(places)
-  const half = rest.replace(/0+$/, '') === '5'
+  const half = /^50*$/.test(rest)
   const above = rest > '5' && !half
   const last = Number(kept.at(-1) ?? whole.at(-1) ?? '0')
   const up = above || (half && last % 2 === 1)
@@ -63,9 +63,17 @@ export function money(value: number): string {
   return `${value < 0 ? '-' : ''}$${thousands(whole)}.${fraction}`
 }
 
+/** Digits with a comma before every group of three counted from the right. */
+function groupDigits(digits: string): string {
+  const lead = digits.length % 3 || 3
+  const groups = [digits.slice(0, lead)]
+  for (let at = lead; at < digits.length; at += 3) groups.push(digits.slice(at, at + 3))
+  return groups.join(',')
+}
+
 /** A whole number with its thousands separated: `18,240`. */
 export function thousands(value: number | string): string {
-  return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return String(value).replace(/\d+/g, groupDigits)
 }
 
 /**
@@ -176,13 +184,26 @@ export function spendTitle(what: string, estimated = false): string {
   return estimated ? `${what}; ${ESTIMATE_NOTE}` : what
 }
 
+const ESTIMATE_MARK = new Map([
+  [true, '~'],
+  [false, ''],
+])
+
 /** A cost in dollars, led by `~` when a part of it is the board's estimate (CF-1216). */
 export function cost(value: number, estimated = false): string {
-  return estimated ? `~${money(value)}` : money(value)
+  return `${ESTIMATE_MARK.get(estimated) ?? ''}${money(value)}`
 }
 
 /** How close a ticket's agent spend is to its budget: over it, within the last fifth, or neither. */
 export function spendLevel(spent: number, budget: number | null): 'over' | 'watch' | 'normal' {
   if (budget === null) return 'normal'
-  return spent >= budget ? 'over' : spent >= budget * 0.8 ? 'watch' : 'normal'
+  if (spent >= budget) return 'over'
+  return spent >= budget * 0.8 ? 'watch' : 'normal'
+}
+
+/** `text` without the slashes that end it. */
+export function withoutTrailingSlashes(text: string): string {
+  let end = text.length
+  while (end > 0 && text[end - 1] === '/') end -= 1
+  return text.slice(0, end)
 }

@@ -1,7 +1,7 @@
 // How the Sessions page reads a session: its state as the person sees it, what it is doing and
 // the repository and branch it is on (CF-1204).
 
-import { span, trim } from './format'
+import { span, trim, withoutTrailingSlashes } from './format'
 import type { Entry, Session } from './sessions'
 
 /** The filter chips, in the order they show: a session's state, stale apart from the rest. */
@@ -23,7 +23,7 @@ export function filterOf(value: unknown): StateFilter | null {
 /** `text` with every path inside the session's folder written from that folder; a folder that is
  * the root (or none) leaves the text as it is. */
 export function fromFolder(text: string, cwd: string): string {
-  const folder = cwd.replace(/\/+$/, '')
+  const folder = withoutTrailingSlashes(cwd)
   return folder ? text.replaceAll(`${folder}/`, '') : text
 }
 
