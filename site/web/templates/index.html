@@ -80,8 +80,8 @@
 <section id="how" class="{{ band }} bg-muted/50 scroll-mt-14">
   <div class="{{ pad }}">
     {{ heading('Workflow', 'How tickets move through the board',
-       'File a ticket on the board or bring work in from GitHub, Linear, Jira or Slack. The board
-        reads branch, pull request and merge status from Git. You can also set a ticket’s column yourself.') }}
+       'File a ticket on the board or bring work in from GitHub, Linear, Jira or Slack. Factory
+        uses branch, pull request and merge status to place tickets. You can also set a ticket’s column yourself.') }}
     {# stage, dot and meaning follow stages/rules/evidence.py and STAGE_DOT in
        web/src/lib/board.ts; a test pins this list to the board's stages. #}
     <dl class="{{ lede }} grid sm:grid-cols-2 lg:grid-cols-5 gap-x-10 gap-y-8">
