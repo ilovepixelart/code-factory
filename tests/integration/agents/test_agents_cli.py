@@ -184,3 +184,16 @@ async def test_a_failed_rotation_keeps_the_grant_the_old_key_was_stored_under(
     kept = await settings.intake_grant(name)
     assert kept is not None
     assert kept.repository == "/old"
+
+
+async def test_the_connections_status_says_a_connection_that_does_not_answer_and_why(
+    agents: AgentService, services: Services, capsys: pytest.CaptureFixture[str]
+) -> None:
+    await agents.add_connection(
+        ConnectionChange(name="gone", kind="custom", base_url="http://127.0.0.1:9")
+    )
+    assert await run(connections_command, services, action="status") == 0
+    lines = capsys.readouterr().out.splitlines()
+    assert lines[0].split() == ["NAME", "ANSWERS", "MODELS", "PROBLEM"]
+    assert lines[1].split()[:3] == ["gone", "no", "-"]
+    assert len(lines[1].split()) > 3  # a problem sentence follows
