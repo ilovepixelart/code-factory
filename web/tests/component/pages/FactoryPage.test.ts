@@ -82,6 +82,23 @@ describe('the read', () => {
 })
 
 describe('the tiles', () => {
+  test('merged cost shows the median and how many merges could be priced', async () => {
+    await show('/analytics/factory', (dashboard) => {
+      dashboard.merged_cost = {
+        median: 126.25,
+        priced: 2,
+        merged: 4,
+        owner_recorded: 3,
+        estimated: false,
+      }
+    })
+    const text =
+      document.getElementById('merged-cost-heading')?.closest('section')?.textContent ?? ''
+    expect(text).toContain('$126.25')
+    expect(text).toContain('2 of 4 merges have complete costs.')
+    expect(text).toContain('Owner time recorded for 3.')
+  })
+
   test('analytics shows fix-round outcomes and role notes linked to fixed findings', async () => {
     await show('/analytics/factory?role_notes_sort=share&role_notes_dir=desc', (dashboard) => {
       dashboard.fix_rounds = [

@@ -8,6 +8,8 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
+MAX_SAFE_JSON_INT = 2**53 - 1
+
 
 class Frozen(BaseModel):
     """A value that never changes after it is built."""
@@ -249,6 +251,25 @@ class CostSummary(Frozen):
     by_size: list[SizeCost]
 
 
+class OwnerTime(Frozen):
+    """An owner's recorded active time and USD hourly rate for one pull request."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+    pull_url: str = Field(min_length=1, max_length=2048)
+    active_minutes: int = Field(ge=0, le=MAX_SAFE_JSON_INT)
+    hourly_rate_usd: float = Field(ge=0, le=MAX_SAFE_JSON_INT)
+
+
+class MergedCost(Frozen):
+    """Median including owner time, over merges with a time entry and complete run costs."""
+
+    median: float | None
+    priced: int
+    owner_recorded: int
+    merged: int
+    estimated: bool
+
+
 class KeyCount(Frozen):
     """Runs sharing one value of a breakdown key."""
 
@@ -350,6 +371,7 @@ class Dashboard(Frozen):
     autonomy: Autonomy
     cycle: CycleSummary
     cost: CostSummary
+    merged_cost: MergedCost
     expensive: list[ExpensivePr]
     scorers: Scorers
     improvements: Improvements

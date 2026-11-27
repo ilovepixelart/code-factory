@@ -1134,3 +1134,16 @@ One saved view: its name and the board's address query (`type=bug&sort=title`).
 | `id` | `BIGINT` | no | identity | primary key |
 | `name` | `TEXT` | no |  |  |
 | `query` | `TEXT` | no |  |  |
+
+## factory
+
+### factory_owner_time
+
+The active minutes and USD hourly rate recorded for one ticket's merged PR.
+
+| Column | Type | Null | Default | Key |
+|---|---|---|---|---|
+| `ticket_id` | `TEXT` | no |  | primary key |
+| `pull_url` | `TEXT` | no |  | primary key |
+| `active_minutes` | `BIGINT` | no |  |  |
+| `hourly_rate_usd` | `FLOAT` | no |  |  |

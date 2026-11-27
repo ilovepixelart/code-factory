@@ -9,6 +9,7 @@ import ExpensiveTable from '../components/factory/ExpensiveTable.vue'
 import AnalyticsFrame from '../components/AnalyticsFrame.vue'
 import FactoryTiles from '../components/factory/FactoryTiles.vue'
 import FixRoundsTable from '../components/factory/FixRoundsTable.vue'
+import MergedCostSection from '../components/factory/MergedCostSection.vue'
 import RoleNotesTable from '../components/factory/RoleNotesTable.vue'
 import ImprovementList from '../components/factory/ImprovementList.vue'
 import RunsTable from '../components/factory/RunsTable.vue'
@@ -71,6 +72,8 @@ const closedShare = computed(() => {
 
       <FixRoundsTable v-if="dashboard.fix_rounds?.length" :rows="dashboard.fix_rounds" />
       <RoleNotesTable v-if="dashboard.role_notes?.length" :rows="dashboard.role_notes" />
+
+      <MergedCostSection :summary="dashboard.merged_cost" />
 
       <SectionCard heading="cost-heading" title="Cost per PR" :empty="!dashboard.cost.priced">
         <template #empty

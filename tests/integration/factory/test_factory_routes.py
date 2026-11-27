@@ -10,8 +10,15 @@ from fastapi import FastAPI
 
 from code_factory.factory.models import ImprovementPR, Improvements, PullState, ScorerCards
 from code_factory.factory.service import FactoryPorts, FactoryService
-from factory_fakes import FakeCosts, FakeImprovements, FakePulls, FakeRuns, FakeScorers
-from factory_values import CARD, COSTS, NOW, OPENED_R1, P0, RUNS
+from factory_fakes import (
+    FakeCosts,
+    FakeImprovements,
+    FakeOwnerTime,
+    FakePulls,
+    FakeRuns,
+    FakeScorers,
+)
+from factory_values import CARD, COSTS, NOW, OPENED_R1, P0, P2, RUNS
 from repo_files import ROOT
 
 RANGE = "from=2026-11-01&to=2026-11-08"
@@ -48,6 +55,7 @@ async def fed(offline_app: FastAPI) -> AsyncGenerator[httpx.AsyncClient]:
         FakeCosts().holding(COSTS),
         scorers,
         improvements,
+        owner_time=FakeOwnerTime(),
     )
     offline_app.state.services.add(FactoryService, FactoryService(ports, now=lambda: NOW))
     transport = httpx.ASGITransport(app=offline_app)
@@ -76,6 +84,33 @@ async def test_the_expensive_route_answers_the_spec_example(fed: httpx.AsyncClie
 async def test_the_scorers_route_answers_the_spec_example(fed: httpx.AsyncClient) -> None:
     response = await fed.get(f"/api/factory/scorers?{RANGE}")
     assert (response.status_code, response.json()) == (200, golden("scorers"))
+
+
+async def test_recording_owner_time_updates_the_merged_pr_cost(fed: httpx.AsyncClient) -> None:
+    path = "/api/factory/tickets/CF-2/owner-time"
+    entry = {"pull_url": P2.url, "active_minutes": 0, "hourly_rate_usd": 120.0}
+    response = await fed.put(path, json=entry)
+    assert (response.status_code, response.json()) == (200, entry)
+    other = await fed.put("/api/factory/tickets/CF-3/owner-time", json=entry)
+    assert (other.status_code, other.json()["detail"]) == (
+        404,
+        "This ticket has no merged pull request with that URL.",
+    )
+    dashboard = (await fed.get(f"/api/factory/dashboard?{RANGE}")).json()
+    assert dashboard["merged_cost"] == {
+        "median": 5.0,
+        "priced": 1,
+        "owner_recorded": 1,
+        "merged": 3,
+        "estimated": False,
+    }
+    for invalid_entry in (
+        {"active_minutes": -1},
+        {"active_minutes": True},
+        {"hourly_rate_usd": 1e100},
+    ):
+        invalid = await fed.put(path, json={**entry, **invalid_entry})
+        assert invalid.status_code == 400
 
 
 async def test_the_improvements_route_answers_the_spec_example(fed: httpx.AsyncClient) -> None:
@@ -138,6 +173,13 @@ async def test_an_empty_board_answers_an_empty_dashboard_not_an_error(
     assert body["prs"] == {"opened": 0, "merged": 0, "merged_in_period": 0, "open": 0, "closed": 0}
     assert body["autonomy"] == {"share": None, "autonomous": 0, "assisted": 0, "unknown": 0}
     assert body["cost"]["median"] is None
+    assert body["merged_cost"] == {
+        "median": None,
+        "priced": 0,
+        "owner_recorded": 0,
+        "merged": 0,
+        "estimated": False,
+    }
     assert body["expensive"] == []
     assert body["scorers"] == {"available": True, "cards": []}
     assert body["improvements"] == {"available": False, "items": []}

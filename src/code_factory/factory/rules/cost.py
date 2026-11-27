@@ -8,6 +8,8 @@ from code_factory.factory.models import (
     ComponentCost,
     CostSummary,
     ExpensivePr,
+    MergedCost,
+    OwnerTime,
     PrCost,
     PullFact,
     RunCost,
@@ -113,6 +115,31 @@ def cost_summary(costed: Sequence[PrCost], measurement: float) -> CostSummary:
         measurement=measurement,
         by_component=_component_costs(priced),
         by_size=_size_costs(costed),
+    )
+
+
+def merged_cost_summary(
+    costed: Sequence[PrCost], recorded: Mapping[tuple[str, str], OwnerTime]
+) -> MergedCost:
+    """Combine measured owner time with complete run costs, counting missing inputs."""
+    totals = []
+    owner_recorded = 0
+    estimated = False
+    for cost in costed:
+        owner = recorded.get((cost.pull.ticket_id or "", cost.pull.url))
+        if owner is None:
+            continue
+        owner_recorded += 1
+        if cost.cost is None or not cost.complete:
+            continue
+        totals.append(cost.cost + owner.active_minutes / 60 * owner.hourly_rate_usd)
+        estimated = estimated or cost.estimated
+    return MergedCost(
+        median=median(totals),
+        priced=len(totals),
+        owner_recorded=owner_recorded,
+        merged=len(costed),
+        estimated=estimated,
     )
 
 

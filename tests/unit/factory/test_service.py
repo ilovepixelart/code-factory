@@ -10,6 +10,7 @@ from code_factory.factory.models import (
     AutonomyClass,
     ImprovementPR,
     Improvements,
+    OwnerTime,
     PullState,
     RunCost,
     ScorerCards,
@@ -23,7 +24,14 @@ from code_factory.factory.ports import (
 )
 from code_factory.factory.service import FactoryPorts, FactoryService
 from code_factory.platform.errors import BadRequestError, UnavailableError
-from factory_fakes import FakeCosts, FakeImprovements, FakePulls, FakeRuns, FakeScorers
+from factory_fakes import (
+    FakeCosts,
+    FakeImprovements,
+    FakeOwnerTime,
+    FakePulls,
+    FakeRuns,
+    FakeScorers,
+)
 from factory_values import (
     CARD,
     COSTS,
@@ -31,6 +39,7 @@ from factory_values import (
     NOW,
     OPENED_R1,
     P0,
+    P1,
     P2,
     RUNS,
     nov,
@@ -46,14 +55,21 @@ ALL_PULLS = [P0, *OPENED_R1]
 class World:
     """The five fakes of one test, and the service over them."""
 
-    def __init__(self, now: float = NOW) -> None:
+    def __init__(self, now: float = NOW, *, owner_time: FakeOwnerTime | None = None) -> None:
         self.runs = FakeRuns().holding(RUNS)
         self.pulls = FakePulls().holding(ALL_PULLS)
         self.costs = FakeCosts().holding(COSTS)
         self.scorers = FakeScorers().holding(ScorerCards(available=True, cards=[CARD]))
         self.improvements = FakeImprovements().holding(Improvements(available=False))
         self.service = FactoryService(
-            FactoryPorts(self.runs, self.pulls, self.costs, self.scorers, self.improvements),
+            FactoryPorts(
+                self.runs,
+                self.pulls,
+                self.costs,
+                self.scorers,
+                self.improvements,
+                owner_time=owner_time,
+            ),
             now=lambda: now,
         )
 
@@ -109,6 +125,37 @@ async def test_the_second_week_has_more_merges_than_openings() -> None:
     world = World(now=nov(15))
     got = await world.service.dashboard("2026-11-08", "2026-11-15")
     assert (got.prs.opened, got.prs.merged, got.prs.merged_in_period) == (0, 0, 2)
+    assert (got.merged_cost.merged, got.merged_cost.priced, got.merged_cost.median) == (2, 0, None)
+
+
+async def test_merged_cost_needs_owner_time_and_complete_run_costs() -> None:
+    owner_time = FakeOwnerTime()
+    world = World(owner_time=owner_time)
+    old_run = run("prior", "CF-0", "build", "builder", "opus", "finished", nov(0))
+    world.runs.holding([old_run, *RUNS])
+    world.costs.holding(
+        {**COSTS, "prior": RunCost(cost=2.0, estimated=True), "r02": RunCost(cost=None)}
+    )
+    for ticket, pr, minutes in (("CF-0", P0, 15), ("CF-1", P1, 0), ("CF-2", P2, 45)):
+        await world.service.record_owner_time(
+            ticket, OwnerTime(pull_url=pr.url, active_minutes=minutes, hourly_rate_usd=120)
+        )
+    await world.service.record_owner_time(
+        "CF-2", OwnerTime(pull_url=P2.url, active_minutes=30, hourly_rate_usd=120)
+    )
+
+    got = (await world.service.dashboard("2026-11-01", "2026-11-08")).merged_cost
+
+    assert (got.merged, got.owner_recorded, got.priced) == (3, 3, 2)
+    assert got.median == 48.5  # ($2 + $30) for the old PR, ($5 + $60) for the other.
+    assert got.estimated is True
+    assert owner_time.calls[-1] == ("recorded", (("CF-0", "CF-1", "CF-2"),))
+
+
+async def test_recording_owner_time_without_its_provider_is_unavailable() -> None:
+    entry = OwnerTime(pull_url=P2.url, active_minutes=10, hourly_rate_usd=120)
+    with pytest.raises(UnavailableError, match="Recording owner time is unavailable"):
+        await World().service.record_owner_time("CF-2", entry)
 
 
 async def test_the_kickoff_is_the_earliest_run_of_the_ticket_even_before_the_range() -> None:

@@ -146,6 +146,14 @@ class DeliveredPulls:
             if p.merged_at is not None and since <= p.merged_at < until
         ]
 
+    async def known_merge(self, ticket: str, url: str) -> bool:
+        """Whether delivery recorded this exact pull as merged for the ticket."""
+        history = await self._services.get(DeliveryService).history()
+        return any(
+            row.pull.ticket_id == ticket and row.pull.url == url and row.merged_at is not None
+            for row in history
+        )
+
 
 def _event(event: DeliveryEvent) -> ActivityRecord:
     data = event.model_dump(exclude={"id", "ticket_id", "kind", "at"})

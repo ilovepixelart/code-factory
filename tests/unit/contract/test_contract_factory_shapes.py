@@ -35,6 +35,7 @@ def test_the_dashboard_shape_accepts_the_empty_answer_of_the_null_providers() ->
         "autonomy": {"share": None, "autonomous": 0, "assisted": 0, "unknown": 0},
         "cycle": {"total": {"median": None, "count": 0}, "stages": []},
         "cost": {**GOLDEN["cost"], "median": None, "by_component": [], "by_size": []},
+        "merged_cost": {**GOLDEN["merged_cost"], "merged": 0},
         "expensive": [],
         "scorers": {"available": False, "cards": []},
         "improvements": {"available": False, "items": []},

@@ -10,7 +10,14 @@ answers the whole range, never one call per pull request. A provider that cannot
 from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
-from code_factory.factory.models import Improvements, PullFact, RunCost, RunFact, ScorerCards
+from code_factory.factory.models import (
+    Improvements,
+    OwnerTime,
+    PullFact,
+    RunCost,
+    RunFact,
+    ScorerCards,
+)
 
 
 @runtime_checkable
@@ -36,6 +43,10 @@ class PullsPort(Protocol):
 
     async def merged(self, since: float, until: float) -> list[PullFact]:
         """Pull requests merged in `[since, until)`, opened in it or before."""
+        ...
+
+    async def known_merge(self, ticket: str, url: str) -> bool:
+        """Whether delivery recorded this exact pull request as merged for the ticket."""
         ...
 
 
@@ -79,4 +90,16 @@ class RoleNotesPort(Protocol):
 
     async def role_note_outcomes(self, since: float, until: float) -> dict[str, tuple[int, int]]:
         """Note counts and fixed note counts by role for notes posted in this window."""
+        ...
+
+
+class OwnerTimePort(Protocol):
+    """Owner-recorded active time, keyed by ticket and pull request URL."""
+
+    async def record(self, ticket: str, entry: OwnerTime) -> None:
+        """Record the current owner time of a merged pull request."""
+        ...
+
+    async def recorded(self, tickets: list[str]) -> dict[tuple[str, str], OwnerTime]:
+        """Read the latest entry for each named ticket and pull request."""
         ...
