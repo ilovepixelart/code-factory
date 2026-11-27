@@ -1,4 +1,5 @@
 import os
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -284,11 +285,13 @@ def test_the_run_directory_is_under_the_runtime_directory_when_there_is_one(
 
 
 def test_the_run_directory_falls_back_to_a_folder_named_for_the_user(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setenv(DATABASE_URL_VARIABLE, URL)
     monkeypatch.delenv("XDG_RUNTIME_DIR", raising=False)
-    assert load_settings().run_dir == Path(f"/tmp/code-factory-{os.getuid()}")  # noqa: S108  # the documented fallback
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    monkeypatch.setattr(tempfile, "tempdir", None)  # tempfile caches the folder it chose first
+    assert load_settings().run_dir == tmp_path / f"code-factory-{os.getuid()}"
 
 
 def test_stop_at_eof_is_off_until_asked_for(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -359,7 +362,11 @@ def test_a_bad_password_url_from_a_file_is_refused_without_echoing_it(
     assert LEAK_MARKER not in str(raised.value)
 
 
-def test_an_empty_runtime_directory_counts_as_unset(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_an_empty_runtime_directory_counts_as_unset(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     monkeypatch.setenv(DATABASE_URL_VARIABLE, URL)
     monkeypatch.setenv("XDG_RUNTIME_DIR", "")
-    assert load_settings().run_dir == Path(f"/tmp/code-factory-{os.getuid()}")  # noqa: S108  # the documented fallback
+    monkeypatch.setenv("TMPDIR", str(tmp_path))
+    monkeypatch.setattr(tempfile, "tempdir", None)
+    assert load_settings().run_dir == tmp_path / f"code-factory-{os.getuid()}"

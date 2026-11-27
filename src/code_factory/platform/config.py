@@ -2,6 +2,7 @@
 
 import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Annotated
 
@@ -11,6 +12,7 @@ from sqlalchemy.engine import URL, make_url
 from sqlalchemy.exc import ArgumentError
 
 from code_factory.platform.errors import SettingsError
+from code_factory.platform.network import http_url
 
 DATABASE_URL_VARIABLE = "CODE_FACTORY_DATABASE_URL"
 ENV_NAME_VARIABLE = "CODE_FACTORY_ENV"
@@ -26,7 +28,7 @@ _URL_HINT = (
 
 # `load_settings(database=False)` only: nothing reads it, and the unit of work it leads to refuses
 # every use, so a command that never opens the database cannot reach it by accident.
-NO_DATABASE_URL = "postgresql+asyncpg://unused:unused@127.0.0.1:1/unused"
+NO_DATABASE_URL = "postgresql+asyncpg://127.0.0.1:1/unused"  # no user: no keychain lookup
 
 
 def _env_files() -> tuple[str, ...]:
@@ -84,7 +86,8 @@ def _run_dir() -> Path:
     runtime = os.environ.get("XDG_RUNTIME_DIR", "")
     if runtime:
         return Path(runtime) / "code-factory"
-    return Path(f"/tmp/code-factory-{os.getuid()}")  # noqa: S108  # owner-only, checked on use
+    # The user's own temporary folder (`TMPDIR`), not a name others could take first in `/tmp`.
+    return Path(tempfile.gettempdir()) / f"code-factory-{os.getuid()}"
 
 
 class Settings(BaseSettings):
@@ -161,9 +164,7 @@ class Settings(BaseSettings):
     @property
     def base_url(self) -> str:
         """Where the server is reached: an IPv6 literal is bracketed."""
-        advertised = self.advertised_host
-        host = f"[{advertised}]" if ":" in advertised else advertised
-        return f"http://{host}:{self.port}"
+        return http_url(self.advertised_host, self.port)
 
     @property
     def database_target(self) -> str:

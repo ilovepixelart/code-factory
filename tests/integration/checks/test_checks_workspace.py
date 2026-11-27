@@ -28,7 +28,7 @@ class PlainPolicy:
         return None
 
     def places(self) -> list[Path]:
-        return [self._root, Path("/tmp"), Path("/var/tmp")]  # noqa: S108
+        return [self._root]
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def workspaces(git_service: GitService, root: Path, state: Path) -> Workspaces:
 
 @pytest.fixture
 def judge(root: Path) -> TreeJudge:
-    return TreeJudge(lambda: [root, Path("/tmp"), Path("/var/tmp")])  # noqa: S108
+    return TreeJudge(lambda: [root])
 
 
 async def test_a_snapshot_is_a_detached_worktree_of_the_commit_among_the_boards_trees(

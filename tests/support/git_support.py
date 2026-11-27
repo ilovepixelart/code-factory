@@ -161,4 +161,4 @@ def make_service(uow: UnitOfWork, fakes: Fakes) -> GitService:
     ports = GitPorts(
         directory=fakes, tickets=fakes, forge=fakes.forge, checks=fakes, screen=fakes, hooks=fakes
     )
-    return GitService(uow, GitRunner((Path("/tmp"),)), ports)  # noqa: S108
+    return GitService(uow, GitRunner(()), ports)

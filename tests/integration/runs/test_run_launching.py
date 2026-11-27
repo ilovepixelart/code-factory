@@ -40,7 +40,7 @@ async def _plan(app: FastAPI, tmp_path: Path, runtime: str = "claude") -> Launch
         NewTicket(repository="sample", title="Paint the fence"), by="owner"
     )
     return LaunchPlan(
-        run_id="r1",
+        run_id="ab12cd34ef56",  # a run id as the board makes one: 12 hex digits
         stage="build",
         ticket=TicketFacts(
             id=ticket.id, number=1, repository="sample", title=ticket.title, kind="feature"
@@ -49,8 +49,8 @@ async def _plan(app: FastAPI, tmp_path: Path, runtime: str = "claude") -> Launch
         given=Given(agent="", runtime=runtime, model="", connection="", fingerprint="f"),
         permissions="acceptEdits",
         remaining=None,
-        exit_file=tmp_path / "r1.exit",
-        log=tmp_path / "r1.log",
+        exit_file=tmp_path / "ab12cd34ef56.exit",
+        log=tmp_path / "ab12cd34ef56.log",
         token="run-token",  # noqa: S106  # a stand-in the test looks for
     )
 

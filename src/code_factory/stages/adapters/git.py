@@ -18,8 +18,6 @@ TIMEOUT_S = 30.0
 OUTPUT_CAP = 8 * MIB
 CONCURRENCY = 4
 SUBMODULES = "--ignore-submodules=none"
-# Folders a run may write: a program found there is not trusted (`platform.programs`).
-RUN_PLACES = (Path("/tmp"), Path("/var/tmp"))  # noqa: S108
 FIXED_ENVIRONMENT = {"GIT_NO_REPLACE_OBJECTS": "1", "GIT_TERMINAL_PROMPT": "0", "LC_ALL": "C"}
 
 
@@ -53,7 +51,7 @@ class GitRunner:
     async def _git(self) -> Path | None:
         """The git to start, found once in a folder only root or the user can write."""
         if self._program is None:
-            self._program = await find_program("git", RUN_PLACES)
+            self._program = await find_program("git", ())
         return self._program
 
     async def run(self, root: Path, *args: str) -> GitResult | None:

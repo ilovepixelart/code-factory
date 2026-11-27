@@ -26,9 +26,14 @@ class ClientGoneError(Exception):
     """The client closed the connection before the request was complete."""
 
 
-async def _no_chunks() -> AsyncIterator[bytes]:
-    return
-    yield b""  # pragma: no cover  # makes this an async generator
+class _NoChunks:
+    """A body that ends before its first chunk."""
+
+    def __aiter__(self) -> _NoChunks:
+        return self
+
+    async def __anext__(self) -> bytes:
+        raise StopAsyncIteration
 
 
 @dataclass
@@ -51,7 +56,7 @@ class ProxyAnswer:
 
     status: int
     headers: list[tuple[str, str]]
-    body: AsyncIterator[bytes] = field(default_factory=_no_chunks)
+    body: AsyncIterator[bytes] = field(default_factory=_NoChunks)
     ended: asyncio.Event | None = None
     close: Callable[[], Awaitable[None]] | None = field(default=None, repr=False)
 

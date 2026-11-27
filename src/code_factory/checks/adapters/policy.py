@@ -9,8 +9,6 @@ from code_factory.platform.programs import NVMRC_BYTES
 from code_factory.repositories.service import RepositoryService
 from code_factory.settings.service import SettingsService
 
-RUN_PLACES = (Path("/tmp"), Path("/var/tmp"))  # noqa: S108  # what a run may write, by name
-
 
 class CheckPolicy:
     """`ContainedPolicy` over the repository's `[agents] sandbox`, `.nvmrc` and tracked folders."""
@@ -47,4 +45,4 @@ class CheckPolicy:
 
     def places(self) -> Sequence[Path]:
         """The folders a run may write: tracked repositories, the state folder, `/tmp`."""
-        return (*self._roots, self._state, *RUN_PLACES)
+        return (*self._roots, self._state)

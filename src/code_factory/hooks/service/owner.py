@@ -7,6 +7,7 @@ from code_factory.hooks.rules.audit import export_line
 from code_factory.hooks.rules.open_board import board_page, owner_link
 from code_factory.hooks.service.base import Collaborators
 from code_factory.platform.errors import BadRequestError, UnavailableError
+from code_factory.platform.network import http_url
 from code_factory.platform.text import is_iso_date
 
 BAD_PAGE = "the page must be a path on the board, such as /inbox"
@@ -16,9 +17,7 @@ class OwnerMixin(Collaborators):
     """Sign the browser in or out, and list who did what."""
 
     def _base(self, port: int | None) -> str:
-        host = self._ports.board.host
-        shown = f"[{host}]" if ":" in host else host
-        return f"http://{shown}:{port or self._ports.board.port}"
+        return http_url(self._ports.board.host, port or self._ports.board.port)
 
     async def open_board(self, page: str = "/", *, port: int | None = None) -> OpenedBoard:
         """Open the default browser on `page`, signed in with a one-time nonce.

@@ -1,12 +1,11 @@
 """The one way a service reaches the database: a unit of work per use case."""
 
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager
-from typing import override
 
 import asyncpg
 from sqlalchemy.exc import DBAPIError
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from code_factory.platform.errors import DatabaseUnavailableError, SettingsError
 
@@ -31,7 +30,7 @@ class UnitOfWork:
     without committing and the session rolls back.
     """
 
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(self, session_factory: Callable[[], AsyncSession]) -> None:
         self._session_factory = session_factory
 
     @asynccontextmanager
@@ -49,16 +48,13 @@ class UnitOfWork:
             raise DatabaseUnavailableError(msg) from error
 
 
+def _refuse() -> AsyncSession:
+    msg = "this command runs without a database, so it cannot read or write one"
+    raise SettingsError(msg)
+
+
 class NoDatabase(UnitOfWork):
     """The unit of work of a command that runs without a database: every use refuses."""
 
-    def __init__(self) -> None:  # no session factory: there is nothing to open
-        pass
-
-    @override
-    @asynccontextmanager
-    async def __call__(self) -> AsyncGenerator[AsyncSession]:
-        """Refuse with the sentence the person sees."""
-        msg = "this command runs without a database, so it cannot read or write one"
-        raise SettingsError(msg)
-        yield  # pragma: no cover  # makes this an async generator
+    def __init__(self) -> None:
+        super().__init__(_refuse)

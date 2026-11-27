@@ -1,7 +1,6 @@
 """The `git` module as the platform sees it."""
 
 from collections.abc import Callable
-from pathlib import Path
 
 from code_factory.git import tables  # noqa: F401  # puts the tables on Base.metadata
 from code_factory.git.adapters.runner import GitRunner
@@ -11,15 +10,12 @@ from code_factory.platform.background import BackgroundTasks
 from code_factory.platform.module import Module, Resources
 from code_factory.platform.services import Services
 
-# Folders a run may write: a program found there is not trusted (platform.programs).
-RUN_PLACES = (Path("/tmp"), Path("/var/tmp"))  # noqa: S108
-
 
 def build_module(ports_of: Callable[[Services], GitPorts]) -> Module:
     """The module over the ports `ports_of` builds from the registry (`code_factory.app`)."""
 
     def provide(services: Services, resources: Resources) -> None:
-        service = GitService(resources.uow, GitRunner(RUN_PLACES), ports_of(services))
+        service = GitService(resources.uow, GitRunner(()), ports_of(services))
         services.add(GitService, service)
 
     def background(services: Services, tasks: BackgroundTasks) -> None:

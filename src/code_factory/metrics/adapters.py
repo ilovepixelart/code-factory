@@ -21,7 +21,6 @@ from code_factory.platform.errors import UnavailableError
 from code_factory.platform.process import MIB, ProcessResult, run_process
 from code_factory.platform.programs import child_environment, find_program
 
-RUN_PLACES = (Path("/tmp"), Path("/var/tmp"))  # noqa: S108  # folders a run may write
 CONCURRENCY = 4
 NO_SUCH_REMOTE = 2  # `git remote get-url` of a remote that is not configured
 LOG_TIMEOUT_S = 60.0
@@ -59,7 +58,7 @@ class GitReader:
         self,
         program: str = "git",
         *,
-        places: Sequence[Path] = RUN_PLACES,
+        places: Sequence[Path] = (),
         log_timeout_s: float = LOG_TIMEOUT_S,
         read_timeout_s: float = READ_TIMEOUT_S,
         origin_timeout_s: float = ORIGIN_TIMEOUT_S,

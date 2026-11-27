@@ -228,7 +228,7 @@ from the keychain item `code-factory-postgres`. A tracked repository's own setti
 | `CODE_FACTORY_SHUTDOWN_TIMEOUT_S` | `10` | seconds the server waits for open requests on shutdown |
 | `CODE_FACTORY_STATE_DIR` | `~/.local/state/code-factory` | absolute folder for what is not in the database: run logs, the session spool, check logs and caches |
 | `CODE_FACTORY_RELEASES_DIR` | `~/.local/share/code-factory/releases` | absolute folder of the unpacked releases a deploy switches between |
-| `CODE_FACTORY_RUN_DIR` | `$XDG_RUNTIME_DIR/code-factory` | absolute folder for a served board's sockets and log (`/tmp/code-factory-<uid>` when `XDG_RUNTIME_DIR` is unset) |
+| `CODE_FACTORY_RUN_DIR` | `$XDG_RUNTIME_DIR/code-factory` | absolute folder for a served board's sockets and log (`code-factory-<uid>` in the temporary folder, `$TMPDIR`, when `XDG_RUNTIME_DIR` is unset) |
 | `CODE_FACTORY_STOP_AT_EOF` | `False` | end the served board when its standard input closes |
 | `CODE_FACTORY_BROKER_CALL_TIMEOUT_S` | `15.0` | seconds a key broker call to a provider may take |
 | `CODE_FACTORY_BROKER_SWEEP_INTERVAL_S` | `30.0` | seconds between sweeps of the broker's run keys |

@@ -2,6 +2,8 @@
 
 from urllib.parse import urlsplit
 
+from code_factory.platform.network import http_url
+
 
 def preview_address(board: str, port: int) -> str:
     """The link to a preview on `port`, never on the board's own host.
@@ -18,5 +20,5 @@ def preview_address(board: str, port: int) -> str:
         board_port = None
     name = "127.0.0.1" if parts.hostname in {None, "localhost"} else "localhost"
     if board_port is None:
-        return f"http://{name}:{port}/"
-    return f"http://{name}:{board_port}/preview/{port}"
+        return http_url(name, port, "/")
+    return http_url(name, board_port, f"/preview/{port}")

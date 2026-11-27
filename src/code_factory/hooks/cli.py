@@ -82,17 +82,26 @@ async def _folder_repository(services: Services) -> str | None:
 
 
 async def _recall(args: argparse.Namespace, services: Services) -> int:  # noqa: ARG001
+    text = await _recalled(services)
+    if text is not None:
+        sys.stdout.write(text)
+    return 0
+
+
+async def _recalled(services: Services) -> str | None:
+    """What to recall for the hook's payload on stdin; None for no payload object or any failure.
+
+    Recall never fails the owner's session.
+    """
     try:
         payload = json.loads(sys.stdin.read() or "{}")
         if not isinstance(payload, dict):
-            return 0
+            return None
         cwd = str(payload.get("cwd") or Path.cwd())
         recalled = await services.get(HookService).recall(cwd=cwd, actor=None)
-    except Exception:  # noqa: BLE001  # recall never fails the owner's session
-        return 0
-    if recalled is not None:
-        sys.stdout.write(recalled.text)
-    return 0
+    except Exception:  # noqa: BLE001
+        return None
+    return None if recalled is None else recalled.text
 
 
 commands = (

@@ -14,7 +14,6 @@ from code_factory.screens.rules import image_stem
 SCRIPT = Path(__file__).with_name("shoot.cjs")
 # The web app's packages, in the checkout this module runs from: Playwright lives there.
 NODE_MODULES = Path(__file__).resolve().parents[3] / "web" / "node_modules"
-PLACES = (Path("/tmp"), Path("/var/tmp"))  # noqa: S108  # folders a run may write
 GIT_S = 30.0
 CAPTURE_S = 300.0
 NOT_INSTALLED = 3
@@ -22,7 +21,7 @@ NOT_INSTALLED = 3
 
 async def tree_of(root: Path, ref: str) -> str:
     """The tree id of `ref` in the repository at `root`."""
-    git = await find_program("git", PLACES)
+    git = await find_program("git", ())
     if git is None:
         msg = "git is not on PATH"
         raise UnavailableError(msg)
@@ -44,7 +43,7 @@ async def tree_of(root: Path, ref: str) -> str:
 
 async def capture(board: str, folder: Path, pages: list[str], session: SecretStr) -> None:
     """Write each page's light and dark image into `folder` as the signed-in owner."""
-    node = await find_program("node", PLACES)
+    node = await find_program("node", ())
     if node is None:
         msg = "the capture tool needs Node: install Node 26 or later"
         raise UnavailableError(msg)

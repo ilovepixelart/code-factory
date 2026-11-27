@@ -51,7 +51,7 @@ class RosterService(Shared):
     @staticmethod
     async def local_harnesses(state_dir: Path) -> dict[str, bool]:
         """Check for installed executables on the board's trusted PATH without running them."""
-        places = (state_dir, Path("/tmp"), Path("/var/tmp"))  # noqa: S108  # exclude temp tools
+        places = (state_dir,)
         programs = (*RUNTIMES, SANDBOX_PROGRAM)
         found = await asyncio.gather(*(find_program(name, places) for name in programs))
         return {name: binary is not None for name, binary in zip(programs, found, strict=True)}

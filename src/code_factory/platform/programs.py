@@ -3,9 +3,9 @@
 A run writes in its clone and in temporary folders, so a program found by name through a `PATH`
 folder it can write, or through a link in one, is code the run chose. A program is therefore taken
 only from an absolute `PATH` folder that only root or the user can write, outside `places` (the
-folders a run may write: tracked repositories, the state folder, `/tmp`, `/var/tmp`), through no
-link that sits in a folder the run could change. What is returned is the file itself, resolved:
-start that, never the name.
+folders a run may write: tracked repositories, the state folder) and below no folder everyone may
+write (a shared temporary folder), through no link that sits in a folder the run could change.
+What is returned is the file itself, resolved: start that, never the name.
 
 The functions here are synchronous and read the filesystem; `find_program` and `find_path` run
 them in a worker thread under their own limiter and a time limit. Children never inherit the
@@ -79,6 +79,18 @@ def _holds_safely(folder: Path) -> bool:
     return _writers_known(found) or (bool(found.st_mode & _STICKY) and owned)
 
 
+def _shared(folder: Path) -> bool:
+    """Whether `folder` is a shared temporary folder: sticky, and everyone may write in it.
+
+    Whatever it holds may have been made there by a run, even an entry the user owns.
+    """
+    try:
+        mode = folder.stat().st_mode
+    except OSError:
+        return False
+    return bool(mode & _STICKY) and bool(mode & _OTHERS_WRITE)
+
+
 def _outside(real: Path, places: Iterable[Path]) -> bool:
     return not any(real.is_relative_to(place.resolve()) for place in places)
 
@@ -94,9 +106,10 @@ def _trusted_folder(folder: Path, places: Sequence[Path]) -> bool:
         found = folder.stat()
     except OSError, RuntimeError:
         return False
+    parents = (*folder.parents, *real.parents)
     return (
         _writers_known(found)
-        and all(_holds_safely(parent) for parent in (*folder.parents, *real.parents))
+        and all(_holds_safely(parent) and not _shared(parent) for parent in parents)
         and _outside(real, places)
         and _trusted_way(folder, places) is not None
     )

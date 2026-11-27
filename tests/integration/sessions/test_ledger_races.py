@@ -355,7 +355,7 @@ async def test_a_nul_or_a_lone_surrogate_in_a_prompt_does_not_stop_the_ledger(
     spool.write_bytes(spool.read_bytes() + spool_line("s", 2))
     assert (await sessions.ingest_once()).lines == 1
     prompt = await scalar(db_session, "select view->>'last_prompt' from session_views")
-    assert prompt == "a�b?c"
+    assert prompt == "a\ufffdb?c"
     assert await scalar(db_session, "select count(*) from session_events") == 2
 
 

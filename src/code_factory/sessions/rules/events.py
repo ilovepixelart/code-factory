@@ -43,7 +43,7 @@ def _storable(text: str) -> bool:
 
 
 def _head(line: bytes) -> str:
-    return line[:HEAD_BYTES].decode("utf-8", errors="replace").replace("\x00", "�")
+    return line[:HEAD_BYTES].decode("utf-8", errors="replace").replace("\x00", "\ufffd")
 
 
 def _no_constant(name: str) -> object:

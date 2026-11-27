@@ -47,10 +47,10 @@ def test_a_view_holds_no_nul_and_no_lone_surrogate_whatever_the_payload_did() ->
     dumped = view.model_dump_json()
     assert "\\u0000" not in dumped
     assert "\\ud800" not in dumped
-    assert view.cwd == "/wa�b?c"
-    assert view.last_prompt == "pa�b?c"
+    assert view.cwd == "/wa\ufffdb?c"
+    assert view.last_prompt == "pa\ufffdb?c"
     assert view.current_action is not None
-    assert view.current_action.summary == "ls a�b?c"
+    assert view.current_action.summary == "ls a\ufffdb?c"
     json.dumps(view.model_dump())
     view.last_prompt.encode("utf-8")
 

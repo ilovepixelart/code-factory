@@ -5,15 +5,15 @@
    the 6 px radius, the workspace and sidebar colours, and contrast adjustments for controls and
    text. A preset switch rewrites the preset's own names; theme.test.ts checks them again. */
 @import 'tailwindcss' source('..');
+@import 'tw-animate-css';
+@import '@fontsource-variable/inter';
+@import './shadcn-vue.css';
+@import './typeset.css';
 @source '../../index.html';
 /* Words in tests and in the generated answers are not classes. */
 @source not '../**/*.test.ts';
 @source not '../generated';
 @source not '../test';
-@import 'tw-animate-css';
-@import '@fontsource-variable/inter';
-@import './shadcn-vue.css';
-@import './typeset.css';
 
 @custom-variant dark (&:is(.dark *));
 
