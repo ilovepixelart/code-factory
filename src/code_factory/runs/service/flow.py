@@ -40,9 +40,12 @@ class FlowAdapter:
     async def build_ended(self, ticket_id: str, head: str) -> None:
         """Queue the head's checks; a ticket the review returned goes back to its evidence."""
         stages = self._services.get(StageService)
-        fixing = await stages.review_fix_due(ticket_id)
-        await self._services.get(CheckService).queue_head(ticket_id, head, review_fix=fixing)
-        await stages.fix_committed(ticket_id)
+        returned_at = await stages.review_return_at(ticket_id)
+        await self._services.get(CheckService).queue_head(
+            ticket_id, head, review_fix=returned_at is not None
+        )
+        if returned_at is not None:
+            await stages.fix_committed(ticket_id, returned_at=returned_at)
 
     async def review_ended(self, ticket_id: str, run_id: str, head: str) -> None:
         """Apply the review the run submitted: a pass records it, changes return the ticket."""
