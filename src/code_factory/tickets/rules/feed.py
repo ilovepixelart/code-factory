@@ -115,6 +115,7 @@ _SENTENCES: dict[str, Callable[[dict[str, Any]], str]] = {
         f"Closed {_text(d, 'id')} as {_text(d, 'state')}: {_text(d, 'reason')}"
     ),
     "review_submitted": _review,
+    "run.handoff_refused": lambda d: f"{_column(d, 'stage')} handoff refused: {_text(d, 'reason')}",
     "field": _field,
     "checks": _checks,
     "capture": _capture,
