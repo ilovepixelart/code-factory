@@ -396,6 +396,9 @@ shipping and records the commit, selected switches, driver exit status, and elap
 uv run --no-sync python scripts/eval_pipeline.py /owner/matrix.toml /owner/result.json /owner/eval-driver
 ```
 
+Use a [paired fix-round trial](docs/agents.md#fix-round-cap-trial) to compare caps of two
+and three on the same cases, with merge outcomes and measured agent and owner costs.
+
 Tests run only against a database whose name ends in `_test`; each xdist worker migrates a schema
 of its own. Work is test first, one behaviour at a time; the rules are in [CLAUDE.md](CLAUDE.md),
 testing practice in [docs/testing.md](docs/testing.md) and async rules in

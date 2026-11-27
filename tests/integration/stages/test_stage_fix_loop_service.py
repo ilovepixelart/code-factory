@@ -58,13 +58,17 @@ async def test_at_the_cap_the_rounds_are_halted_once_and_nothing_more_is_given(
     assert len(ledger.rounds) == 3
 
 
+@pytest.mark.parametrize("cap", [1, 2, 3])
 async def test_the_cap_is_the_repositorys_fix_rounds_setting(
-    stages: StageService, started: Ticket, checkout: Path
+    stages: StageService, started: Ticket, checkout: Path, cap: int
 ) -> None:
-    configure(checkout, "[agents]\nfix_rounds = 1\n")
+    configure(checkout, f"[agents]\nfix_rounds = {cap}\n")
 
-    assert (await stages.begin_fix_round(started.id, "h1", "ci")).outcome == "started"
-    assert (await stages.begin_fix_round(started.id, "h2", "ci")).outcome == "halted"
+    for index in range(1, cap + 1):
+        decision = await stages.begin_fix_round(started.id, f"h{index}", "ci")
+        assert (decision.outcome, decision.rounds) == ("started", index)
+    decision = await stages.begin_fix_round(started.id, f"h{cap + 1}", "ci")
+    assert (decision.outcome, decision.rounds) == ("halted", cap)
 
 
 async def test_a_round_that_cannot_start_waits_and_records_nothing(
