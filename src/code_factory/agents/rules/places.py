@@ -26,7 +26,7 @@ SANDBOX_DOMAINS = ("pypi.org:443", "files.pythonhosted.org:443", "registry.npmjs
 # An `allowed_domains` entry the sandbox proxy holds to its local address check: a host name ending
 # in letters, optionally `*.` before it and a port after it. IP literals and names without a dot
 # are decided by the list alone, and `localhost` names may resolve to loopback.
-_HOST_NAME = re.compile(r"(?:\*\.)?(?:[A-Za-z0-9-]+\.)+([A-Za-z]+)(?::[0-9]+)?")
+_HOST_NAME = re.compile(r"(?:\*\.)?(?:[A-Za-z0-9-]+\.)+([A-Za-z]+)(?::\d+)?", re.ASCII)
 _PORT = 65535
 
 
