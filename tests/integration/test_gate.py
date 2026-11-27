@@ -1,8 +1,11 @@
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
+
+from git_support import make_repo, write
 
 GATE = Path(__file__).resolve().parents[2] / "scripts" / "gate.sh"
 
@@ -164,7 +167,9 @@ esac
         assert any("exec vitest run --project unit" in line for line in lines)
 
 
-def _run_part(tmp_path: Path, *args: str) -> tuple[subprocess.CompletedProcess[str], list[str]]:
+def _run_part(
+    tmp_path: Path, *args: str, scan_code: int = 0, test_code: int = 0
+) -> tuple[subprocess.CompletedProcess[str], list[str]]:
     scripts = tmp_path / "scripts"
     scripts.mkdir()
     gate = scripts / GATE.name
@@ -187,6 +192,8 @@ case "$*" in
     echo tests/integration/a/test_x.py
     echo tests/integration/test_y.py
     ;;
+  *"gate_scan.py semgrep"*|*"gate_mutation.py"*) exit {scan_code} ;;
+  *"pytest -n"*) exit {test_code} ;;
 esac
 """,
     )
@@ -266,3 +273,47 @@ def test_a_sharded_part_runs_only_the_files_of_its_shard(tmp_path: Path) -> None
         "tests/integration/a/test_x.py tests/integration/test_y.py"
     ) in lines
     assert not any(line.endswith("--cov-fail-under=0 tests/integration") for line in lines)
+
+
+def test_merge_advisories_report_tool_errors_without_failing_the_gate(tmp_path: Path) -> None:
+    result, lines = _run_part(tmp_path, "--semgrep", "rules.yml", "--mutation", scan_code=7)
+
+    assert result.returncode == 0, result.stderr
+    assert "gate: warning: semgrep exited 7" in result.stdout
+    assert "gate: warning: mutation exited 7" in result.stdout
+    assert "run --no-sync python scripts/gate_scan.py semgrep base --config rules.yml" in lines
+    assert "run --no-sync python scripts/gate_mutation.py base" in lines
+
+
+def test_merge_advisories_leave_required_tests_blocking(tmp_path: Path) -> None:
+    result, lines = _run_part(tmp_path, "--semgrep", "rules.yml", "--mutation", test_code=1)
+
+    assert result.returncode == 1, result.stderr
+    assert "gate: pytest FAILED (exit 1)" in result.stderr
+    assert not any("gate_mutation.py" in line for line in lines)
+
+
+def test_semgrep_reports_findings_for_changed_files_without_failing(tmp_path: Path) -> None:
+    repo = make_repo(tmp_path)
+    rules = tmp_path / "rules.yml"
+    rules.write_text("rules: []\n", encoding="utf-8")
+    write(repo, "changed.py", "VALUE = True\n")
+    seen = tmp_path / "scan-arguments"
+    _fake(tmp_path, "semgrep", f"printf '%s\\n' \"$@\" > '{seen}'\nexit 1")
+    scanner = GATE.with_name("gate_scan.py")
+
+    result = subprocess.run(  # noqa: S603  # the checked-in scanner wrapper over fixture inputs
+        [sys.executable, str(scanner), "semgrep", "HEAD", "--config", str(rules)],
+        cwd=repo,
+        env={**os.environ, "PATH": f"{tmp_path}:{os.environ['PATH']}"},
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=20,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "Semgrep warning" in result.stdout
+    args = seen.read_text(encoding="utf-8").splitlines()
+    assert "--error" in args
+    assert args[args.index("--") + 1 :] == ["changed.py"]

@@ -303,6 +303,24 @@ Factory's sandbox integration tests need a runner that supports the sandbox's ow
 user and mount namespaces. The [host runner example](.code-factory/config.example.toml)
 shows the commands for a provisioned host runner.
 
+To opt this repository into advisory scans before merge, add either flag or both to
+`[checks] command` in `.code-factory/config.toml`. For example, for a provisioned container
+runner with Semgrep installed and a checked-in rules file:
+
+```toml
+[checks]
+container = "code-factory-checks:local"
+command = "sh scripts/gate.sh --force --secrets --semgrep .code-factory/semgrep.yml --mutation"
+fast = "sh scripts/gate.sh --fast --force --secrets"
+main = "sh scripts/gate.sh --force --secrets"
+timeout = 1200
+```
+
+The standard checks image needs Semgrep added to use this example. Semgrep scans changed files
+for up to 60 seconds. The mutation sample runs after the required gate passes, with a
+180-second test budget. Allow time for the optional scans in the runner timeout. Findings and
+scanner errors appear in the check log as warnings. Required gate failures still block merge.
+
 For a Python check named by a spec, commit the test before Build and verify the expected red state
 from an owner-controlled checkout. Repeat `--check` for each named test. The gate checks the sealed
 files in the working tree and the Git index. Keep the receipt outside the repository in a location

@@ -7,10 +7,12 @@ from pathlib import Path
 
 from gate_delta import git, paths
 
+SEMGREP_SECONDS = 60
 
-def run(command: list[str], data: bytes | None = None) -> int:
+
+def run(command: list[str], data: bytes | None = None, *, timeout: int | None = None) -> int:
     """Run an installed scanner with redaction set by the caller."""
-    return subprocess.run(command, input=data, check=False).returncode  # noqa: S603
+    return subprocess.run(command, input=data, check=False, timeout=timeout).returncode  # noqa: S603
 
 
 def secrets(program: str, base: str) -> int:
@@ -61,18 +63,28 @@ def main() -> int:
     if not changed:
         print("Semgrep: no changed files to scan.")
         return 0
-    return run(
-        [
-            program,
-            "scan",
-            "--metrics=off",
-            "--disable-version-check",
-            "--config",
-            args.config,
-            "--",
-            *changed,
-        ]
-    )
+    try:
+        status = run(
+            [
+                program,
+                "scan",
+                "--metrics=off",
+                "--disable-version-check",
+                "--error",
+                "--config",
+                args.config,
+                "--",
+                *changed,
+            ],
+            timeout=SEMGREP_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        print(f"Semgrep scan exceeded {SEMGREP_SECONDS} seconds.")
+        return 2
+    if status == 1:
+        print("Semgrep warning: review the findings above.")
+        return 0
+    return status
 
 
 if __name__ == "__main__":

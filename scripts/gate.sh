@@ -98,6 +98,18 @@ timed() {
   fi
 }
 
+advisory() {
+  phase=$1
+  shift
+  began=$(date +%s)
+  echo "gate: $phase starts"
+  if "$@"; then
+    echo "gate: $phase passed in $(($(date +%s) - began))s"
+  else
+    echo "gate: warning: $phase exited $?; see the scanner output above"
+  fi
+}
+
 KEYCHAIN_ACCOUNT=code_factory
 KEYCHAIN_SERVICE=code-factory-postgres
 TEST_DATABASE=${CODE_FACTORY_TEST_DATABASE:-code_factory_test}
@@ -234,7 +246,7 @@ if [ "$branch_checks" = 1 ] && [ "$audit" = 1 ]; then
   (unset CODE_FACTORY_DATABASE_URL; timed audit sh scripts/audit.sh --changed --base "$base")
 fi
 if [ "$branch_checks" = 1 ] && [ -n "$semgrep_rules" ]; then
-  (unset CODE_FACTORY_DATABASE_URL; timed semgrep uv run --no-sync python scripts/gate_scan.py semgrep "$base" --config "$semgrep_rules")
+  (unset CODE_FACTORY_DATABASE_URL; advisory semgrep uv run --no-sync python scripts/gate_scan.py semgrep "$base" --config "$semgrep_rules")
 fi
 
 if [ "$fast" = 1 ] && [ "$diff_coverage" = 0 ] && [ "$mutation" = 0 ]; then
@@ -376,7 +388,7 @@ if [ "$diff_coverage" = 1 ]; then
     "$base" "$LOG_DIR/python-coverage.json" web/coverage/lcov.info
 fi
 if [ "$mutation" = 1 ]; then
-  timed mutation uv run --no-sync python scripts/gate_mutation.py "$base"
+  advisory mutation uv run --no-sync python scripts/gate_mutation.py "$base"
 fi
 if [ -n "$key" ] && [ "$(uv run --no-sync python scripts/gate_cache.py "$base")" = "$key" ]; then
   mkdir -p .pytest_cache
