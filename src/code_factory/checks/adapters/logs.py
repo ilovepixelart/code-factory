@@ -65,11 +65,11 @@ def _within_any(folder: Path, path: Path) -> Path | None:
 
 def _older_than(folder: Path, cutoff: float) -> list[Path]:
     try:
-        entries = list(folder.iterdir())
+        entries = sorted(folder.iterdir())
     except OSError:
         return []
     found = []
-    for entry in sorted(entries):
+    for entry in entries:
         try:
             info = entry.lstat()
         except OSError:

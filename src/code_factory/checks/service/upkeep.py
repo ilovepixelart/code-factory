@@ -140,7 +140,7 @@ class UpkeepMixin(PipelineMixin):
             task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def stop(self, check_id: int, by: str) -> None:  # noqa: ARG002  # who stopped it is not kept
+    async def stop(self, check_id: int) -> None:
         """End the process group of a running check of this process; no record is written."""
         row = await self._row(check_id)
         if row.state not in {RunState.QUEUED, RunState.RUNNING}:
