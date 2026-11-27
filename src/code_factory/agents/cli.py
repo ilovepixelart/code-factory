@@ -62,13 +62,22 @@ def _configure_connections(parser: argparse.ArgumentParser) -> None:
 async def _run_connections(args: argparse.Namespace, services: Services) -> int:
     agents = services.get(AgentService)
     if args.action == "list":
-        sys.stdout.write(_line("NAME", "KIND", "ADDRESS", "KEY"))
-        for view in (await agents.list_connections()).connections:
-            key = "-" if not view.connection.key_env else ("set" if view.key_set else "not set")
-            sys.stdout.write(
-                _line(view.connection.name, view.connection.kind, view.connection.base_url, key)
-            )
-        return 0
+        await _list_connections(agents)
+    else:
+        await _connection_status(agents)
+    return 0
+
+
+async def _list_connections(agents: AgentService) -> None:
+    sys.stdout.write(_line("NAME", "KIND", "ADDRESS", "KEY"))
+    for view in (await agents.list_connections()).connections:
+        key = "-" if not view.connection.key_env else ("set" if view.key_set else "not set")
+        sys.stdout.write(
+            _line(view.connection.name, view.connection.kind, view.connection.base_url, key)
+        )
+
+
+async def _connection_status(agents: AgentService) -> None:
     status = await agents.connection_status()
     sys.stdout.write(_line("NAME", "ANSWERS", "MODELS", "PROBLEM"))
     for found in status.connections:
@@ -76,7 +85,6 @@ async def _run_connections(args: argparse.Namespace, services: Services) -> int:
         sys.stdout.write(_line(found.name, "yes" if found.answers else "no", models, found.problem))
     for local in status.local:
         sys.stdout.write(_line("local", local.kind, local.base_url, local.state))
-    return 0
 
 
 def _configure_secret(parser: argparse.ArgumentParser) -> None:

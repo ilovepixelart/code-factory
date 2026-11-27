@@ -16,9 +16,9 @@ async def _run(args: argparse.Namespace, services: Services) -> int:
     if args.action == "plan":
         for ticket, note in (await services.get(QueueService).plan()).items():
             sys.stdout.write(f"{ticket}\t{note or 'next up'}\n")
-        return 0
-    for step, said in (await services.get(FollowerService).run_pass()).steps.items():
-        sys.stdout.write(f"{step}: {said}\n")
+    else:
+        for step, said in (await services.get(FollowerService).run_pass()).steps.items():
+            sys.stdout.write(f"{step}: {said}\n")
     return 0
 
 
