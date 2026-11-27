@@ -83,6 +83,29 @@ async def test_a_changed_spec_head_after_preflight_blocks_launch_and_releases_th
     assert (await runs.start(facts.id)).runs
 
 
+@pytest.mark.parametrize("after", ["review", "build"])
+async def test_a_completed_spec_proof_refreshes_the_ticket_before_claiming(
+    runs: RunService,
+    fakes: Fakes,
+    facts: TicketFacts,
+    monkeypatch: pytest.MonkeyPatch,
+    after: str,
+) -> None:
+    async def complete(ticket_id: str) -> bool:
+        fakes.tickets.facts_by_id[ticket_id] = facts.model_copy(update={"column": after})
+        return True
+
+    monkeypatch.setattr(fakes.flow, "prepare_build", complete)
+
+    if after == "review":
+        with pytest.raises(ConflictError, match="ticket changed stage while its spec checks ran"):
+            await runs.start(facts.id)
+        assert fakes.calls.log == []
+    else:
+        assert (await runs.start(facts.id)).runs[0].stage == "build"
+        assert fakes.flow.verified == [(facts.id, "head0")]
+
+
 async def test_the_run_token_lives_as_long_as_the_run_may_plus_five_minutes(
     runs: RunService, fakes: Fakes, facts: TicketFacts
 ) -> None:

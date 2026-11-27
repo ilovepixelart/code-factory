@@ -295,6 +295,59 @@ async def test_an_uncommitted_snapshot_is_refused_before_any_check_runs(
     assert verifier.calls == []
 
 
+async def test_a_request_without_a_committed_tip_refuses_build(
+    preflight: tuple[CheckService, Verifier],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service, verifier = preflight
+    git = service._deps.git
+    monkeypatch.setattr(git, "branch_state", AsyncMock(return_value=SimpleNamespace(tip="")))
+
+    with pytest.raises(ConflictError, match="commit the spec tests on CF-1's branch"):
+        await service.prepare_build(TICKET)
+
+    assert verifier.calls == []
+    assert not verifier.receipt.exists()
+
+
+@pytest.mark.parametrize(
+    ("draining", "reason"),
+    [(True, "checks supervisor is stopping"), (False, "waiting for a runner")],
+)
+async def test_an_unavailable_supervisor_does_not_admit_a_spec_proof(
+    preflight: tuple[CheckService, Verifier],
+    monkeypatch: pytest.MonkeyPatch,
+    draining: bool,
+    reason: str,
+) -> None:
+    service, verifier = preflight
+    async with asyncio.TaskGroup() as group:
+        monkeypatch.setattr(service, "_group", group)
+        monkeypatch.setattr(service, "_draining", draining)
+        if not draining:
+            monkeypatch.setattr(
+                service, "_spec_tasks", {"CF-2": group.create_task(asyncio.sleep(0))}
+            )
+        with pytest.raises(ConflictError, match=reason):
+            await service.prepare_build(TICKET)
+
+    assert verifier.calls == []
+    assert not verifier.receipt.exists()
+
+
+async def test_a_proof_timeout_does_not_leave_a_receipt(
+    preflight: tuple[CheckService, Verifier],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service, verifier = preflight
+    monkeypatch.setattr(service, "_spec_proof", AsyncMock(side_effect=TimeoutError))
+
+    with pytest.raises(ConflictError, match="checks for CF-1 timed out"):
+        await service.prepare_build(TICKET)
+
+    assert not verifier.receipt.exists()
+
+
 async def test_a_receipt_write_failure_never_licenses_build(
     preflight: tuple[CheckService, Verifier],
     monkeypatch: pytest.MonkeyPatch,
