@@ -207,17 +207,10 @@ class QueryMixin(ConcludeMixin):
         text, _, following = await self._logs.page(path, offset, size)
         return text, following
 
-    async def latest_verdicts(self, ids: Sequence[str]) -> dict[str, CheckRecord]:
-        """The newest `checks` record of each ticket that has one."""
-        found: dict[str, CheckRecord] = {}
-        for ticket_id in ids:
-            try:
-                newest = await self._newest_records(ticket_id, 1)
-            except NotFoundError:
-                continue
-            if newest:
-                found[ticket_id] = _record(ticket_id, newest[0].at, newest[0].data)
-        return found
+    async def card_records(self, heads: Mapping[str, str]) -> dict[str, list[CheckRecord]]:
+        """At most one verdict-bearing record for each card's requested head."""
+        found = await self._deps.activity.latest_checks(heads, NO_VERDICT_CODES)
+        return {t: [_record(t, item.at, item.data)] for t, item in found.items()}
 
     async def records_of(self, ids: Sequence[str]) -> dict[str, list[CheckRecord]]:
         """Each ticket's `checks` records, oldest first, in one read; none: the ticket is absent."""

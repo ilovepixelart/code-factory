@@ -37,7 +37,11 @@ class PipelineMixin(ReleasingMixin):
         row = await self._row(check_id)
         if not adopted:
             return row
-        beat = asyncio.create_task(self._beat(check_id), name=f"check-beat-{check_id}")
+        beat = (
+            asyncio.create_task(self._beat(check_id), name=f"check-beat-{check_id}")
+            if self._group is None
+            else None
+        )
         current = asyncio.current_task()
         if current is not None:
             self._running[check_id] = current
@@ -50,8 +54,9 @@ class PipelineMixin(ReleasingMixin):
             await self._lose(check_id)
             raise
         finally:
-            beat.cancel()
-            await asyncio.gather(beat, return_exceptions=True)
+            if beat is not None:
+                beat.cancel()
+                await asyncio.gather(beat, return_exceptions=True)
             permit.release()
             self._permits.pop(check_id, None)
             self._running.pop(check_id, None)
@@ -59,15 +64,18 @@ class PipelineMixin(ReleasingMixin):
             self._trees.pop(check_id, None)
         return await self._row(check_id)
 
-    async def _beat(self, check_id: int) -> None:
-        """Beat the row from its own session until cancelled."""
+    async def _beat(self, check_id: int | None = None) -> None:
+        """Refresh leases for supervised checks, or for one standalone check."""
         while True:
             await asyncio.sleep(self._opts.heartbeat_s)
+            ids = list(self._running) if check_id is None else [check_id]
+            if not ids:
+                continue
             try:
-                async with self._db() as store:
-                    await store.runs.beat(check_id, self._owner, self._now())
-            except CodeFactoryError, OSError:
-                logger.warning("the heartbeat of check %s failed", check_id, exc_info=True)
+                async with asyncio.timeout(self._opts.heartbeat_s), self._db() as store:
+                    await store.runs.beat(ids, self._owner, self._now())
+            except Exception:  # a missed batch must not stop the supervisor
+                logger.warning("the heartbeat of %d checks failed", len(ids), exc_info=True)
 
     async def _pipeline(self, row: CheckRun) -> None:
         await self._policy.refresh()

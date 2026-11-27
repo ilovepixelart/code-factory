@@ -31,15 +31,19 @@ async def card_facts(
     ids = [t.id for t in tickets]
     asked = await sources.talk.open_counts(ids)
     runs = await sources.runs.card_runs(ids)
-    checks = await sources.checks.latest_checks(ids) if checks is None else checks
     pulls = await sources.delivery.pulls(ids)
+    card_pulls = {t.id: pulls.get(t.id) or _own_pull(t) for t in tickets}
+    if checks is None:
+        checks = await sources.checks.latest_checks(
+            ids, heads={ticket: pull.head if pull else "" for ticket, pull in card_pulls.items()}
+        )
     events = await sources.delivery.events(ids)
     holders = await sources.queue.holders(ids)
     relations = world.relations()
     found = []
     for ticket in tickets:
         repository = world.repositories.get(ticket.repository)
-        pull = pulls.get(ticket.id) or _own_pull(ticket)
+        pull = card_pulls[ticket.id]
         head = pull.head if pull else ""
         found.append(
             CardFacts(

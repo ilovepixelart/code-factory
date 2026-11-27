@@ -8,9 +8,10 @@ import pytest
 from checks_support import REPO, FakeForge, write_config
 from code_factory.checks.models import PullHead, RunState, Scope, Verdict
 from code_factory.checks.service import CheckService
-from code_factory.tickets.models import Ticket
-from code_factory.tickets.service import ActivityService
+from code_factory.tickets.models import NewActivity, NewTicket, Ticket
+from code_factory.tickets.service import ActivityService, TicketService
 from git_support import git
+from ticket_values import OWNER
 
 CONTEXT = "code-factory/checks"
 
@@ -77,6 +78,34 @@ async def test_a_failing_command_is_a_failed_row_and_a_failure_status(
     assert record["exit_code"] == 3
     assert "boom" in Path(record["log"]).read_text()
     assert forge.posts[-1][2:] == ("failure", CONTEXT, "The board's checks failed: exited 3")
+
+
+async def test_card_checks_keep_only_the_newest_usable_verdict_for_each_head(
+    checks: CheckService, activity: ActivityService, started: Ticket, tickets: TicketService
+) -> None:
+    other = await tickets.create(NewTicket(repository=REPO, title="Other ticket"), by=OWNER)
+    for commit, codes in (
+        ("keep", (1, 0, -1, 137, "5", True, 2.5, None)),
+        ("newer", (3,)),
+    ):
+        for code in codes:
+            await activity.append(
+                started.id,
+                NewActivity(kind="checks", data={"commit": commit, "exit_code": code}),
+                by=OWNER,
+            )
+    await activity.append(
+        other.id, NewActivity(kind="checks", data={"commit": "other", "exit_code": 2}), by=OWNER
+    )
+
+    results = await checks.card_records({started.id: "keep", other.id: "", "CF-999": "gone"})
+
+    assert {k: [(r.commit, r.exit_code) for r in rows] for k, rows in results.items()} == {
+        started.id: [("keep", 0)],
+        other.id: [("other", 2)],
+    }
+    assert await checks.card_records({started.id: "missing"}) == {}
+    assert len((await checks.records_of([started.id]))[started.id]) == 9
 
 
 @pytest.mark.parametrize(("fast", "expected"), [("true", True), ("false", False)])

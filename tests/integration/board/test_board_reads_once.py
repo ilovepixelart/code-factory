@@ -25,9 +25,11 @@ class CountingChecks(FakeChecks):
         self.asked: list[list[str]] = []
 
     @override
-    async def latest_checks(self, ticket_ids: Sequence[str]) -> dict[str, list[CheckRecord]]:
+    async def latest_checks(
+        self, ticket_ids: Sequence[str], *, heads: dict[str, str] | None = None
+    ) -> dict[str, list[CheckRecord]]:
         self.asked.append(list(ticket_ids))
-        return await super().latest_checks(ticket_ids)
+        return await super().latest_checks(ticket_ids, heads=heads)
 
 
 class CountingStages:

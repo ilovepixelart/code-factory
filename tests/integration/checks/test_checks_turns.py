@@ -80,5 +80,5 @@ async def test_a_running_row_unbeaten_for_a_minute_gives_its_slot_to_the_next(
         clock.after(seconds=59)
         assert not await store.runs.take_turn(newer, 1, clock.now)
         clock.after(seconds=2)
-        assert await store.runs.beat(newer, "me", clock.now)
+        assert await store.runs.beat([newer], "me", clock.now)
         assert await store.runs.take_turn(newer, 1, clock.now)
