@@ -266,3 +266,20 @@ def test_the_service_reads_a_log_with_or_without_the_exit_code_of_its_run() -> N
     assert StageService.read_log(TEST_FAILED, exit_code=100) == plain
     assert StageService.read_log(TEST_FAILED, 100) == plain
     assert plain.failing_lines == read_log(TEST_FAILED).failing_lines
+
+
+@pytest.mark.parametrize(
+    ("log", "build_failure"),
+    [
+        ("error: could not compile `app`\n", True),
+        ("error: could not compile `app`\ntest parse::tests::bad ... FAILED\n", False),
+        ("error: could not compile `app`\nFAILED tests/test_a.py::test_x\n", False),
+        ("E   SyntaxError: invalid syntax\n", True),
+        ("ERROR collecting tests/test_a.py\n", True),
+        ("x = 'E   SyntaxError'\n", False),
+    ],
+)
+def test_a_build_failure_is_a_build_error_with_no_failed_test(
+    log: str, *, build_failure: bool
+) -> None:
+    assert read_log(log).build_failure is build_failure

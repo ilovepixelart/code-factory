@@ -16,11 +16,15 @@ _STEP = re.compile(r"[A-Za-z0-9-]+")
 _FAILURE = re.compile(r"\b(fail|failed|error|panicked)\b", re.IGNORECASE)
 _LIBTEST_FAILED = re.compile(r"^\s*test (\S+) \.\.\. FAILED\s*$", re.MULTILINE)
 _PYTEST_FAILED = re.compile(r"^FAILED (\S+)", re.MULTILINE)
-_TEST_FAILED = re.compile(r"^(?:\s*FAIL(?:ED)?\b|(?:.*\.\.\. FAILED\s*$))", re.MULTILINE)
+# A line that starts FAIL or FAILED, or one that ends "... FAILED".
+_TEST_FAILED = (
+    re.compile(r"^\s*FAIL(?:ED)?\b", re.MULTILINE),
+    re.compile(r"\.\.\. FAILED\s*$", re.MULTILINE),
+)
 _RUST_ERROR = re.compile(
     r"^\s*(error\[E\d{4}\]|error: could not compile|error: linking with)", re.MULTILINE
 )
-_PYTHON_BUILD = re.compile(r"ERROR collecting |(?:^E\s+SyntaxError)", re.MULTILINE)
+_PYTHON_BUILD = (re.compile(r"ERROR collecting "), re.compile(r"^E\s+SyntaxError", re.MULTILINE))
 _PYTHON_CAUSE = re.compile(r"^E\s+(\w*(?:Error|Exception))\b", re.MULTILINE)
 _RUST_ENVIRONMENT = (
     "error[E0463]",
@@ -90,15 +94,19 @@ def _failing_tests(log: str) -> list[str]:
 def _environmental(log: str) -> bool:
     rust = [line.lstrip() for line in log.splitlines() if line.lstrip().startswith("error")]
     rust_ok = all(line.startswith(_RUST_ENVIRONMENT) for line in rust)
-    if _PYTHON_BUILD.search(log) is None:
+    if not _any(_PYTHON_BUILD, log):
         return rust_ok
     causes = _PYTHON_CAUSE.findall(log)
     return rust_ok and bool(causes) and all(cause == "ModuleNotFoundError" for cause in causes)
 
 
+def _any(patterns: tuple[re.Pattern[str], ...], log: str) -> bool:
+    return any(pattern.search(log) is not None for pattern in patterns)
+
+
 def _build_failure(log: str) -> bool:
-    signal = _RUST_ERROR.search(log) or _PYTHON_BUILD.search(log)
-    return signal is not None and _TEST_FAILED.search(log) is None
+    built = _RUST_ERROR.search(log) is None and not _any(_PYTHON_BUILD, log)
+    return not built and not _any(_TEST_FAILED, log)
 
 
 def _step_state(rest: str) -> tuple[str, int | None] | None:
