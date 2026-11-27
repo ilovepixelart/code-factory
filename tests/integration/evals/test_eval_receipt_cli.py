@@ -72,12 +72,12 @@ async def test_record_rejects_unsupported_arguments_and_invalid_receipts(
     eval_command.configure(parser)
     assert eval_command.run_async is not None
 
+    no_input = parser.parse_args(["record", "smoke"])
+    report_with_input = parser.parse_args(["report", "smoke", "--input", str(path)])
     with pytest.raises(BadRequestError, match="record needs --input"):
-        await eval_command.run_async(parser.parse_args(["record", "smoke"]), services)
+        await eval_command.run_async(no_input, services)
     with pytest.raises(BadRequestError, match="--input is for eval record"):
-        await eval_command.run_async(
-            parser.parse_args(["report", "smoke", "--input", str(path)]), services
-        )
+        await eval_command.run_async(report_with_input, services)
 
     params = parser.parse_args(
         ["record", "smoke", "--repository", project.name, "--input", str(path)]

@@ -157,11 +157,15 @@ async def test_an_eval_receipt_is_idempotent_and_its_cost_is_counted_once(
     }
     receipt = EvalRecord.model_validate(raw)
     start, end = NOW, NOW + timedelta(days=1)
-    assert await evals.record(receipt) == await evals.record(receipt)
+    stored_id = await evals.record(receipt)
+    replay_id = await evals.record(receipt)
+    assert replay_id == stored_id
+    assert [entry.id for entry in await evals.records("sample", "smoke")] == [stored_id]
     assert await evals.measurement_spend(start, end) == 0.0
 
+    altered = receipt.model_copy(update={"cost": 2.0})
     with pytest.raises(ConflictError, match="different result"):
-        await evals.record(receipt.model_copy(update={"cost": 2.0}))
+        await evals.record(altered)
 
     await judge.record_score("sample", "s1", 4, [], cost=1.25)
     await judge.record_score("sample", "s2", 4, [])
