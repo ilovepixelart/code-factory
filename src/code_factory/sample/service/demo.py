@@ -13,6 +13,7 @@ from code_factory.checks.service import CheckService
 from code_factory.delivery.service import DeliveryService
 from code_factory.evals.models import AnswerRow
 from code_factory.evals.service import JudgeService
+from code_factory.factory.service import FactoryService
 from code_factory.memory.models import NewMemory
 from code_factory.memory.service import MemoryService
 from code_factory.metrics.service import MetricsService
@@ -45,6 +46,7 @@ from code_factory.sample.service.analytics import (
     IDLE_PULL,
     file_tickets,
     record_open_pull,
+    record_owner_time,
     record_pull_history,
     record_response_history,
     record_review_notes,
@@ -106,6 +108,7 @@ class DemoDeps:
     runs: RunService
     judge: JudgeService
     delivery: DeliveryService
+    factory: FactoryService
 
 
 def _config(name: str) -> str:
@@ -152,6 +155,7 @@ class DemoLoader:
         await self._record_sessions()
         await self._capture_screens()
         await record_pull_history(self._d.delivery, self._d.runs, self._ids, self._heads, at)
+        await record_owner_time(self._d.factory, self._ids)
         await record_response_history(self._d.talk_at, self._ids, at)
         reviewed = self._ticket("Product images load lazily below the fold")
         await record_review_notes(self._d.activities, self._d.reviews, reviewed)

@@ -101,6 +101,23 @@ the stage rules, undo and refusals. A move to Build needs a branch. The Review c
 a pushed branch and a recorded pull request. The ticket's **Review with an agent** action can
 run a review of a completed local Build before shipping.
 
+While signed in, open `/api/docs` and use **Record active owner time on a merged PR**. Set
+`ticket_id` to the Factory ticket, then submit its recorded pull request URL, active minutes,
+and the USD hourly rate used for this calculation. For example:
+
+```json
+{
+  "pull_url": "https://github.com/example/project/pull/42",
+  "active_minutes": 25,
+  "hourly_rate_usd": 120
+}
+```
+
+The operation sends `PUT /api/factory/tickets/CF-<n>/owner-time`. Submit the same ticket and URL
+again to correct its entry. Record zero minutes when the owner spent no time. The inputs are
+private to Factory's owner API and analytics. Each PR merged in the selected date range counts
+once, and the median uses PRs with both an owner entry and complete priced runs.
+
 ## The contract harness
 
 `tests/support/contract_catalogue.py` lists every route the web app calls with the module that

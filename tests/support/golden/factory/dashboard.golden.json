@@ -73,6 +73,7 @@
       {"size": "XL", "median": 10.0, "priced": 1, "of": 1}
     ]
   },
+  "merged_cost": {"median": null, "priced": 0, "owner_recorded": 0, "merged": 3, "estimated": false},
   "expensive": [
     {"url": "https://github.com/sample/sample/pull/14", "repository": "sample", "number": 14, "ticket": "CF-4", "title": "Cache the index", "state": "open", "opened_at": 1793952000, "cost": 10.0, "cost_complete": true, "estimated": false, "changed_lines": 1000, "size": "XL", "runs": 2},
     {"url": "https://github.com/sample/sample/pull/12", "repository": "sample", "number": 12, "ticket": "CF-2", "title": "Split the loader", "state": "merged", "opened_at": 1793700000, "cost": 5.0, "cost_complete": true, "estimated": false, "changed_lines": 100, "size": "M", "runs": 3},

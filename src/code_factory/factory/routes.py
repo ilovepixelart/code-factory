@@ -1,4 +1,4 @@
-"""Factory output and model performance: read-only figures over a range.
+"""Factory output and model performance over a range.
 
 `from` and `to` are epoch seconds, a UTC date (`2026-11-01` is midnight) or an RFC 3339 instant;
 both are optional (the range defaults to the last 30 days up to now).
@@ -12,6 +12,7 @@ from code_factory.factory.models import (
     Dashboard,
     ExpensiveList,
     Improvements,
+    OwnerTime,
     RunBreakdowns,
     Scorers,
 )
@@ -37,6 +38,13 @@ LimitQuery = Annotated[str | None, Query(description="How many to list, from 1 t
 async def dashboard(service: FactoryDep, from_: FromQuery = None, to: ToQuery = None) -> Dashboard:
     """Runs, pull requests, cycle time, cost, scorers and improvements in one answer."""
     return await service.dashboard(from_, to)
+
+
+@router.put("/tickets/{ticket_id}/owner-time", summary="Record active owner time on a merged PR")
+async def owner_time(ticket_id: str, entry: OwnerTime, service: FactoryDep) -> OwnerTime:
+    """Set the active time and USD hourly rate for the ticket's named merged pull request."""
+    await service.record_owner_time(ticket_id, entry)
+    return entry
 
 
 @router.get("/runs", summary="Runs of a range counted by stage, state, source, model and agent")

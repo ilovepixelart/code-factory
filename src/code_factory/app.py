@@ -227,8 +227,8 @@ MODULES: tuple[Module, ...] = (
     push,
     commands,
     board,
-    sample,
     factory,
+    sample,
 )
 
 

@@ -6,6 +6,7 @@ from code_factory.board.service import BoardService
 from code_factory.checks.service import CheckService
 from code_factory.delivery.service import DeliveryService
 from code_factory.evals.service import JudgeService
+from code_factory.factory.service import FactoryService
 from code_factory.memory.service import MemoryService
 from code_factory.metrics.service import MetricsService
 from code_factory.platform.module import Module, Resources
@@ -59,6 +60,7 @@ def _demo(services: Services, resources: Resources) -> DemoDeps:
         runs=services.get(RunService),
         judge=services.get(JudgeService),
         delivery=services.get(DeliveryService),
+        factory=services.get(FactoryService),
     )
 
 

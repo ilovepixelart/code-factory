@@ -200,6 +200,10 @@ _FACTORY_DASHBOARD = {
         "by_component": [{"component": str, "median": float | None, "total": float}],
         "by_size": [{"size": str, "median": float | None, "priced": int, "of": int}],
     },
+    "merged_cost": {
+        "median": float | None, "priced": int, "owner_recorded": int,
+        "merged": int, "estimated": bool,
+    },
     "expensive": [_FACTORY_PR],
     "scorers": _FACTORY_SCORERS,
     "improvements": _FACTORY_IMPROVEMENTS,
@@ -418,6 +422,12 @@ ROUTES: tuple[Route, ...] = (
         "factory",
         _hand(_FACTORY_DASHBOARD),
         f"/api/factory/dashboard?{_FACTORY_RANGE}",
+    ),
+    Route(
+        "PUT",
+        "/api/factory/tickets/{ticket_id}/owner-time",
+        "factory",
+        _hand({"pull_url": str, "active_minutes": int, "hourly_rate_usd": float}),
     ),
     Route(
         "GET",
