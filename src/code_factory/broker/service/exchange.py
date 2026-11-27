@@ -27,8 +27,8 @@ class ClientGoneError(Exception):
 
 
 async def _no_chunks() -> AsyncIterator[bytes]:
-    return
-    yield b""  # pragma: no cover  # makes this an async generator
+    for chunk in ():
+        yield chunk
 
 
 @dataclass

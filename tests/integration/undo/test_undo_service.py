@@ -239,7 +239,7 @@ async def test_the_window_starts_once_the_connection_is_held(
         join_transaction_mode="create_savepoint",
         expire_on_commit=False,
     )
-    units = UnitOfWork(sessions)  # ty: ignore[invalid-argument-type]  # a session subclass is an AsyncSession
+    units = UnitOfWork(sessions)
     undo = UndoService(units, clock=clock)
     undo.register("test.revert", Calls())
     token = (await undo.offer("test.revert", {}, "n")).undo or ""
@@ -312,7 +312,7 @@ async def test_the_window_is_read_before_the_claim_commits(
         join_transaction_mode="create_savepoint",
         expire_on_commit=False,
     )
-    units = UnitOfWork(sessions)  # ty: ignore[invalid-argument-type]  # a session subclass is an AsyncSession
+    units = UnitOfWork(sessions)
     undo = UndoService(units, clock=clock)
     handler = Calls()
     undo.register("test.revert", handler)
