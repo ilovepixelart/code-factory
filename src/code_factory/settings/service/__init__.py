@@ -99,25 +99,21 @@ class SettingsService:
         """The lenient typed config of the repository at `root`.
 
         A missing, unreadable or non-table file is an empty config, each invalid key is dropped and
-        the rest read. One `stat` per call: the parse is cached by the file's modification time,
-        size and inode, for at most 64 roots. The returned object is shared: do not change it.
+        the rest read. One bounded read per call, with the parse cached by exact contents for
+        at most 64 roots. The returned object is shared: do not change it.
 
         Raises `ConfigUnjudgedError` when a read or the scan ran out of time before it judged the
         mounts: a file that cannot be read in time may hold some.
         """
         try:
-            key = await self._files.stat(root, CONFIG_FILE, strict=True)
-            if key is None:
-                self._cache.drop(root)
-                return RepositoryConfig()
-            if (cached := self._cache.get(root, key)) is not None:
-                return cached
             text = await self._files.read_below(root, CONFIG_FILE, CONFIG_BYTES, strict=True)
         except FileTimedOut as timed_out:
             raise self._refusal(root, ()) from timed_out
         if text is None:
             self._cache.drop(root)
             return RepositoryConfig()
+        if (cached := self._cache.get(root, text)) is not None:
+            return cached
         try:
             parsed = await in_thread(
                 loaded_config, text, self._homes, resolver_for(self._homes, root)
@@ -135,7 +131,7 @@ class SettingsService:
             # Where a mount leads is on disk, not in the file: judged afresh on every load.
             self._cache.drop(root)
             return config
-        self._cache.put(root, key, config)
+        self._cache.put(root, text, config)
         return config
 
     def _refusal(self, root: Path, entries: tuple[str, ...]) -> ConfigUnjudgedError:
