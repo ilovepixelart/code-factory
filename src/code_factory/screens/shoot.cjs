@@ -26,24 +26,31 @@ async function showSection(page, path, id) {
   if (top < 0 || top >= VIEW.height) throw new Error(`${path} cannot scroll the section ${id} into view`)
 }
 
+// One page after the other: a capture waits for the network and the scroll of its own page.
+async function capture(browser, [path, stem, id], theme) {
+  const context = await browser.newContext({ viewport: VIEW, colorScheme: theme })
+  await context.addCookies([
+    { name: 'code_factory_owner', value: process.env.CODE_FACTORY_SHOOT_SESSION ?? '', url },
+  ])
+  const page = await context.newPage()
+  await page.goto(url + path)
+  await page.waitForLoadState('networkidle')
+  if (id) await showSection(page, path, id)
+  await page.screenshot({ path: `${folder}/${stem}-${theme}.png` })
+  await context.close()
+}
+
 ;(async () => {
   const browser = await chromium.launch({ ignoreDefaultArgs: ['--hide-scrollbars'] })
   try {
+    const jobs = []
     for (let i = 0; i < triples.length; i += 3) {
-      const [path, stem, id] = triples.slice(i, i + 3)
-      for (const theme of ['light', 'dark']) {
-        const context = await browser.newContext({ viewport: VIEW, colorScheme: theme })
-        await context.addCookies([
-          { name: 'code_factory_owner', value: process.env.CODE_FACTORY_SHOOT_SESSION ?? '', url },
-        ])
-        const page = await context.newPage()
-        await page.goto(url + path)
-        await page.waitForLoadState('networkidle')
-        if (id) await showSection(page, path, id)
-        await page.screenshot({ path: `${folder}/${stem}-${theme}.png` })
-        await context.close()
-      }
+      for (const theme of ['light', 'dark']) jobs.push([triples.slice(i, i + 3), theme])
     }
+    await jobs.reduce(
+      (done, [triple, theme]) => done.then(() => capture(browser, triple, theme)),
+      Promise.resolve(),
+    )
   } finally {
     await browser.close()
   }
