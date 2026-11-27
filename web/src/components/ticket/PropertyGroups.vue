@@ -111,8 +111,11 @@ const foldOpen = computed(() =>
   ),
 )
 
-const placeholderOf = (row: Row): string =>
-  row.key === 'branch' ? branch : row.key === 'budget' ? budget : (row.placeholder ?? '')
+const placeholderOf = (row: Row): string => {
+  if (row.key === 'branch') return branch
+  if (row.key === 'budget') return budget
+  return row.placeholder ?? ''
+}
 // A written code value carries all of it as its tooltip; an empty one says what it takes.
 const titleOf = (row: Row): string => {
   const value = model.value[row.key] ?? ''
@@ -121,15 +124,14 @@ const titleOf = (row: Row): string => {
 // Being edited, a row is quiet until it is changed (PropertyShown); a new ticket shows its controls.
 const Bare: FunctionalComponent = (_, { slots }) => slots.default?.()
 const EMPTY: Partial<Record<string, string>> = { priority: 'none', parallel: '1' }
+function shownValue(row: Row, raw: string): string {
+  if (row.key === 'stage' && raw) return STAGE_LABELS[raw as keyof typeof STAGE_LABELS]
+  return row.key === 'type' || row.key === 'priority' ? sentence(raw) : raw
+}
 function shownOf(row: Row): Record<string, unknown> {
   if (mode !== 'edit') return {}
   const raw = row.key === 'source' ? source : (model.value[row.key] ?? '')
-  const value =
-    row.key === 'stage' && raw
-      ? STAGE_LABELS[raw as keyof typeof STAGE_LABELS]
-      : row.key === 'type' || row.key === 'priority'
-        ? sentence(raw)
-        : raw
+  const value = shownValue(row, raw)
   return {
     id: `${prefix}-${row.key}`,
     label: row.label,

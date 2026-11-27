@@ -63,16 +63,20 @@ const breakdown = computed(() => {
     .filter(Boolean)
     .join(' · ')
 })
+type MonthBudget = NonNullable<TicketView['month_budget']>
+function monthEnding(m: MonthBudget): [string, string] {
+  if (m.reached) return ['reached', 'text-destructive']
+  if (m.runs_out) {
+    return [`runs out ${day(m.runs_out, m.runs_out, m.runs_out)} at this pace`, 'text-foreground']
+  }
+  return ['lasts the month at this pace', 'text-muted-foreground']
+}
 // The repository's monthly budget (CF-671). `runs_out` always falls in the current month, so it is
 // its own `today` and shows without its year.
 const month = computed(() => {
   const m = view.month_budget
   if (!m) return null
-  const [ending, tone] = m.reached
-    ? ['reached', 'text-destructive']
-    : m.runs_out
-      ? [`runs out ${day(m.runs_out, m.runs_out, m.runs_out)} at this pace`, 'text-foreground']
-      : ['lasts the month at this pace', 'text-muted-foreground']
+  const [ending, tone] = monthEnding(m)
   return { text: `Month budget: ${money(m.spent)} of ${money(m.budget)}, ${ending}`, tone }
 })
 // Someone else at work holds the ticket as a run of its own does: no second agent is offered.

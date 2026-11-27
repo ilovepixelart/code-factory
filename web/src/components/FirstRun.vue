@@ -33,7 +33,10 @@ const tracked = computed(() => (repositories.data.value ?? []).length > 0)
 const connected = computed(() => (connections.data.value?.connections ?? []).length > 0)
 // Filing the first ticket ends the first run, so only the first two can be done while it shows.
 const stepsDone = computed(() => Number(tracked.value) + Number(connected.value))
-const next = computed(() => (!tracked.value ? 'track' : !connected.value ? 'connect' : 'file'))
+const next = computed(() => {
+  if (!tracked.value) return 'track'
+  return connected.value ? 'file' : 'connect'
+})
 
 const path = ref('')
 const refusal = ref('')

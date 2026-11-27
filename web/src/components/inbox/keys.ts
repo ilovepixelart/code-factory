@@ -21,7 +21,8 @@ function step(region: HTMLElement, by: 1 | -1): boolean {
   const items = [...region.querySelectorAll<HTMLElement>(ITEM)]
   if (!items.length) return false
   const at = items.indexOf(current() ?? items[0] ?? region)
-  const here = current() === null ? (by === 1 ? -1 : items.length) : at
+  const outside = by === 1 ? -1 : items.length
+  const here = current() === null ? outside : at
   const next = items[Math.min(items.length - 1, Math.max(0, here + by))]
   next?.focus()
   next?.scrollIntoView({ block: 'nearest' })
