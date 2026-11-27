@@ -208,7 +208,8 @@ class ContainedRunner:
             line, settings = made
             return await run_logged(line, cwd=tree, log=log, env=env, limit_s=limit_s)
         finally:
-            await anyio.to_thread.run_sync(_remove, scratch, settings, limiter=_files)
+            with anyio.CancelScope(shield=True):
+                await anyio.to_thread.run_sync(_remove, scratch, settings, limiter=_files)
 
     async def _rules(
         self, work: Work, repository: str, places: tuple[Path, Path, Path]

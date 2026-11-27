@@ -82,10 +82,6 @@ class ScreenPort(Protocol):
 class HooksPort(Protocol):
     """The setup command of a repository."""
 
-    async def setup_command(self, repository: str) -> str | None:
-        """The configured setup command, if any."""
-        ...
-
-    async def run_setup(self, repository: str, ticket_id: str, tree: Path) -> HookOutcome:
-        """Run it in `tree`."""
+    async def run_setup(self, repository: str, tree: Path) -> HookOutcome:
+        """Run it in `tree`, or report success when none is configured."""
         ...

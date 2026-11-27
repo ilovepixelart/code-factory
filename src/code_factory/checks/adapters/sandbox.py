@@ -46,7 +46,7 @@ class KitSandbox(SandboxSettings, CheckoutDenials):
             state=self._state, home=self._home, tree=str(tree), log=str(log),
             scratch=str(temporary), keys=[],
             hosts=await self._hosts(repository) if reaches_hosts else [],
-            denied=await self._denied(repository, tree),
+            denied=await self._denied(repository, tree, protect_git=reaches_hosts),
         )  # fmt: skip
 
     @override
@@ -75,11 +75,15 @@ class KitSandbox(SandboxSettings, CheckoutDenials):
         found = self._kit.checkout_denials(str(tree), BOARD_FOLDERS, is_checkout=True, clones=None)
         return [Path(path) for path in found]
 
-    async def _denied(self, repository: str, tree: Path) -> list[str]:
-        """The checkout denials of a tree with a git folder of its own; nothing for a worktree."""
-        if not await anyio.Path(tree / ".git").is_dir():
+    async def _denied(self, repository: str, tree: Path, *, protect_git: bool = False) -> list[str]:
+        """Keep setup out of a clone's Git metadata before the board starts using it."""
+        git = tree / ".git"
+        if not await anyio.Path(git).is_dir():
             return []
-        return [str(path) for path in await self.checkout_denials(repository, tree)]
+        denied = await self.checkout_denials(repository, tree)
+        if protect_git:
+            denied.append(git)
+        return [str(path) for path in denied]
 
     async def _hosts(self, repository: str) -> list[str]:
         config = await self._settings.load(await self._repositories.get(repository))

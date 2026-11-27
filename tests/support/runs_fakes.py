@@ -68,20 +68,38 @@ class FakeTeams:
         self.agent = "writer"
         self.passed: tuple[str, ...] = ()
         self.attach_error: Exception | None = None
+        self.lease_id: int | None = None
         self.ended_with: list[str | None] = []
 
     async def claim_for_run(self, ticket_id: str, stage: str, settings: Settings) -> Claimed:  # noqa: ARG002
         self.calls.add(f"claim:{ticket_id}:{stage}")
         if self.refusal is not None:
             raise ConflictError(self.refusal)
-        return Claimed(agent=self.agent, passed_over=self.passed)
+        return Claimed(agent=self.agent, passed_over=self.passed, lease_id=self.lease_id)
 
-    async def attach_run(self, ticket_id: str, run_id: str) -> None:  # noqa: ARG002
+    async def beat_start(self, ticket_id: str, lease_id: int) -> bool:  # noqa: ARG002
+        return True
+
+    async def attach_run(
+        self,
+        ticket_id: str,
+        run_id: str,
+        *,
+        lease_id: int | None = None,
+    ) -> None:
+        del ticket_id, run_id, lease_id
         self.calls.add("attach")
         if self.attach_error is not None:
             raise self.attach_error
 
-    async def end_claim(self, ticket_id: str, run_id: str | None) -> None:  # noqa: ARG002
+    async def end_claim(
+        self,
+        ticket_id: str,
+        run_id: str | None,
+        *,
+        lease_id: int | None = None,
+    ) -> None:
+        del ticket_id, lease_id
         self.calls.add("end_claim")
         self.ended_with.append(run_id)
 

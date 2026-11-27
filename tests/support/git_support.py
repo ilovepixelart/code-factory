@@ -137,12 +137,8 @@ class Fakes:
         self.screened.append((branch, new))
         return self.held_
 
-    async def setup_command(self, repository: str) -> str | None:  # noqa: ARG002
-        return None if self.setup is None else "setup"
-
-    async def run_setup(self, repository: str, ticket_id: str, tree: Path) -> HookOutcome:  # noqa: ARG002
-        assert self.setup is not None
-        return self.setup
+    async def run_setup(self, repository: str, tree: Path) -> HookOutcome:  # noqa: ARG002
+        return self.setup or HookOutcome(code=0)
 
 
 def ticket_ref(ticket_id: str = "CF-1", branch: str = "") -> TicketRef:

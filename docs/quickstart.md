@@ -143,8 +143,9 @@ In Local mode, use **Track repository** on the board. For Server mode, see the
 uv run code-factory track ~/code/my-repo
 ```
 
-The board files tickets in the tracked repositories. A repository's own settings (checks command,
-agents, preview) live in its `.code-factory/config.toml`: [reference/config.md](reference/config.md).
+The board files tickets in the tracked repositories. Repository settings live in
+`.code-factory/config.toml`. See the [configuration reference](reference/config.md) and
+[worktree setup guide](guides/operations.md#agent-worktree-setup).
 On a repository with a GitHub remote, Factory can push finished branches and open pull requests
 automatically. Set `[agents] ship = false` to disable automatic shipping while trying Factory on a
 repository. Merging waits for owner approval by default.

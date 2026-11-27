@@ -182,6 +182,7 @@ class Claim(_Frozen):
     """The agent a run takes (`None` for the default agent) and the agents it passed over."""
 
     agent: TeamAgent | None
+    lease_id: int | None = None
     passed_over: tuple[str, ...] = ()
 
 

@@ -157,6 +157,7 @@ class PreviewStatus(_Frozen):
 
     configured: bool
     running: bool
+    unavailable_reason: str | None = None
     port: int | None = None
     address: str | None = None
     started: datetime | None = None
