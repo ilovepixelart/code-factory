@@ -223,6 +223,11 @@ jobs:
       # vitest writes lcov paths relative to web/, and the scanner resolves them from the root.
       - name: Write the web coverage for SonarCloud
         run: sed 's#^SF:#SF:web/#' lcov.info > coverage/web.info
+      # The web tsconfig files extend @vue/tsconfig: without node_modules the scanner analyses the
+      # TypeScript without their compiler options and without the packages' types.
+      - uses: ./.github/actions/setup-web
+      - name: Install the web packages for the scanner
+        run: pnpm --dir web install --frozen-lockfile --ignore-scripts
       # Skipped when SONAR_TOKEN is absent (forks, Dependabot), so the check stays green there.
       - name: SonarCloud scan
         if: env.SONAR_TOKEN
