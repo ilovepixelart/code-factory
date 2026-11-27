@@ -27,19 +27,21 @@ def flaky_failure(records: Sequence[Record], tree: str) -> str | None:
         if record.kind == "flaky":
             counted.clear()
             tracked = True
-        elif (
-            record.kind == "checks"
-            and record.data.get("outcome") != "killed"
-            and record.text("scope") != "fast"
-        ):
-            code = exit_code_of(record)
-            if code is not None and no_verdict(code):
-                continue
-            failed = code != 0
-            asleep = record.data.get("slept") is True
-            if (failed and not asleep) or (not failed and not tracked and _unclean(record)):
-                counted.append(record)
+        elif record.kind == "checks" and _counts(record, tracked=tracked):
+            counted.append(record)
     return counted[0].text("log") if counted else None
+
+
+def _counts(record: Record, *, tracked: bool) -> bool:
+    """Whether the checks run `record` counts toward a flaky pass; `tracked` once one is filed."""
+    if record.data.get("outcome") == "killed" or record.text("scope") == "fast":
+        return False
+    code = exit_code_of(record)
+    if code is not None and no_verdict(code):
+        return False
+    failed = code != 0
+    asleep = record.data.get("slept") is True
+    return (failed and not asleep) or (not failed and not tracked and _unclean(record))
 
 
 def flaky_reason(records: Sequence[Record], ticket_id: str, tree: str, failed: str) -> str:

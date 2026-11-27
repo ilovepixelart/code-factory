@@ -50,12 +50,14 @@ def _held(ticket: TicketCore, field: str) -> list[str]:
 
 def _link_value(field: str, held: list[str], linked: str, *, add: bool) -> str | None:
     """The field text after the link is added or removed, `None` when a removal finds none."""
-    if add:
-        wanted = [linked] if field == "parent" else [*held, *([] if linked in held else [linked])]
-    elif linked not in held:
+    if not add and linked not in held:
         return None
+    if field == "parent":
+        return linked if add else ""
+    if add:
+        wanted = held if linked in held else [*held, linked]
     else:
-        wanted = [] if field == "parent" else [t for t in held if t != linked]
+        wanted = [t for t in held if t != linked]
     return ", ".join(wanted)
 
 

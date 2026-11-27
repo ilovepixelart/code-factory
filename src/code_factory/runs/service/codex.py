@@ -21,6 +21,7 @@ from code_factory.platform.programs import find_program
 from code_factory.platform.served import Served
 from code_factory.platform.services import Services
 from code_factory.runs.adapters import files
+from code_factory.runs.adapters.runner.wrapper import RUNS_VARIABLE
 from code_factory.runs.ports import Launch, LaunchPlan
 
 MCP_TOKEN = "CODE_FACTORY_MCP_TOKEN"  # noqa: S105  # variable name
@@ -147,5 +148,6 @@ class CodexLauncher:
             **kit.agent_identity(None),
             "CODEX_HOME": str(home),
             MCP_TOKEN: plan.token,
+            RUNS_VARIABLE: str(plan.exit_file.parent),
             **({BROKER_TOKEN: token} if token else {}),
         }

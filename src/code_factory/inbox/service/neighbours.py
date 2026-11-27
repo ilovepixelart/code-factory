@@ -186,16 +186,22 @@ class _InboxRead:
             if pull.ci == "failed":
                 failing.append(self._pull_item(pull, ref, "failing"))
                 continue
-            if _green(pull) and await self._checked(pull):
-                if await self._waits(pull.repository):
-                    mergeable.append(self._pull_item(pull, ref, "merge"))
-                    continue
-                if note := delivery.owner_hold(pull.ticket_id, pull.head):
-                    mergeable.append(self._pull_item(pull, ref, "merge", note=note))
-                    continue
+            if (merge := await self._merge_item(pull, ref)) is not None:
+                mergeable.append(merge)
+                continue
             if (since := _idle_since(pull, now)) is not None:
                 idle.append(Item(since=since, kind="idle", reason=pull.url, ticket=ref))
         return {"mergeable": mergeable, "failing": failing, "idle": idle}
+
+    async def _merge_item(self, pull: PullView, ref: TicketRef) -> Item | None:
+        """The inbox item asking the owner to merge `pull`, when it is green and checked."""
+        if not (_green(pull) and await self._checked(pull)):
+            return None
+        if await self._waits(pull.repository):
+            return self._pull_item(pull, ref, "merge")
+        if note := self._services.get(DeliveryService).owner_hold(pull.ticket_id, pull.head):
+            return self._pull_item(pull, ref, "merge", note=note)
+        return None
 
     async def _checked(self, pull: PullView) -> bool:
         """Whether the board's checks passed on the head, as the merge needs when they are set."""
