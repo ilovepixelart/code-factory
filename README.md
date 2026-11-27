@@ -286,6 +286,9 @@ candidate. Surviving mutations and inconclusive runs produce warnings.
 GitHub's dependency audit checks only the lockfiles changed by a pull request. Pushes to
 `main` and manually dispatched runs check all lockfiles.
 
+Checks run on the Factory host or through its configured container engine. Independently deployed
+workers polling a Factory server for jobs are outside the supported deployment modes.
+
 The [container runner example](.code-factory/config.container.example.toml) uses a checks container.
 Build its image on the Docker runner from the checkout root, and rebuild it when the toolchain
 or a lockfile changes:

@@ -10,7 +10,7 @@ import { isAbsolute, join, resolve } from 'node:path'
 import { present } from '../support/present'
 import { OWNER_COOKIE } from './owner'
 
-export const ROOT = resolve(import.meta.dirname, '../..')
+export const ROOT = resolve(import.meta.dirname, '../../..')
 export const TIMEOUT = 10_000
 
 export const DESIGN_VIEWPORTS = [
@@ -48,7 +48,7 @@ function command(args: string[], executable = 'code-factory'): [string, string[]
 }
 
 /** Run a `code-factory` command to its end; a failure throws its stderr. */
-function codeFactory(args: string[], env: NodeJS.ProcessEnv): string {
+export function codeFactory(args: string[], env: NodeJS.ProcessEnv): string {
   const [file, argv] = command(args)
   return execFileSync(file, argv, { env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
 }
