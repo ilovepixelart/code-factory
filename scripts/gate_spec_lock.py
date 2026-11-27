@@ -104,12 +104,8 @@ def expected_assertion(node: str, reason: str) -> bool:
         return message == f"AssertionError: {reason}"
 
 
-def seal(root: Path, receipt: Path, checks: list[tuple[str, str]]) -> int:
-    """Write an owner receipt only after all named cases fail as expected."""
-    where = receipt.resolve()
-    if where.is_relative_to(root) or receipt.exists() or receipt.is_symlink():
-        msg = "use a new receipt file outside the project checkout"
-        raise ValueError(msg)
+def prove(root: Path, checks: list[tuple[str, str]]) -> str | None:
+    """Return the proof as JSON only after all named cases fail as expected."""
     head = git("rev-parse", "--verify", "HEAD").stdout.decode().strip()
     if git("diff", "--quiet", "--no-ext-diff", "--no-textconv", head, "--", check=False).returncode:
         msg = "commit the spec tests before running the expected-failure check"
@@ -126,18 +122,29 @@ def seal(root: Path, receipt: Path, checks: list[tuple[str, str]]) -> int:
         raise ValueError(msg)
     for node, reason in checks:
         if not expected_assertion(node, reason):
-            print(f"Spec lock refused {node}. The expected assertion did not fail.")
-            return 1
+            msg = f"Spec lock refused {node}. The expected assertion did not fail."
+            print(msg, file=sys.stderr)
+            return None
     if any(digest(checked_file(root, path)) != value for path, value in files.items()):
         msg = "a sealed test file changed while the expected-failure checks ran"
         raise ValueError(msg)
+    return json.dumps({"commit": head, "nodes": [node for node, _ in checks], "files": files})
+
+
+def seal(root: Path, receipt: Path, checks: list[tuple[str, str]]) -> int:
+    """Write an owner receipt only after all named cases fail as expected."""
+    where = receipt.resolve()
+    if where.is_relative_to(root) or receipt.exists() or receipt.is_symlink():
+        msg = "use a new receipt file outside the project checkout"
+        raise ValueError(msg)
+    proof = prove(root, checks)
+    if proof is None:
+        return 1
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=where.parent) as temporary:
-        json.dump(
-            {"commit": head, "nodes": [node for node, _ in checks], "files": files}, temporary
-        )
+        temporary.write(proof)
         temporary.flush()
         os.link(temporary.name, where)
-    print(f"Locked {len(files)} test files from {head[:12]}.")
+    print(f"Locked test files in {where}.")
     return 0
 
 
@@ -170,26 +177,36 @@ def verify(root: Path, receipt: Path) -> int:
     return int(bool(changed))
 
 
+def _check_inputs(parser: argparse.ArgumentParser) -> None:
+    inputs = parser.add_mutually_exclusive_group(required=True)
+    inputs.add_argument("--check", nargs=2, metavar=("NODE", "REASON"), action="append")
+    inputs.add_argument("--manifest", type=Path)
+
+
 def main() -> int:
-    """Run a human-approved seal or verify an existing receipt."""
+    """Prove expected failures, seal them, or verify an existing receipt."""
     parser = argparse.ArgumentParser(description=__doc__)
     actions = parser.add_subparsers(dest="action", required=True)
     sealing = actions.add_parser("seal")
     sealing.add_argument("receipt", type=Path)
-    inputs = sealing.add_mutually_exclusive_group(required=True)
-    inputs.add_argument("--check", nargs=2, metavar=("NODE", "REASON"), action="append")
-    inputs.add_argument("--manifest", type=Path)
+    _check_inputs(sealing)
+    _check_inputs(actions.add_parser("prove"))
     actions.add_parser("verify").add_argument("receipt", type=Path)
     args = parser.parse_args()
     try:
         root = Path(git("rev-parse", "--show-toplevel").stdout.decode().strip()).resolve()
-        receipt = args.receipt.absolute()
-        manifest = args.manifest.absolute() if args.action == "seal" and args.manifest else None
+        receipt = args.receipt.absolute() if args.action != "prove" else None
+        manifest = args.manifest.absolute() if args.action != "verify" and args.manifest else None
         os.chdir(root)
-        if args.action == "seal":
-            checks = manifest_checks(root, manifest) if manifest is not None else args.check
+        if args.action == "verify" and receipt is not None:
+            return verify(root, receipt)
+        checks = manifest_checks(root, manifest) if manifest is not None else args.check
+        if receipt is not None:
             return seal(root, receipt, checks)
-        return verify(root, receipt)
+        proof = prove(root, checks)
+        if proof is None:
+            return 1
+        print(proof)
     except (
         OSError,
         subprocess.SubprocessError,
@@ -199,6 +216,7 @@ def main() -> int:
         ET.ParseError,
     ) as error:
         parser.exit(2, f"Spec lock could not be checked: {error}\n")
+    return 0
 
 
 if __name__ == "__main__":

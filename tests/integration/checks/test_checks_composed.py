@@ -1,11 +1,15 @@
 """A ticket check of the composed app: the real srt, with the settings the app builds."""
 
+import json
+import shlex
+import shutil
+import sys
 from pathlib import Path
 
 import pytest
 
 from app_lifespan import IDLE_MODULES
-from checks_support import write_config
+from checks_support import script, write_config
 from code_factory.app import build_services
 from code_factory.checks.models import Verdict
 from code_factory.checks.service import CheckService
@@ -15,6 +19,7 @@ from code_factory.platform.db import UnitOfWork, create_engine
 from code_factory.platform.module import Resources
 from code_factory.tickets.models import Ticket
 from code_factory.tickets.service import ActivityService
+from git_support import commit, git
 
 
 @pytest.fixture
@@ -40,6 +45,40 @@ async def test_a_ticket_check_runs_inside_srt_and_records_its_verdict(
     [record] = [item.data for item in page.items]
     assert record["exit_code"] == 0
     assert Path(record["log"]).read_text().splitlines()[0] == "inside"
+
+
+async def test_a_prebuild_proof_seals_an_expected_failure_inside_srt(
+    composed: CheckService, started: Ticket, tracked: Path, state: Path, tmp_path: Path
+) -> None:
+    path = "tests/test_contract.py"
+    expected = "the contract is missing"
+    git(tracked, "switch", started.branch)
+    head = commit(
+        tracked,
+        "Define the contract",
+        **{path: f"def test_contract():\n    assert False, {expected!r}\n"},
+    )
+    git(tracked, "switch", "main")
+    write_config(tracked, "[checks]\ncommand = 'true'\n")
+    owner = tmp_path / "owner"
+    owner.mkdir()
+    scripts = Path(__file__).resolve().parents[3] / "scripts"
+    for name in ("gate_spec_lock.py", "gate_delta.py"):
+        shutil.copyfile(scripts / name, owner / name)
+    command = shlex.join([sys.executable, str(owner / "gate_spec_lock.py"), "prove"])
+    verifier = script(owner / "verify", f'exec {command} "$@"')
+    requests = state / "spec-lock-requests"
+    requests.mkdir(parents=True)
+    name = f"{started.id}.json"
+    request = {"argv": [str(verifier), "--check", f"{path}::test_contract", expected]}
+    (requests / name).write_text(json.dumps(request), encoding="utf-8")
+
+    assert await composed.prepare_build(started.id)
+    await composed.verify_build(started.id, head)
+
+    receipt = json.loads((state / "spec-locks" / name).read_text())
+    assert receipt["commit"] == head
+    assert set(receipt["files"]) == {path}
 
 
 async def test_a_ticket_check_cannot_write_outside_its_tree(

@@ -114,6 +114,19 @@ async def test_without_the_sandbox_the_command_runs_as_it_is_in_the_tree(
     assert read(log).splitlines() == [str(bin_folder), str(tree)]
 
 
+async def test_a_check_that_requires_the_sandbox_cannot_fall_back_to_plain_execution(
+    tmp_path: Path,
+    tree: Path,
+) -> None:
+    log = tmp_path / "run.log"
+    contained = runner(tmp_path, Policy(sandbox=False), Rules())
+
+    with pytest.raises(UnavailableError, match="spec checks require the agent sandbox"):
+        await contained.run(Work.CHECKS, "repo", "echo ran", tree, log, 30, require_sandbox=True)
+
+    assert not log.exists()
+
+
 async def test_a_child_never_inherits_the_variables_that_name_a_repository(
     tmp_path: Path, tree: Path, bin_folder: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

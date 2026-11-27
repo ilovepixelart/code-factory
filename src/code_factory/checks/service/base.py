@@ -125,6 +125,8 @@ class CheckBase:
         self._admitted: set[int] = set()
         self._release_candidates: deque[str] = deque()
         self._release_tasks: dict[str, asyncio.Task[None]] = {}
+        self._spec_tasks: dict[str, asyncio.Task[None]] = {}
+        self._spec_failures: dict[str, tuple[str, str, str, float]] = {}
         self._draining = False
         self._group: asyncio.TaskGroup | None = None
         self._running: dict[int, asyncio.Task[object]] = {}
@@ -151,13 +153,21 @@ class CheckBase:
             text = await git.read_text_below(
                 self._spec_state, f"spec-locks/{ticket}.json", SPEC_RECEIPT_BYTES
             )
-            if text is None:
-                return None
+        except BadRequestError:
+            return f"Spec lock could not read the owner receipt for {ticket}."
+        if text is None:
+            return None
+        return await self._sealed_files_refusal(repository, ticket, head, text)
+
+    async def _sealed_files_refusal(
+        self, repository: str, ticket: str, head: str, text: str
+    ) -> str | None:
+        try:
             sealed, paths = receipt_files(text)
-        except BadRequestError, TypeError, ValueError:
+        except TypeError, ValueError:
             return f"Spec lock could not read the owner receipt for {ticket}."
         try:
-            changed = await git.changed_files(repository, sealed, head, paths)
+            changed = await self._deps.git.changed_files(repository, sealed, head, paths)
         except UnavailableError as error:
             return f"Spec lock could not compare the sealed files. {error}."
         if changed:

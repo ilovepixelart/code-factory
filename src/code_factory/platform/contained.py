@@ -170,6 +170,8 @@ class ContainedRunner:
         tree: Path,
         log: Path,
         limit_s: float | None,
+        *,
+        require_sandbox: bool = False,
     ) -> int | None:
         """Run `command` in `tree`, its output in `log`.
 
@@ -185,6 +187,9 @@ class ContainedRunner:
         path = await find_path(places) or EMPTY_PATH
         env = {**_base_values(), "PATH": path}
         if not await self._policy.sandboxed(repository):
+            if require_sandbox:
+                msg = "the spec checks require the agent sandbox; enable it and retry Build"
+                raise UnavailableError(msg)
             line = command if pinned is None else _pinned(pinned, command)
             return await run_logged(line, cwd=tree, log=log, env=env, limit_s=limit_s)
         scratch = await anyio.to_thread.run_sync(_make_scratch, limiter=_files)

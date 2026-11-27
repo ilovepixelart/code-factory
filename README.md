@@ -354,6 +354,32 @@ command passed earlier. Other test runners can supply the same receipt format. T
 field names the sealed Git commit and the `files` object maps repository-relative paths to
 their SHA-256 digests.
 
+To have Factory run the expected-failure checks before Build, place a request at
+`spec-lock-requests/CF-<n>.json` in the board's state directory. Commit the test files to the
+ticket's branch first. Enable the agent sandbox and set a required `[checks] command` so Factory
+can enforce the receipt on merge.
+
+```json
+{
+  "argv": [
+    "/owner/bin/verify-spec",
+    "--check",
+    "tests/test_example.py::test_new_behaviour",
+    "the new behaviour is required"
+  ]
+}
+```
+
+Install the verifier and any scripts it runs outside the board state and the tracked repositories.
+For pytest, point the installed wrapper at a trusted copy of `gate_spec_lock.py` and use its
+`prove` command. The verifier runs against a disposable checkout with network access off, so any
+test tooling and dependencies must already be available. It exits zero only when every named test
+fails for its expected reason and emits one single-line JSON receipt. Factory validates the
+receipt against the checkout and publishes it in `spec-locks` before launching Build. The board
+reports the proof as pending while it runs and can launch the ticket on a later pass. Later starts
+reuse the receipt while the request and sealed files agree. A changed request requires reviewing
+the existing receipt before another Build can start.
+
 To keep acceptance cases private until QA, put them in `qa-holdouts/CF-<n>.md` inside the board's
 state directory. Enable the `qa` review role and use the board's normal agent sandbox, which
 blocks Build's access to that directory. The QA run can read only its own ticket's cases through

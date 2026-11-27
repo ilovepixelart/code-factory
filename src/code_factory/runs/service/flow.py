@@ -11,6 +11,14 @@ class FlowAdapter:
     def __init__(self, services: Services) -> None:
         self._services = services
 
+    async def prepare_build(self, ticket_id: str) -> bool:
+        """Seal the requested spec checks before creating an agent claim."""
+        return await self._services.get(CheckService).prepare_build(ticket_id)
+
+    async def verify_build(self, ticket_id: str, head: str) -> None:
+        """Recheck the receipt against the commit the Build agent will receive."""
+        await self._services.get(CheckService).verify_build(ticket_id, head)
+
     async def build_ended(self, ticket_id: str, head: str) -> None:
         """Queue the head's checks; a ticket the review returned goes back to its evidence."""
         stages = self._services.get(StageService)

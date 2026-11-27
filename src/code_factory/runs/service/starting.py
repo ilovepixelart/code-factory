@@ -130,6 +130,15 @@ class Starting(Reading):
         if await self._halted():
             raise ConflictError(HALTED)
         self._check_ask(facts, begin.stage, begin.options)
+        if begin.stage == "build" and await self._ports.flow.prepare_build(facts.id):
+            if await self._halted():
+                raise ConflictError(HALTED)
+            facts = await self._ports.tickets.facts(ticket_id)
+            if stage is None and facts.column != begin.stage:
+                msg = "the ticket changed stage while its spec checks ran; start it again"
+                raise ConflictError(msg)
+            self._check_ask(facts, begin.stage, begin.options)
+            begin.facts = facts
         begin.settings = await self._ports.config.settings(facts.repository)
         claimed = await self._ports.teams.claim_for_run(ticket_id, begin.stage, begin.settings)
         begin.count = budget_rules.attempt_count(facts.parallel, begin.settings.attempts)
@@ -171,6 +180,8 @@ class Starting(Reading):
             facts.repository, facts.id, options.attempt
         )
         head = await self._ports.trees.head(tree)
+        if begin.stage == "build":
+            await self._ports.flow.verify_build(facts.id, head)
         run_id = secrets.token_hex(6)
         now = self._clock()
         run = Run(

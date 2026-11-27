@@ -287,7 +287,15 @@ class Config(Protocol):
 
 
 class Flow(Protocol):
-    """The step a run's end sets off in the modules that own it."""
+    """The steps a run's start and end set off in the modules that own them."""
+
+    async def prepare_build(self, ticket_id: str) -> bool:
+        """Seal the requested spec checks, returning true if this caller waited for proof."""
+        ...
+
+    async def verify_build(self, ticket_id: str, head: str) -> None:
+        """Recheck the sealed files against the actual Build candidate under the claim."""
+        ...
 
     async def build_ended(self, ticket_id: str, head: str) -> None:
         """A build run left commits ending at `head` on the ticket's branch."""

@@ -41,6 +41,8 @@ async def test_a_start_claims_then_probes_then_makes_the_tree_before_the_process
     runs: RunService, fakes: Fakes, facts: TicketFacts
 ) -> None:
     await runs.start(facts.id)
+    assert fakes.flow.prepared == [facts.id]
+    assert fakes.flow.verified == [(facts.id, "head0")]
     assert fakes.calls.log == [
         f"claim:{facts.id}:build",
         "probe",
@@ -51,6 +53,34 @@ async def test_a_start_claims_then_probes_then_makes_the_tree_before_the_process
         "attach",
         "event:run.started",
     ]
+
+
+async def test_a_failed_spec_check_blocks_build_before_it_takes_a_claim(
+    runs: RunService, fakes: Fakes, facts: TicketFacts
+) -> None:
+    fakes.flow.prepare_error = ConflictError("the expected assertion did not fail")
+
+    with pytest.raises(ConflictError, match="the expected assertion did not fail"):
+        await runs.start(facts.id)
+
+    assert fakes.agents.plans == []
+    assert fakes.calls.log == []
+    fakes.flow.prepare_error = None
+    assert (await runs.start(facts.id)).runs
+
+
+async def test_a_changed_spec_head_after_preflight_blocks_launch_and_releases_the_claim(
+    runs: RunService, fakes: Fakes, facts: TicketFacts
+) -> None:
+    fakes.flow.verify_error = ConflictError("a sealed test changed")
+
+    with pytest.raises(ConflictError, match="a sealed test changed"):
+        await runs.start(facts.id)
+
+    assert fakes.agents.plans == []
+    assert "launch" not in fakes.calls.log
+    fakes.flow.verify_error = None
+    assert (await runs.start(facts.id)).runs
 
 
 async def test_the_run_token_lives_as_long_as_the_run_may_plus_five_minutes(

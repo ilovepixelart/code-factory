@@ -115,6 +115,8 @@ class UpkeepMixin(PipelineMixin):
                 self._admitted.clear()
                 self._release_tasks.clear()
                 self._release_candidates.clear()
+                self._spec_tasks.clear()
+                self._spec_failures.clear()
 
     async def _admit(self, group: asyncio.TaskGroup, slots: int) -> None:
         try:
@@ -177,7 +179,7 @@ class UpkeepMixin(PipelineMixin):
     async def drain(self) -> None:
         """Wait for the running checks for `shutdown_s`, then cancel them."""
         self._draining = True
-        tasks = [*self._running.values(), *self._release_tasks.values()]
+        tasks = [*self._running.values(), *self._release_tasks.values(), *self._spec_tasks.values()]
         if not tasks:
             return
         await asyncio.wait(tasks, timeout=self._opts.shutdown_s)
