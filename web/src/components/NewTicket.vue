@@ -109,6 +109,7 @@ async function show(preset: { repository?: string; parent?: string } = {}): Prom
   open.value = true
   // A read the board does not answer, or answers with anything but a list, leaves the list empty
   // and the form open.
+  repositories.value = []
   const listed = await readJson<string[]>('/api/repositories').catch(() => null)
   if (!current()) return
   repositories.value = Array.isArray(listed) ? listed : []
@@ -150,6 +151,7 @@ const sent = () => ({
 /** A refusal stays in the form with every typed value; the dialog closes once the board took it. */
 const create = handleSubmit(async () => {
   const repository = ticket.repository
+  if (!repositories.value.includes(repository)) return
   await send('POST', '/api/tickets', sent(), async (answer) => {
     saveText(LAST_REPOSITORY, repository)
     const id = answer.id
@@ -225,7 +227,7 @@ defineExpose({ open: show })
       </FieldGroup>
       <DialogFooter class="flex-row justify-end border-t p-4 sm:px-6">
         <Button type="button" variant="outline" @click="cancel()">Cancel</Button>
-        <Button type="submit" :disabled="busy"
+        <Button type="submit" :disabled="busy || !repositories.includes(ticket.repository)"
           ><Spinner v-if="busy" data-icon="inline-start" />Create ticket</Button
         >
       </DialogFooter>
