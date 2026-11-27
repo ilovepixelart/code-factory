@@ -107,7 +107,7 @@ def test_the_one_pass_timeline_agrees_with_the_naive_scan_of_each_call(seed: int
     fast = rules.timeline(events)
     tools = [entry for entry in fast if entry.kind == "tool"]
     scanned = [
-        rules.outcome_of(events, at)[1] for at, e in enumerate(events) if e.event == "PreToolUse"
+        rules.outcome_of(events, at)[1] for at, e in enumerate(events) if e.name == "PreToolUse"
     ]
     assert [entry.status for entry in tools] == scanned
 

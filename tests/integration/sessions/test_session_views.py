@@ -38,7 +38,7 @@ async def assert_views_are_the_full_rederivation(db: AsyncSession) -> int:
             exclude={"repository", "branch"}
         ), session_id
         assert stored.last_seq == events[-1].seq
-        starts = [e.seq for e in events if e.event == "SessionStart"]
+        starts = [e.seq for e in events if e.name == "SessionStart"]
         assert stored.window_seq == (starts[-1] if starts else events[0].seq)
         assert stored.rules_version == derive.RULES_VERSION
     return len(ids)

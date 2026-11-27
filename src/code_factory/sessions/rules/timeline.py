@@ -44,7 +44,7 @@ _PLAIN = {
 
 
 def _plain_entry(event: Event) -> Entry | None:
-    found = _PLAIN.get(event.event)
+    found = _PLAIN.get(event.name)
     if found is None:
         return None
     kind, title, detail_field = found
@@ -71,7 +71,7 @@ def _duration(call: Event, result: Event) -> float:
 
 def _status(result: Event | None, *, permission: bool, closed: bool) -> str:
     if result is not None:
-        return "failed" if result.event == "PostToolUseFailure" else "done"
+        return "failed" if result.name == "PostToolUseFailure" else "done"
     if closed:
         return "denied" if permission else "interrupted"
     return "waiting" if permission else "running"
@@ -90,18 +90,18 @@ def outcome_of(events: Sequence[Event], index: int) -> tuple[Event | None, str]:
     later = [event for event in events[index + 1 :] if event.agent_id == call.agent_id]
     result = None
     for event in later:
-        if event.event in CLOSES_ACTIONS:
+        if event.name in CLOSES_ACTIONS:
             break
-        if event.event in TOOL_RESULTS and text_field(event.payload, "tool_use_id") == call_id:
+        if event.name in TOOL_RESULTS and text_field(event.payload, "tool_use_id") == call_id:
             result = event
             break
     if result is not None:
         return result, _status(result, permission=False, closed=False)
     permission = False
     for event in later:
-        if event.event == "PermissionRequest" and text_field(event.payload, "tool_name") == name:
+        if event.name == "PermissionRequest" and text_field(event.payload, "tool_name") == name:
             permission = True
-        if event.event in CLOSES_ACTIONS or event.event == "SubagentStop":
+        if event.name in CLOSES_ACTIONS or event.name == "SubagentStop":
             return None, _status(None, permission=permission, closed=True)
     return None, _status(None, permission=permission, closed=False)
 
@@ -120,13 +120,13 @@ class _Stream:
     def of(cls, events: list[Event]) -> _Stream:
         stream = cls(events, [], [], {}, {})
         for at, event in enumerate(events):
-            if event.event in CLOSES_ACTIONS:
+            if event.name in CLOSES_ACTIONS:
                 stream.closes.append(at)
-            if event.event in CLOSES_ACTIONS or event.event == "SubagentStop":
+            if event.name in CLOSES_ACTIONS or event.name == "SubagentStop":
                 stream.stops.append(at)
-            if event.event in TOOL_RESULTS:
+            if event.name in TOOL_RESULTS:
                 stream.results.setdefault(text_field(event.payload, "tool_use_id"), []).append(at)
-            if event.event == "PermissionRequest":
+            if event.name == "PermissionRequest":
                 stream.permissions.setdefault(text_field(event.payload, "tool_name"), []).append(at)
         return stream
 
@@ -159,7 +159,7 @@ def timeline(events: Sequence[Event]) -> list[Entry]:
     for event in events:
         at = positions[event.agent_id]
         positions[event.agent_id] = at + 1
-        if event.event != "PreToolUse":
+        if event.name != "PreToolUse":
             entry = _plain_entry(event)
             if entry is not None:
                 entries.append(entry)
@@ -189,7 +189,7 @@ def window(entries: Sequence[Entry], last: int) -> tuple[Sequence[Entry], int]:
 def tool_call(events: Sequence[Event], seq: int) -> ToolCall | None:
     """The call the `PreToolUse` event `seq` made; None when `seq` is no such event."""
     index = next(
-        (at for at, e in enumerate(events) if e.seq == seq and e.event == "PreToolUse"), None
+        (at for at, e in enumerate(events) if e.seq == seq and e.name == "PreToolUse"), None
     )
     if index is None:
         return None
@@ -198,7 +198,7 @@ def tool_call(events: Sequence[Event], seq: int) -> ToolCall | None:
     output = None
     if result is not None:
         output = result.payload.get(
-            "error" if result.event == "PostToolUseFailure" else "tool_response"
+            "error" if result.name == "PostToolUseFailure" else "tool_response"
         )
     return ToolCall(field(call, "tool_name"), call.payload.get("tool_input"), output)
 

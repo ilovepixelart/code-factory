@@ -103,7 +103,7 @@ def spool_lines(events: list[Event]) -> list[bytes]:
     for e in events:
         payload: dict[str, object] = {
             "session_id": e.session_id,
-            "hook_event_name": e.event,
+            "hook_event_name": e.name,
             **({"agent_id": e.agent_id} if e.agent_id is not None else {}),
             **e.payload,
             "_captured_at": e.captured_at,
