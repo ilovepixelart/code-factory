@@ -19,8 +19,8 @@ from code_factory.runs.repository import RunRepository
 from code_factory.runs.service import HALTED, RunService
 from code_factory.talk.models import Reply
 from code_factory.talk.service import TalkService
-from code_factory.tickets.models import NewTicket
-from code_factory.tickets.service import TicketService
+from code_factory.tickets.models import NewActivity, NewTicket
+from code_factory.tickets.service import ActivityService, TicketService
 from git_support import git, make_repo
 from runs_values import a_run
 
@@ -133,6 +133,35 @@ async def test_a_green_pull_request_is_ready_to_merge_when_the_board_runs_no_che
     page = await app.state.services.get(InboxService).page()
 
     assert [i["ticket"]["id"] for i in page["mergeable"]] == [ticket]
+
+
+async def test_failed_factory_check_surfaces_only_for_the_current_pull_head(
+    app: FastAPI, uow: UnitOfWork, tmp_path: Path
+) -> None:
+    root = make_repo(tmp_path)
+    write_config(root, "[checks]\ncommand = 'true'\n")
+    ticket = await _green_pull(app, uow, root)
+    head = git(root, "rev-parse", "HEAD")
+    activity = app.state.services.get(ActivityService)
+    inbox = app.state.services.get(InboxService)
+
+    async def record(commit: str, code: int) -> None:
+        await activity.append(
+            ticket, NewActivity(kind="checks", data={"commit": commit, "exit_code": code}), by="o"
+        )
+
+    await record("old-head", 1)
+    assert (await inbox.page())["failing"] == []
+    await record(head, 1)
+    page = await inbox.page()
+    assert [(i["ticket"]["id"], i["note"]) for i in page["failing"]] == [
+        (ticket, "Factory checks failed on this commit")
+    ]
+    assert page["mergeable"] == []
+    assert page["latest"] == f"{ticket}: Factory checks failed on this commit"
+    assert (await inbox.count())["count"] == 1
+    await record(head, 0)
+    assert (await inbox.page())["failing"] == []
 
 
 async def test_a_merge_item_carries_the_pull_requests_size_when_github_counted_it(

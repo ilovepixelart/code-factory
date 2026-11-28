@@ -13,13 +13,18 @@ from code_factory.follower.ports import FollowerPorts
 from code_factory.follower.repository import Leader
 from code_factory.follower.rules.queue import Rule
 from code_factory.follower.service import FollowerService, QueueService
+from code_factory.follower.service.neighbours import BoardAdapter
 from code_factory.follower.tables import QueuePlanRow
 from code_factory.platform.config import Settings
 from code_factory.platform.db import UnitOfWork, create_engine
 from code_factory.platform.errors import ConflictError
+from code_factory.platform.services import Services
 from code_factory.runs.models import Repair
+from code_factory.team.service import TeamService
 from code_factory.tickets.models import NewTicket
 from code_factory.tickets.service import TicketService
+from team_fakes import Fakes as TeamFakes
+from team_values import agent
 
 NOW = datetime(2026, 9, 21, 10, tzinfo=UTC)
 
@@ -140,6 +145,24 @@ async def test_a_review_role_due_starts_as_its_own_run_stage(
     await follower.run_pass(("start_queued",))
 
     assert fakes.started == [(ids[0], "security")]
+
+
+async def test_a_build_needing_a_reader_can_start_with_only_a_spec_agent(
+    follower: FollowerService, fakes: Fakes, uow: UnitOfWork, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ticket, waiting = fakes.ids
+    fakes.run_stage[ticket] = "read"
+    team = TeamFakes()
+    team.agents.agents = [agent("reader", "spec")]
+    services = Services()
+    services.add(TeamService, TeamService(uow, team.ports))
+    monkeypatch.setattr(fakes, "rule", BoardAdapter(services).rule)
+
+    report = await follower.run_pass(("start_queued",))
+
+    assert report.steps["start_queued"] == "1 started of 2 planned"
+    assert fakes.started == [(ticket, "read")]
+    assert await QueueService(uow).plan() == {ticket: "", waiting: "sample 1 of 1"}
 
 
 async def test_a_refused_start_becomes_the_tickets_note(

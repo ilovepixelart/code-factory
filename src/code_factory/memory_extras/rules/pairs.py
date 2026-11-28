@@ -104,13 +104,19 @@ def _going(entries: Sequence[MemoryEntry], defined: AbstractSet[str], now: int) 
     }
 
 
-def pairs(entries: Sequence[MemoryEntry], defined: AbstractSet[str], now: int) -> list[Pair]:
+def pairs(
+    entries: Sequence[MemoryEntry],
+    defined: AbstractSet[str],
+    now: int,
+    *,
+    excluded: AbstractSet[str] | None = None,
+) -> list[Pair]:
     """The pairs of active entries on one subject, in id order.
 
     Their statements share at least 3 words each held by at most 4 active entries. An entry a
     consolidation would merge away or retire is in none.
     """
-    going = _going(entries, defined, now)
+    going = _going(entries, defined, now) if excluded is None else excluded
     active = sorted((e for e in entries if not e.retired and e.id not in going), key=lambda e: e.id)
     words = [_subject_words(e.statement) for e in active]
     held = Counter(word for found in words for word in found)

@@ -105,6 +105,30 @@ test('e2e_the_memory_page_lists_and_applies_a_proposal', async ({ served, writes
   await expect(core(writesBoard).getByRole('listitem', { name: LATER })).toBeVisible()
 })
 
+test('e2e_a_flagged_pair_can_be_resolved_and_restored', async ({ served, writesBoard }) => {
+  const older = 'Squash ticket branches before landing them through the merge queue'
+  const newer = 'Never let the merge queue take ticket branches unsquashed'
+  seedMemory(served, [
+    { ...SMALL, day: '2026-10-01', statement: older },
+    { ...SMALL, day: '2026-10-05', statement: newer },
+  ])
+  await writesBoard.goto(`${served.url}/memory`)
+  const flagged = writesBoard.getByRole('region', { name: /^Flagged by consolidate/ })
+  await expect(flagged.getByText('Contradicts', { exact: true })).toBeVisible()
+  await expect(flagged).toContainText(older)
+  await expect(flagged).toContainText(newer)
+
+  await flagged.getByRole('button', { name: 'Newer supersedes older' }).click()
+
+  await expect(flagged).toHaveCount(0)
+  await history(writesBoard).getByRole('button', { name: 'Show' }).click()
+  await expect(history(writesBoard).getByRole('listitem', { name: older })).toBeVisible()
+  await expect(core(writesBoard).getByRole('listitem', { name: newer })).toBeVisible()
+  await toasts(writesBoard).getByRole('button', { name: 'Undo' }).click()
+  await expect(flagged.getByText('Contradicts', { exact: true })).toBeVisible()
+  await expect(core(writesBoard).getByRole('listitem', { name: older })).toBeVisible()
+})
+
 test('e2e_review_due_comes_first_and_empties_when_reviewed', async ({ served, writesBoard }) => {
   const [, staleId] = seedMemory(served, [{ ...SMALL, day: TODAY }, TWICE])
   await writesBoard.goto(`${served.url}/memory`)

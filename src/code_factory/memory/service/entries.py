@@ -94,11 +94,7 @@ def _flags(keep_both: bool, check_pairs: bool) -> dict[str, bool]:
     return {"keep_both": keep_both, "check_pairs": check_pairs}
 
 
-def _sources(source: str) -> list[str]:
-    return [part.strip() for part in source.split(";") if part.strip()]
-
-
-class MemoryService:
+class Entries:
     """A repository's memory entries."""
 
     def __init__(self, uow: UnitOfWork, clock: Callable[[], datetime] = utc_now) -> None:
@@ -318,36 +314,6 @@ class MemoryService:
             row = await self._proposal(MemoryRepository(session), repository, name)
             row.retired, row.updated_at = DISMISSED, self._clock()
             return to_entry(row, self._today())
-
-    async def merge(self, repository: str, name: str, into: str) -> MemoryEntry:
-        """Fold an active entry into another, which gains its sources."""
-        source, _, _ = await self.merge_with_images(repository, name, into)
-        return source
-
-    async def merge_with_images(
-        self, repository: str, name: str, into: str
-    ) -> tuple[MemoryEntry, MemoryEntry, builtins.list[EntryImage]]:
-        """Fold an entry and return both entries and their before-images."""
-        if name == into:
-            raise BadRequestError("an entry cannot be merged into itself; name another entry")
-        async with self._uow() as session:
-            entries = MemoryRepository(session)
-            locked = {
-                key: await self._active(entries, repository, key) for key in sorted((name, into))
-            }
-            row, target = locked[name], locked[into]
-            now = self._clock()
-            images = [
-                EntryImage(repository=repository, id=key, before=record_of(current), updated_at=now)
-                for key, current in locked.items()
-            ]
-            row.retired, row.merged_into = f'merged into "{target.statement}"', into
-            named = _sources(target.source)
-            added = [s for s in _sources(row.source) if s not in named]
-            target.source = "; ".join([*named, *added])
-            row.updated_at = target.updated_at = now
-            today = self._today()
-            return to_entry(row, today), to_entry(target, today), images
 
     async def rules_for(self, stage: Stage, repository: str | None = None) -> str:
         """The text a run of `stage` is given: the active entries it loads, one line each."""

@@ -2,6 +2,7 @@
 
 import builtins
 from collections.abc import Sequence
+from collections.abc import Set as AbstractSet
 
 from code_factory.memory.models import MemoryEntry
 from code_factory.memory_extras.models import (
@@ -111,7 +112,9 @@ def history(view: View) -> builtins.list[History]:
     return [*ended, *gone]
 
 
-def pair_records(view: View, now: int) -> builtins.list[PairRecord]:
+def pair_records(
+    view: View, now: int, *, excluded: AbstractSet[str] | None = None
+) -> builtins.list[PairRecord]:
     """The pairs of current entries on one subject, each with both statements."""
     said = {e.id: e.statement for e in view.current}
     return [
@@ -124,7 +127,7 @@ def pair_records(view: View, now: int) -> builtins.list[PairRecord]:
             terms=list(p.terms),
             contradicts=p.contradicts,
         )
-        for p in pairs(view.current, view.defined, now)
+        for p in pairs(view.current, view.defined, now, excluded=excluded)
     ]
 
 

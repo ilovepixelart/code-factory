@@ -39,7 +39,7 @@ _KINDS = {
     "stopped": ("stopped", ": an agent stopped"),
     "screens": ("screens", ": screens wait for your approval"),
     "mergeable": ("merge", " is ready to merge"),
-    "failing": ("failing", ": CI failed on its pull request"),
+    "failing": ("failing", ": checks failed on its pull request"),
     "idle": ("idle", " has an idle pull request"),
 }
 _IDENTITY: dict[str, tuple[tuple[str, ...], ...]] = {

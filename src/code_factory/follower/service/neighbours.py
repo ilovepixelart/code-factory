@@ -239,7 +239,7 @@ class BoardAdapter(_Neighbour):
     async def rule(self, ids: list[str]) -> Rule:
         """The team's say: which agent takes each card."""
         team_rule = await self._services.get(TeamService).queue_rule(ids)
-        return lambda card: team_rule(card.id, card.stage, card.kind, card.labels)
+        return lambda card: team_rule(card.id, card.run_stage or card.stage, card.kind, card.labels)
 
 
 class WorkAdapter(_Neighbour):

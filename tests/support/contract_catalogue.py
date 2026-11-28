@@ -334,6 +334,7 @@ ROUTES: tuple[Route, ...] = (
     Route("POST", "/api/memory/{repository}/{id}/dismiss", "memory", _hand(CHANGED)),
     Route("POST", "/api/memory/{repository}/{id}/merge", "memory", _hand(CHANGED)),
     Route("POST", "/api/memory/{repository}/{id}/retire", "memory", _hand(CHANGED)),
+    Route("POST", "/api/memory/{repository}/{id}/supersede", "memory", _hand(CHANGED)),
     Route("GET", "/api/inbox", "inbox", _inbox, "/api/inbox"),
     Route(
         "GET",

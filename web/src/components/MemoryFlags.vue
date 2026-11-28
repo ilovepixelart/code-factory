@@ -48,8 +48,8 @@ const sides = computed(() =>
 
 function supersede(p: MemoryPair): Promise<void> {
   const [older, newer] = sides.value[keyOf(p)] ?? []
-  return run(keyOf(p), 'PATCH', entryPath(p.repository, newer?.id ?? ''), {
-    supersedes: older?.id ?? '',
+  return run(keyOf(p), 'POST', `${entryPath(p.repository, newer?.id ?? '')}/supersede`, {
+    older: older?.id ?? '',
   })
 }
 </script>

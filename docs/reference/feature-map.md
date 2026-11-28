@@ -132,7 +132,8 @@ code-factory
 │       ├── POST /api/memory/{repository}/{name}/approve
 │       ├── POST /api/memory/{repository}/{name}/dismiss
 │       ├── POST /api/memory/{repository}/{name}/merge
-│       └── POST /api/memory/{repository}/{name}/retire
+│       ├── POST /api/memory/{repository}/{name}/retire
+│       └── POST /api/memory/{repository}/{name}/supersede
 ├── releases: Releases: notes drafted from the merged tickets, published, then tagged by the commands module.
 │   ├── commands
 │   │   └── release: draft, edit and publish a repository's release notes
