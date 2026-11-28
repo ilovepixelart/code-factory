@@ -25,7 +25,7 @@ def describe(item: Item) -> str:  # noqa: PLR0911  # one sentence per kind of it
         step = f" {item.main['step']}" if item.main.get("step") else ""
         return f"{item.main['repository']}: main fails{step} at {str(item.main['commit'])[:7]}"
     if item.kind == "failing":
-        return f"{_id(item)}: CI failed on its pull request"
+        return f"{_id(item)}: {item.note or 'CI failed on its pull request'}"
     if item.kind == "idle":
         return f"{_id(item)} has an idle pull request"
     if item.kind == "stuck":

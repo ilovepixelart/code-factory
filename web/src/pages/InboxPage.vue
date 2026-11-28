@@ -285,7 +285,7 @@ const failing = useSectionPage('failing', () => inbox.value?.failing ?? null)
           heading="inbox-failing"
           title="Failing checks"
           :count="inbox.failing.length"
-          description="CI failed on an open pull request, or its fix rounds ran out"
+          description="Open pull requests with failed checks or exhausted fix rounds"
         >
           <ItemGroup class="gap-3">
             <template v-for="(item, n) in failing.paged.rows.value" :key="page(item)">

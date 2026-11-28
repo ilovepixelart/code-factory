@@ -101,6 +101,7 @@ listed after the modules it reads. The MCP tools each caller sees are pinned in
 - `POST /api/memory/{repository}/{name}/dismiss`
 - `POST /api/memory/{repository}/{name}/merge`
 - `POST /api/memory/{repository}/{name}/retire`
+- `POST /api/memory/{repository}/{name}/supersede`
 
 ## checks
 

@@ -179,12 +179,23 @@ class _InboxRead:
         mergeable: list[Item] = []
         idle: list[Item] = []
         delivery = self._services.get(DeliveryService)
-        for pull in await delivery.open_pulls():
+        pulls = await delivery.open_pulls()
+        failures = await self._services.get(CheckService).repair_failures(
+            {p.ticket_id: p.head for p in pulls if p.head and p.ci != "failed"}
+        )
+        for pull in pulls:
             ref = await self._ref(pull.ticket_id)
             if ref is None:
                 continue
             if pull.ci == "failed":
                 failing.append(self._pull_item(pull, ref, "failing"))
+                continue
+            if pull.ticket_id in failures:
+                failing.append(
+                    self._pull_item(
+                        pull, ref, "failing", note="Factory checks failed on this commit"
+                    )
+                )
                 continue
             if (merge := await self._merge_item(pull, ref)) is not None:
                 mergeable.append(merge)

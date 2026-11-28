@@ -79,8 +79,10 @@ class ActivityQueries:
         )
         return list(rows)
 
-    async def timed_checks(self, newest: int | None) -> list[TicketActivityRow]:
-        """The newest visible check runs that carry step data and did not sleep."""
+    async def timed_checks(
+        self, newest: int | None, *, repository: str | None = None
+    ) -> list[TicketActivityRow]:
+        """The newest eligible check runs in the optional repository."""
         row = TicketActivityRow
         seconds = row.data["seconds"]
         steps = row.data["steps"]
@@ -96,10 +98,13 @@ class ActivityQueries:
                     and_(func.jsonb_typeof(steps) == "object", steps.astext != "{}"),
                 ),
             )
-            .order_by(row.at.desc(), row.id.desc())
-            .limit(newest)
         )
-        return list(await self._session.scalars(query))
+        if repository is not None:
+            query = query.where(TicketRow.repository == repository)
+        rows = await self._session.scalars(
+            query.order_by(row.at.desc(), row.id.desc()).limit(newest)
+        )
+        return list(rows)
 
     async def latest_checks(
         self, heads: dict[int, str], excluded_codes: frozenset[int]

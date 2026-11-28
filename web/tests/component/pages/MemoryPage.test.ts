@@ -503,7 +503,7 @@ test('newer_supersedes_older_sends_the_older_id', async () => {
   await press(page, 'Flagged by consolidate', 'Newer supersedes older')
 
   expect(sent).toStrictEqual([
-    { method: 'PATCH', url: '/api/memory/sample/fresh', body: { supersedes: 'later' } },
+    { method: 'POST', url: '/api/memory/sample/fresh/supersede', body: { older: 'later' } },
   ])
   page.unmount()
 })

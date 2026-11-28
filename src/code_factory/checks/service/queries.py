@@ -237,8 +237,10 @@ class QueryMixin(ConcludeMixin):
             )
         return sorted(found, key=lambda record: record.at)
 
-    async def step_runs(self, newest: int | None = None) -> list[StepRun]:
-        """Recent recorded check steps, newest first, with eligibility applied before the limit."""
+    async def step_runs(
+        self, newest: int | None = None, *, repository: str | None = None
+    ) -> list[StepRun]:
+        """Recent eligible check steps, optionally scoped to a repository before the limit."""
         return [
             StepRun(
                 ticket_id=item.ticket_id,
@@ -249,7 +251,7 @@ class QueryMixin(ConcludeMixin):
                 lock_waits=dict(item.data.get("lock_waits") or {}),
                 slept=False,
             )
-            for item in await self._deps.activity.timed_checks(newest)
+            for item in await self._deps.activity.timed_checks(newest, repository=repository)
         ]
 
     async def running(self, ids: Sequence[str]) -> set[str]:

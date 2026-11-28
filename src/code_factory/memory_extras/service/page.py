@@ -66,12 +66,13 @@ def read_repository(view: View, receipts: builtins.list[Receipt], now: int) -> R
     received = _by_entry(receipts)
     records = [record_of(e, view, left_ids, received.get(e.id, []), now) for e in view.current]
     queue = [r for r, e in zip(records, view.current, strict=True) if queued(r, e, now)]
+    proposals = proposal_records(view, now)
     return RepositoryRead(
         records=records,
         history=history(view),
         left_out=[LeftOut(repository=view.repository, id=e.id) for e in left],
-        pairs=pair_records(view, now),
-        proposals=proposal_records(view, now),
+        pairs=pair_records(view, now, excluded={p.id for p in proposals}),
+        proposals=proposals,
         queue=queue,
         loaded_chars=sum(recall_size(e, size(e)) for e in entries),
         rules_over=overflow(entries, size),
@@ -109,19 +110,23 @@ class PageMixin(KnowledgeMixin):
         view = await self._view(repository, now)
         return proposal_records(view, self._day(now))
 
-    async def proposals_for(
+    async def suggestions_for(
         self, active: builtins.list[MemoryEntry]
-    ) -> builtins.list[MergeProposal | RetireProposal]:
-        """Calculate proposals from the active entries the HTTP page already read."""
+    ) -> tuple[builtins.list[PairRecord], builtins.list[MergeProposal | RetireProposal]]:
+        """Find pairs and proposals from the active entries the HTTP page already read."""
         by_repository: defaultdict[str, builtins.list[MemoryEntry]] = defaultdict(list)
         for entry in active:
             by_repository[entry.repository].append(entry)
         now = self._clock()
         day = self._day(now)
         found: builtins.list[MergeProposal | RetireProposal] = []
+        pairs: builtins.list[PairRecord] = []
         for repository, entries in sorted(by_repository.items()):
-            found.extend(proposal_records(await self._view_of(repository, entries, now), day))
-        return found
+            view = await self._view_of(repository, entries, now)
+            proposed = proposal_records(view, day)
+            found.extend(proposed)
+            pairs.extend(pair_records(view, day, excluded={p.id for p in proposed}))
+        return pairs, found
 
     async def review_queue(
         self, repository: str, now: datetime | None = None

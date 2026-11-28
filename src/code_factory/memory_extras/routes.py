@@ -121,10 +121,11 @@ async def page(  # noqa: PLR0913, PLR0917  # three services and search paginatio
     found = await memory.search(q, MemoryFilter()) if q.strip() else []
     window = _window(len(found), page, size)
     shown = int(window.start // size) + 1
+    pairs, proposals = await extras.suggestions_for(active)
     return JSONResponse(
         {
             "repositories": repositories,
-            "proposals": [p.model_dump(mode="json") for p in await extras.proposals_for(active)],
+            "proposals": [p.model_dump(mode="json") for p in proposals],
             "unreviewed": [_record(e) for e in unreviewed],
             "rules": [_record(e) for e in reviewed if e.kind == "rule"],
             "decisions": [_record(e) for e in reviewed if e.kind == "decision"],
@@ -133,7 +134,7 @@ async def page(  # noqa: PLR0913, PLR0917  # three services and search paginatio
             "loaded_chars": sum(_recall_chars(e) for e in active if e.scope in EVERY_SESSION),
             "ceiling": CEILING,
             "left_out": [],
-            "pairs": [],
+            "pairs": [p.model_dump(mode="json") for p in pairs],
             "review_queue": [_record(e) for e in active if e.stale],
             "results": [_found(e) for e in found[window]],
             "matched": len(found),
@@ -183,6 +184,12 @@ class RetireBody(_Strict):
     """`reason`: one line saying why it no longer applies."""
 
     reason: str
+
+
+class SupersedeBody(_Strict):
+    """The entry the replacement retires."""
+
+    older: str
 
 
 def _words(value: str) -> list[str]:
@@ -254,3 +261,12 @@ async def retire(
     """`reason`: one line saying why it no longer applies."""
     entry, image = await memory.retire_with_image(repository, name, body.reason)
     return await _offer(undo, f'Retired "{entry.statement}"', image)
+
+
+@router.post("/memory/{repository}/{name}/supersede", summary="Supersede an entry")
+async def supersede(
+    repository: str, name: str, body: SupersedeBody, memory: MemoryDep, undo: UndoDep
+) -> Changed:
+    """Retire the older entry while keeping the replacement's existing links."""
+    replacement, older, images = await memory.supersede(repository, name, body.older)
+    return await _offer(undo, f'"{replacement.statement}" superseded "{older.statement}"', *images)

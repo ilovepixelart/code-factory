@@ -104,7 +104,12 @@ class FakeChecks:
         self.asked.append((repository, tickets))
         return [r for r in self.records_ if r.ticket_id in tickets]
 
-    async def step_runs(self, newest: int | None) -> list[StepRun]:
+    async def step_runs(
+        self,
+        newest: int | None,
+        *,
+        repository: str | None = None,  # noqa: ARG002  # unscoped fixtures
+    ) -> list[StepRun]:
         ordered = sorted(self.steps, key=lambda s: s.at, reverse=True)
         return ordered if newest is None else ordered[:newest]
 

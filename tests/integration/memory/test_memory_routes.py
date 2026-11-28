@@ -136,6 +136,75 @@ async def test_retiring_without_a_reason_is_refused(client: httpx.AsyncClient) -
     )
 
 
+async def test_a_flagged_memory_pair_can_be_resolved_and_undone(
+    client: httpx.AsyncClient, app: FastAPI
+) -> None:
+    memory = app.state.services.get(MemoryService)
+    prior = await memory.add(
+        NewMemory(
+            repository="sample", kind="rule", statement="Prefer smaller commits", source="CF-1"
+        ),
+        by="owner",
+    )
+    older = await memory.add(
+        NewMemory(
+            repository="sample",
+            kind="rule",
+            source="CF-1",
+            statement="Squash ticket branches before landing them through the merge queue",
+        ),
+        by="owner",
+    )
+    newer = await memory.add(
+        NewMemory(
+            repository="sample",
+            kind="rule",
+            source="CF-2",
+            supersedes=[prior.id],
+            statement="Never let the merge queue take ticket branches unsquashed",
+        ),
+        by="owner",
+    )
+
+    [pair] = (await _page(client))["pairs"]
+    assert {pair["one"], pair["other"]} == {older.id, newer.id}
+    assert pair["contradicts"] is True
+
+    result = await client.post(f"/api/memory/sample/{newer.id}/supersede", json={"older": older.id})
+    assert result.status_code == 200
+    page = await _page(client)
+    assert page["pairs"] == []
+    retired = {entry["id"]: entry["retired"] for entry in page["retired"]}
+    assert retired[older.id] == f"superseded by {newer.id}"
+    kept = await client.get(f"/api/memory/sample/{newer.id}")
+    assert set(kept.json()["supersedes"].split(", ")) == {prior.id, older.id}
+
+    again = await client.post(f"/api/memory/sample/{newer.id}/supersede", json={"older": older.id})
+    assert again.status_code == 409
+    assert (await client.post(f"/api/undo/{result.json()['undo']}")).status_code == 200
+    assert (await _page(client))["pairs"] == [pair]
+    restored = await client.get(f"/api/memory/sample/{newer.id}")
+    assert restored.json()["supersedes"] == prior.id
+
+
+async def test_supersession_rejects_self_and_unapproved_entries(
+    client: httpx.AsyncClient, app: FastAPI
+) -> None:
+    memory = app.state.services.get(MemoryService)
+    draft = NewMemory(repository="sample", kind="rule", statement="Look at the test", source="CF-1")
+    active = await memory.add(draft, by="owner")
+    proposed = await memory.propose(
+        draft.model_copy(update={"statement": "Read the result"}), by="run:reviewer"
+    )
+    path = f"/api/memory/sample/{active.id}/supersede"
+
+    own = await client.post(path, json={"older": active.id})
+    assert (own.status_code, own.json()["detail"]) == (400, "an entry cannot supersede itself")
+    pending = await client.post(path, json={"older": proposed.id})
+    assert pending.status_code == 409
+    assert (await memory.get("sample", proposed.id)).proposed
+
+
 async def test_a_proposal_waits_for_approval_and_dismissing_it_files_it_as_history(
     app: FastAPI, client: httpx.AsyncClient
 ) -> None:

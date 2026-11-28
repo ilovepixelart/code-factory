@@ -142,8 +142,10 @@ class ChecksAdapter:
             for r in await self._checks.records(repository, tickets)
         ]
 
-    async def step_runs(self, newest: int | None) -> list[StepRun]:
-        """What the newest `newest` records (all when None) say of their steps."""
+    async def step_runs(
+        self, newest: int | None, *, repository: str | None = None
+    ) -> list[StepRun]:
+        """Recent check phase results, optionally scoped to a repository."""
         return [
             StepRun(
                 ticket_id=r.ticket_id,
@@ -154,7 +156,7 @@ class ChecksAdapter:
                 lock_waits=r.lock_waits,
                 slept=r.slept,
             )
-            for r in await self._checks.step_runs(newest)
+            for r in await self._checks.step_runs(newest, repository=repository)
         ]
 
 

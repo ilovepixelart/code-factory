@@ -63,7 +63,7 @@ async def times_report(deps: Deps, last: int, repository: str | None) -> TimesRe
     """The step table, then the minutes per column and the reverts since the oldest run read."""
     check_last(last)
     repos = await deps.repositories(repository)
-    window = window_runs(await deps.ports.checks.step_runs(last), last)
+    window = window_runs(await deps.ports.checks.step_runs(last, repository=repository), last)
     if not window:
         return TimesReport(steps=[], since=None, columns=[], merges=0, reverted=0, text=NO_RUNS)
     since = window[-1].at.timestamp()

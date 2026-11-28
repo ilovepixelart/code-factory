@@ -70,8 +70,10 @@ class ChecksPort(Protocol):
         """The check verdicts recorded for these tickets."""
         ...
 
-    async def step_runs(self, newest: int | None) -> list[StepRun]:
-        """Recorded gate runs with step data, the newest `newest` of them, or all."""
+    async def step_runs(
+        self, newest: int | None, *, repository: str | None = None
+    ) -> list[StepRun]:
+        """The newest recorded gate runs with step results in the optional repository."""
         ...
 
 
