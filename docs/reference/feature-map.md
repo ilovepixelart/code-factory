@@ -117,8 +117,13 @@ code-factory
 │       └── git_trees
 ├── memory: Memory: the owner's standing rules, decisions and lessons, and the agents' proposals.
 │   ├── MCP tools (each caller's list is in tests/support/golden/mcp/)
+│   └── tables
+│       └── memory_entries
+├── memory_extras: Memory beyond storing it: scopes, cites, pairs, budget, deliveries and the Memory page.
+│   ├── commands
+│   │   └── memory: review what memory waits on the owner for
 │   ├── tables
-│   │   └── memory_entries
+│   │   └── memory_deliveries
 │   └── routes
 │       ├── GET /api/memory
 │       ├── POST /api/memory
@@ -128,11 +133,6 @@ code-factory
 │       ├── POST /api/memory/{repository}/{name}/dismiss
 │       ├── POST /api/memory/{repository}/{name}/merge
 │       └── POST /api/memory/{repository}/{name}/retire
-├── memory_extras: Memory beyond storing it: scopes, cites, pairs, budget, deliveries and the Memory page.
-│   ├── commands
-│   │   └── memory: review what memory waits on the owner for
-│   └── tables
-│       └── memory_deliveries
 ├── releases: Releases: notes drafted from the merged tickets, published, then tagged by the commands module.
 │   ├── commands
 │   │   └── release: draft, edit and publish a repository's release notes

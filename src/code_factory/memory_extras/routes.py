@@ -1,9 +1,4 @@
-"""The Memory page and the owner's changes to it.
-
-INTERIM: the page is composed from the memory service's entries alone. What needs runs and
-consolidation (received-by lists, proposals, pairs, the budget cut) is empty or neutral until the
-modules that own it exist.
-"""
+"""The Memory page, consolidation suggestions and the owner's changes."""
 
 from typing import Annotated, Any
 
@@ -13,6 +8,7 @@ from pydantic import BaseModel, ConfigDict
 
 from code_factory.board.service import BoardService
 from code_factory.memory.models import (
+    EntryImage,
     MemoryEdit,
     MemoryEntry,
     MemoryFilter,
@@ -20,11 +16,17 @@ from code_factory.memory.models import (
     NewMemory,
 )
 from code_factory.memory.service import MemoryService
+from code_factory.memory_extras.models import UNDO_KIND, Restore
+from code_factory.memory_extras.service import MemoryExtrasService
 from code_factory.platform.web.dependencies import service_of
+from code_factory.undo.models import Changed
+from code_factory.undo.service import UndoService
 
 router = APIRouter(prefix="/api", tags=["memory"])
 
 MemoryDep = Annotated[MemoryService, Depends(service_of(MemoryService))]
+ExtrasDep = Annotated[MemoryExtrasService, Depends(service_of(MemoryExtrasService))]
+UndoDep = Annotated[UndoService, Depends(service_of(UndoService))]
 BoardDep = Annotated[BoardService, Depends(service_of(BoardService))]
 
 OWNER = "owner:owner"
@@ -99,9 +101,10 @@ def _window(total: int, page: int, size: int) -> slice:
 
 
 @router.get("/memory", summary="The Memory page")
-async def page(
+async def page(  # noqa: PLR0913, PLR0917  # three services and search pagination
     memory: MemoryDep,
     board: BoardDep,
+    extras: ExtrasDep,
     q: str = "",
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=PAGE_MAX)] = 25,
@@ -121,7 +124,7 @@ async def page(
     return JSONResponse(
         {
             "repositories": repositories,
-            "proposals": [],
+            "proposals": [p.model_dump(mode="json") for p in await extras.proposals_for(active)],
             "unreviewed": [_record(e) for e in unreviewed],
             "rules": [_record(e) for e in reviewed if e.kind == "rule"],
             "decisions": [_record(e) for e in reviewed if e.kind == "decision"],
@@ -231,15 +234,23 @@ async def dismiss(repository: str, name: str, memory: MemoryDep) -> dict[str, An
     return _changed()
 
 
+async def _offer(undo: UndoService, notice: str, *images: EntryImage) -> Changed:
+    return await undo.offer(UNDO_KIND, Restore(images=images).model_dump(mode="json"), notice)
+
+
 @router.post("/memory/{repository}/{name}/merge", summary="Merge an entry into another")
-async def merge(repository: str, name: str, body: MergeBody, memory: MemoryDep) -> dict[str, Any]:
+async def merge(
+    repository: str, name: str, body: MergeBody, memory: MemoryDep, undo: UndoDep
+) -> Changed:
     """`into`: the id of the entry that keeps it."""
-    await memory.merge(repository, name, body.into)
-    return _changed()
+    folded, target, images = await memory.merge_with_images(repository, name, body.into)
+    return await _offer(undo, f'Merged "{folded.statement}" into "{target.statement}"', *images)
 
 
 @router.post("/memory/{repository}/{name}/retire", summary="Retire an entry")
-async def retire(repository: str, name: str, body: RetireBody, memory: MemoryDep) -> dict[str, Any]:
+async def retire(
+    repository: str, name: str, body: RetireBody, memory: MemoryDep, undo: UndoDep
+) -> Changed:
     """`reason`: one line saying why it no longer applies."""
-    await memory.retire(repository, name, body.reason)
-    return _changed()
+    entry, image = await memory.retire_with_image(repository, name, body.reason)
+    return await _offer(undo, f'Retired "{entry.statement}"', image)

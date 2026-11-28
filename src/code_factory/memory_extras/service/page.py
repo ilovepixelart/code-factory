@@ -1,9 +1,11 @@
 """The Memory page: every tracked repository's lists, queue, pairs and search results."""
 
 import builtins
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from code_factory.memory.models import MemoryEntry
 from code_factory.memory_extras.models import (
     Found,
     History,
@@ -106,6 +108,20 @@ class PageMixin(KnowledgeMixin):
         """The merges and retirements a consolidation proposes."""
         view = await self._view(repository, now)
         return proposal_records(view, self._day(now))
+
+    async def proposals_for(
+        self, active: builtins.list[MemoryEntry]
+    ) -> builtins.list[MergeProposal | RetireProposal]:
+        """Calculate proposals from the active entries the HTTP page already read."""
+        by_repository: defaultdict[str, builtins.list[MemoryEntry]] = defaultdict(list)
+        for entry in active:
+            by_repository[entry.repository].append(entry)
+        now = self._clock()
+        day = self._day(now)
+        found: builtins.list[MergeProposal | RetireProposal] = []
+        for repository, entries in sorted(by_repository.items()):
+            found.extend(proposal_records(await self._view_of(repository, entries, now), day))
+        return found
 
     async def review_queue(
         self, repository: str, now: datetime | None = None

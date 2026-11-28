@@ -10,6 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from code_factory.memory.models import EntryImage, MemoryEntry
 
+UNDO_KIND = "memory.restore"
+
 
 class Frozen(BaseModel):
     """Values are compared and shared, never edited."""

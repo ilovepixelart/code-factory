@@ -1,5 +1,6 @@
 """The Memory page and the owner's changes to it, through the HTTP API over the `board` sample."""
 
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -8,6 +9,7 @@ from fastapi import FastAPI
 
 from code_factory.memory.models import NewMemory
 from code_factory.memory.service import MemoryService
+from code_factory.platform.db import UnitOfWork
 
 RULE = "Keep it small and test first"
 
@@ -117,6 +119,12 @@ async def test_retiring_moves_an_entry_to_history_with_its_reason(
     assert response.status_code == 200
     assert [(r["id"], r["retired"]) for r in page["retired"]] == [(rule["id"], "no longer true")]
     assert rule["id"] not in _ids(page["rules"])
+    assert response.json()["notice"] == f'Retired "{RULE}"'
+    undo = await client.post(f"/api/undo/{response.json()['undo']}")
+    assert undo.status_code == 200
+    restored = await _page(client)
+    assert restored["retired"] == []
+    assert _ids(restored["rules"]) == [rule["id"]]
 
 
 async def test_retiring_without_a_reason_is_refused(client: httpx.AsyncClient) -> None:
@@ -214,3 +222,51 @@ async def test_a_memory_body_out_of_shape_points_at_the_field(
     response = await client.request(method, f"/api/memory{tail}", json=body)
     assert response.status_code == 400
     assert [e["pointer"] for e in response.json()["errors"]] == [pointer]
+
+
+async def test_an_untracked_repository_lists_consolidation_and_undo_restores_both_entries(
+    client: httpx.AsyncClient, uow: UnitOfWork
+) -> None:
+    first = "Run the gate before every push of a ticket branch"
+    second = "Run the gate before each push of the ticket branch"
+    older_memory = MemoryService(uow, clock=lambda: datetime(2026, 9, 1, tzinfo=UTC))
+    newer_memory = MemoryService(uow, clock=lambda: datetime(2026, 9, 5, tzinfo=UTC))
+    kept = await older_memory.add(
+        NewMemory(repository="sample", kind="rule", statement=first, source="CF-1"),
+        by="owner:owner",
+    )
+    folded = await newer_memory.add(
+        NewMemory(repository="sample", kind="rule", statement=second, source="CF-2"),
+        by="owner:owner",
+    )
+    proposal = {
+        "repository": "sample", "action": "merge", "id": folded.id, "statement": second,
+        "into": kept.id, "into_statement": first,
+    }  # fmt: skip
+
+    assert (await _page(client))["proposals"] == [proposal]
+    changed = await client.post(f"/api/memory/sample/{folded.id}/merge", json={"into": kept.id})
+    assert changed.status_code == 200
+    assert changed.json()["notice"] == f'Merged "{second}" into "{first}"'
+    token = changed.json()["undo"]
+    assert token
+
+    after = await _page(client)
+    assert after["proposals"] == []
+    assert [(r["id"], r["merged_into"]) for r in after["retired"]] == [(folded.id, kept.id)]
+    assert (await client.get(f"/api/memory/sample/{kept.id}")).json()["source"] == "CF-1; CF-2"
+
+    assert (await client.post(f"/api/undo/{token}")).status_code == 200
+    assert (await client.post(f"/api/undo/{token}")).status_code == 410
+    restored = await _page(client)
+    assert restored["proposals"] == [proposal]
+    assert restored["retired"] == []
+    assert (await client.get(f"/api/memory/sample/{kept.id}")).json()["source"] == "CF-1"
+
+    moved_again = await client.post(f"/api/memory/sample/{folded.id}/merge", json={"into": kept.id})
+    latest = await client.patch(f"/api/memory/sample/{kept.id}", json={"source": "CF-3"})
+    assert latest.status_code == 200
+    refused = await client.post(f"/api/undo/{moved_again.json()['undo']}")
+    assert refused.status_code == 409
+    assert _ids((await _page(client))["retired"]) == [folded.id]
+    assert (await client.get(f"/api/memory/sample/{kept.id}")).json()["source"] == "CF-3"
