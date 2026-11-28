@@ -58,8 +58,9 @@ def test_spec_and_build_use_the_same_ticket_test_pattern() -> None:
 
 def test_the_review_task_writes_the_review_document_with_severity_and_rule_tags() -> None:
     task = built_in_task("review")
-    assert "`review`" in task
-    for word in ("[blocker]", "[major]", "[minor]", "[nit]", "[rule: name]", "prior"):
+    assert "`submit_review`" in task
+    assert "`write_document`" not in task
+    for word in ("blocker", "major", "minor", "nit", "`rule`", "prior_id", "pass", "changes"):
         assert word in task
 
 
@@ -131,7 +132,7 @@ def test_only_a_review_task_gets_the_rules_in_use_and_the_review_guide() -> None
     rules = rules_in_use_note(["no-sleeps", "no-mocks"])
     guide = review_guide_note("main", "Be strict.")
     assert rules == (
-        "Rule names already in use, most used first (end a finding's item with [rule: name], "
+        "Rule names already in use, most used first (set the finding's `rule` field, "
         "reusing one of these when it is the same rule): no-sleeps, no-mocks"
     )
     assert rules_in_use_note([]) == ""
