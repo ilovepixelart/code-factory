@@ -64,7 +64,7 @@ const seconds = (value: number | null): string => (value === null ? '-' : `${Str
         <p v-else-if="isPending" class="mt-3 text-sm">Reading gate timings…</p>
         <div v-else-if="data?.length" class="mt-3 overflow-x-auto">
           <p class="text-muted-foreground mb-2 text-sm">
-            Latest 25 board check runs across repositories
+            Latest 25 check runs with phase results across repositories
           </p>
           <DataTable
             :columns="columns"

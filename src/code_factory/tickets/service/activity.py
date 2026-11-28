@@ -167,6 +167,12 @@ class ActivityService:
             found.setdefault(ticket_id(row.ticket_number), []).append(to_activity(row))
         return found
 
+    async def timed_checks(self, newest: int | None) -> list[Activity]:
+        """The newest visible check activity with step results, all when unbounded."""
+        async with self._uow() as session:
+            rows = await TicketRepository(session).timed_checks(newest)
+        return [to_activity(row) for row in rows]
+
     async def latest_checks(
         self, heads: Mapping[str, str], excluded_codes: frozenset[int]
     ) -> dict[str, Activity]:
