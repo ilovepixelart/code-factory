@@ -45,7 +45,7 @@ class GateTiming(StepTime):
 
 @router.get("/gate-timings", summary="Gate step timings and advisory budgets")
 async def gate_timings(metrics: MetricsDep) -> list[GateTiming]:
-    """Summarize the most recent 25 recorded runs across repositories."""
+    """Summarize up to 25 recent check runs with step results across repositories."""
     return [
         GateTiming(**step.model_dump(), budget=GATE_BUDGET_SECONDS.get(step.step))
         for step in await metrics.step_times(25)

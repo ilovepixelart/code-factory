@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import BigInteger, Text, cast, column, func, or_, select, true
+from sqlalchemy import BigInteger, Text, and_, cast, column, func, or_, select, text, true
 from sqlalchemy.dialects.postgresql import ARRAY, distinct_on
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
@@ -78,6 +78,28 @@ class ActivityQueries:
             .order_by(TicketActivityRow.id)
         )
         return list(rows)
+
+    async def timed_checks(self, newest: int | None) -> list[TicketActivityRow]:
+        """The newest visible check runs that carry step data and did not sleep."""
+        row = TicketActivityRow
+        seconds = row.data["seconds"]
+        steps = row.data["steps"]
+        query = (
+            select(row)
+            .join(TicketRow, TicketRow.number == row.ticket_number)
+            .where(
+                VISIBLE,
+                row.kind == "checks",
+                row.data["slept"].is_distinct_from(text("'true'::jsonb")),
+                or_(
+                    and_(func.jsonb_typeof(seconds) == "object", seconds.astext != "{}"),
+                    and_(func.jsonb_typeof(steps) == "object", steps.astext != "{}"),
+                ),
+            )
+            .order_by(row.at.desc(), row.id.desc())
+            .limit(newest)
+        )
+        return list(await self._session.scalars(query))
 
     async def latest_checks(
         self, heads: dict[int, str], excluded_codes: frozenset[int]

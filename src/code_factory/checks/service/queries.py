@@ -26,7 +26,7 @@ from code_factory.platform.errors import (
     ConflictError,
     NotFoundError,
 )
-from code_factory.tickets.models import Ticket, TicketFilter
+from code_factory.tickets.models import Ticket
 
 logger = logging.getLogger(__name__)
 NO_SUCH_TICKET = "no such ticket"
@@ -238,24 +238,19 @@ class QueryMixin(ConcludeMixin):
         return sorted(found, key=lambda record: record.at)
 
     async def step_runs(self, newest: int | None = None) -> list[StepRun]:
-        """What each recent `checks` record says of its steps, newest first."""
-        runs: list[StepRun] = []
-        for ticket in await self._deps.tickets.list(TicketFilter(archived=None)):
-            for item in await self._newest_records(ticket.id, newest or 100):
-                data = item.data
-                runs.append(
-                    StepRun(
-                        ticket_id=ticket.id,
-                        at=item.at,
-                        seconds=dict(data.get("seconds") or {}),
-                        states=dict(data.get("steps") or {}),
-                        retried=list(data.get("retried") or []),
-                        lock_waits=dict(data.get("lock_waits") or {}),
-                        slept=data.get("slept") is True,
-                    )
-                )
-        runs.sort(key=lambda run: run.at, reverse=True)
-        return runs if newest is None else runs[:newest]
+        """Recent recorded check steps, newest first, with eligibility applied before the limit."""
+        return [
+            StepRun(
+                ticket_id=item.ticket_id,
+                at=item.at,
+                seconds=dict(item.data.get("seconds") or {}),
+                states=dict(item.data.get("steps") or {}),
+                retried=list(item.data.get("retried") or []),
+                lock_waits=dict(item.data.get("lock_waits") or {}),
+                slept=False,
+            )
+            for item in await self._deps.activity.timed_checks(newest)
+        ]
 
     async def running(self, ids: Sequence[str]) -> set[str]:
         """The tickets among `ids` that have a queued or running check."""
