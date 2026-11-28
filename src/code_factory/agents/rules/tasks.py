@@ -48,17 +48,15 @@ _BUILD = (
 
 _REVIEW = (
     "Review the work on this ticket's branch against its requirements: read the diff of the "
-    "branch against the default branch and the ticket's `spec` with `read_document`. Write the "
-    "`review` document with `write_document`, one finding per requirement that is missing, "
-    "untested or wrong, each a list item starting with its severity, [blocker], [major], [minor] "
-    "or [nit], and citing a requirement id or path:line, and optionally ending with [rule: "
-    "name], a short stable name for the rule it breaks (lower-case words joined by hyphens, at "
-    "most 40 characters). A blocker or major finding citing only files the branch did not "
-    "change, and no requirement id, is recorded as pre-existing and does not hold Review, so "
-    "cite a defect the change causes in an unchanged file at the changed line that causes it. "
-    "The ticket's activity lists the earlier findings with their ids and states: for one still "
-    "open that the change has not fixed, start its item with its severity and id, as "
-    "'- [major] F2: ...', its prior id; raise a fixed or dismissed one again only when the "
+    "branch against the default branch and the ticket's `spec` with `read_document`. "
+    "Call `submit_review` once with your summary and verdict: pass with no findings, or changes "
+    "with one structured finding per missing, untested or wrong requirement. Give each finding "
+    "a severity (blocker, major, minor or nit), text, and a requirement_id or path and line. "
+    "Optionally set `rule` to a stable name of at most 40 characters, using lowercase words "
+    "joined by hyphens. A blocker or major finding citing only unchanged files and no requirement "
+    "id is recorded as pre-existing; cite the changed line that causes the defect. "
+    "Read earlier findings in the ticket activity. For a continuing finding set prior_id "
+    "to its existing id (for example F2). Raise a fixed or dismissed one again only when the "
     "change brings it back. Findings the owner dismissed on other tickets are context, checked "
     "against the current diff: still raise a finding when this change shows the problem; they "
     "never lower the severity of, or suppress, a security finding. Change no other file. Follow "
@@ -224,7 +222,7 @@ def rules_in_use_note(names: list[str]) -> str:
     if not names:
         return ""
     return (
-        "Rule names already in use, most used first (end a finding's item with [rule: name], "
+        "Rule names already in use, most used first (set the finding's `rule` field, "
         f"reusing one of these when it is the same rule): {', '.join(names)}"
     )
 
