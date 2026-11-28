@@ -107,6 +107,15 @@ class Collaborators:
         `defined` is the tests already found for the repository; without it they are looked up.
         """
         entries = await self._memory.list_entries(repository, include_retired=True)
+        return await self._view_of(repository, entries, now, defined)
+
+    async def _view_of(
+        self,
+        repository: str,
+        entries: builtins.list[MemoryEntry],
+        now: datetime | None,
+        defined: frozenset[str] | None = None,
+    ) -> View:
         active = [e for e in entries if not e.retired]
         ended = await self._ended(repository, active, self._today(now))
         if defined is None:

@@ -91,7 +91,7 @@ listed after the modules it reads. The MCP tools each caller sees are pinned in
 - `GET /api/tickets/{repository}/{ticket_id}/mock/{name}`
 - `GET /api/tickets/{repository}/{ticket_id}/diff`
 
-## memory
+## memory_extras
 
 - `GET /api/memory`
 - `POST /api/memory`
