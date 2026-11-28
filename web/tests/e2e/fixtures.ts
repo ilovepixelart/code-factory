@@ -73,6 +73,25 @@ export function seedInbox(served: Served, seed: InboxSeed): void {
   execFileSync(...command(args, 'python'), { env: environment(served.schema), stdio: 'pipe' })
 }
 
+interface MemorySeed {
+  day: string
+  kind: 'rule' | 'decision' | 'lesson'
+  statement: string
+  source: string
+  why: string
+}
+
+/** Add reviewed Memory entries dated as each test needs, in its own schema. */
+export function seedMemory(served: Served, entries: MemorySeed[]): string[] {
+  const args = [resolve(ROOT, 'tests/support/browser_memory_seed.py'), JSON.stringify(entries)]
+  const ids = execFileSync(...command(args, 'python'), {
+    env: environment(served.schema),
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  return JSON.parse(ids) as string[]
+}
+
 /** A board's way to its data: where it is served and the schema its tables live in. */
 export class Served {
   readonly url: string
